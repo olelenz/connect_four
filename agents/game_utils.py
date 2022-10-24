@@ -1,4 +1,6 @@
 from enum import Enum
+
+import numpy
 import numpy as np
 
 BoardPiece = np.int8  # The data type (dtype) of the board
@@ -24,7 +26,7 @@ def initialize_game_state() -> np.ndarray:
     """
     Returns an ndarray, shape (6, 7) and data type (dtype) BoardPiece, initialized to 0 (NO_PLAYER).
     """
-    raise NotImplementedError
+    return np.zeros((6, 7), BoardPiece)
 
 
 def pretty_print_board(board: np.ndarray) -> str:
