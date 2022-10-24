@@ -45,7 +45,20 @@ def pretty_print_board(board: np.ndarray) -> str:
     |==============|
     |0 1 2 3 4 5 6 |
     """
-    raise NotImplementedError()
+    output: str = "|==============|\n"
+    for line in board[::-1]:
+        output += "|"
+        for entry in line:
+            if entry == NO_PLAYER:
+                output += NO_PLAYER_PRINT
+            elif entry == PLAYER1:
+                output += PLAYER1_PRINT
+            elif entry == PLAYER2:
+                output += PLAYER2_PRINT
+            output += " "
+        output += "|\n"
+    output += "|==============|\n|0 1 2 3 4 5 6 |"
+    return output
 
 
 def string_to_board(pp_board: str) -> np.ndarray:
