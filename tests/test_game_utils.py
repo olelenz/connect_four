@@ -38,8 +38,9 @@ def test_string_to_board():
     board[0, 3] = PLAYER1
     board[0, 2] = PLAYER2
 
-    ret = string_to_board("|==============|\n|              |\n|              |\n|              |\n|              |\n|        "
-                          "      |\n|    O X       |\n|==============|\n|0 1 2 3 4 5 6 |")
+    ret = string_to_board(
+        "|==============|\n|              |\n|              |\n|              |\n|              |\n|        "
+        "      |\n|    O X       |\n|==============|\n|0 1 2 3 4 5 6 |")
 
     assert isinstance(ret, np.ndarray)
     assert (ret == board).all()
@@ -57,6 +58,7 @@ def test_apply_player_action():
 
     ret = apply_player_action(board, 3, PLAYER2)
 
+    assert isinstance(ret, np.ndarray)
     assert (ret != board).any()
     board[5, 3] = PLAYER2
     assert (ret == board).all()
@@ -67,5 +69,85 @@ def test_apply_player_action():
 
     with pytest.raises(ValueError):
         apply_player_action(board, 3, PLAYER2)
+
+
+def test_connected_four():
+    from agents.game_utils import initialize_game_state, apply_player_action, connected_four
+
+    ret = connected_four(initialize_game_state(), PLAYER1)
+    assert not ret
+    ret = connected_four(initialize_game_state(), PLAYER2)
+    assert not ret
+
+    # vertical
+    board_one = initialize_game_state()
+    board_one[0, 3] = PLAYER1
+    board_one[1, 3] = PLAYER1
+    board_one[2, 3] = PLAYER1
+    board_one[3, 3] = PLAYER1
+
+    ret = connected_four(board_one, PLAYER1)
+    assert ret
+    ret = connected_four(board_one, PLAYER2)
+    assert not ret
+
+    # horizontal
+    board_two = initialize_game_state()
+    board_two[0, 0] = PLAYER2
+    board_two[0, 1] = PLAYER2
+    board_two[0, 2] = PLAYER2
+    board_two[0, 3] = PLAYER2
+
+    ret = connected_four(board_two, PLAYER2)
+    assert ret
+    ret = connected_four(board_two, PLAYER1)
+    assert not ret
+
+    # diagonal left top
+    print("")
+    board_three = initialize_game_state()
+    board_three[0, 0] = PLAYER1
+    board_three[0, 1] = PLAYER1
+    board_three[0, 2] = PLAYER2
+    board_three[0, 3] = PLAYER1
+
+    board_three[1, 0] = PLAYER2
+    board_three[1, 1] = PLAYER2
+    board_three[1, 2] = PLAYER1
+
+    board_three[2, 0] = PLAYER2
+    board_three[2, 1] = PLAYER1
+    board_three[2, 2] = PLAYER2
+
+    board_three[3, 0] = PLAYER1
+
+    ret = connected_four(board_three, PLAYER1)
+    assert ret
+    ret = connected_four(board_three, PLAYER2)
+    assert not ret
+
+    # diagonal right top
+    board_three = initialize_game_state()
+    board_three[3, 0] = PLAYER1
+    board_three[3, 1] = PLAYER1
+    board_three[3, 2] = PLAYER2
+    board_three[3, 3] = PLAYER1
+
+    board_three[2, 0] = PLAYER2
+    board_three[2, 1] = PLAYER2
+    board_three[2, 2] = PLAYER1
+
+    board_three[1, 0] = PLAYER2
+    board_three[1, 1] = PLAYER1
+    board_three[1, 2] = PLAYER2
+
+    board_three[0, 0] = PLAYER1
+
+    ret = connected_four(board_three, PLAYER1)
+    assert ret
+    ret = connected_four(board_three, PLAYER2)
+    assert not ret
+
+
 
 
