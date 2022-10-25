@@ -1,6 +1,6 @@
 from enum import Enum
 
-import numpy
+
 import numpy as np
 
 BoardPiece = np.int8  # The data type (dtype) of the board
@@ -84,7 +84,15 @@ def apply_player_action(board: np.ndarray, action: PlayerAction, player: BoardPi
     board is returned and the original board should remain unchanged (i.e., either set
     back or copied beforehand).
     """
-    raise NotImplementedError()
+    i: int = 0
+    try:
+        while board[i, action] != NO_PLAYER:
+            i += 1
+    except IndexError:
+        raise ValueError
+    output: np.ndarray = board.copy()
+    output[i, action] = player
+    return output
 
 
 def connected_four(board: np.ndarray, player: BoardPiece) -> bool:
