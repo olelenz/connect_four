@@ -67,7 +67,14 @@ def string_to_board(pp_board: str) -> np.ndarray:
     This is quite useful for debugging, when the agent crashed and you have the last
     board state as a string.
     """
-    raise NotImplementedError()
+    output: np.ndarray = initialize_game_state()
+    for row, line in enumerate(pp_board.split("\n")[1:-2]):
+        for column, entry in enumerate(line[1:-1:2]):
+            if entry == PLAYER1_PRINT:
+                output[5 - row, column] = PLAYER1
+            elif entry == PLAYER2_PRINT:
+                output[5 - row, column] = PLAYER2
+    return output
 
 
 def apply_player_action(board: np.ndarray, action: PlayerAction, player: BoardPiece) -> np.ndarray:

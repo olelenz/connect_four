@@ -26,3 +26,18 @@ def test_pretty_print_board():
     assert isinstance(ret, str)
     assert ret == "|==============|\n|              |\n|              |\n|              |\n|              |\n|        " \
                   "      |\n|X O           |\n|==============|\n|0 1 2 3 4 5 6 |"
+
+
+def test_string_to_board():
+    from agents.game_utils import initialize_game_state, string_to_board
+
+    board = initialize_game_state()
+
+    board[0, 3] = PLAYER1
+    board[0, 2] = PLAYER2
+
+    ret = string_to_board("|==============|\n|              |\n|              |\n|              |\n|              |\n|        " \
+                  "      |\n|    O X       |\n|==============|\n|0 1 2 3 4 5 6 |")
+
+    assert isinstance(ret, np.ndarray)
+    assert (ret == board).all()
