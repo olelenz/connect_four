@@ -2,7 +2,7 @@ import numpy as np
 import random as rd
 from typing import Tuple, Optional
 
-from agents.game_utils import BoardPiece, SavedState, PlayerAction, NO_PLAYER_PRINT
+from agents.game_utils import BoardPiece, SavedState, PlayerAction, NO_PLAYER
 
 
 def generate_move_random(
@@ -13,9 +13,9 @@ def generate_move_random(
     action: int = -1
     while len(choices) != 0:
         action = rd.choice(choices)
-        if board[5][action] == NO_PLAYER_PRINT:
+        if board[5][action] != NO_PLAYER:
             choices.remove(action)
             action = -1
             continue
         break
-    return (action, saved_state)
+    return PlayerAction(action), saved_state
