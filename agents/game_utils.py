@@ -1,7 +1,9 @@
 from enum import Enum
 from scipy import signal
-
 import numpy as np
+from typing import Callable, Optional
+
+
 
 BoardPiece = np.int8  # The data type (dtype) of the board
 NO_PLAYER = BoardPiece(0)  # board[i, j] == NO_PLAYER where the position is empty
@@ -20,6 +22,16 @@ class GameState(Enum):
     IS_WIN = 1
     IS_DRAW = -1
     STILL_PLAYING = 0
+
+
+class SavedState:
+    pass
+
+
+GenMove = Callable[
+    [np.ndarray, BoardPiece, Optional[SavedState]],  # Arguments for the generate_move function
+    tuple[PlayerAction, Optional[SavedState]]  # Return type of the generate_move function
+]
 
 
 def initialize_game_state() -> np.ndarray:
@@ -125,5 +137,5 @@ def check_end_state(board: np.ndarray, player: BoardPiece) -> GameState:
     or is play still on-going (GameState.STILL_PLAYING)?
     """
     if connected_four(board, player): return GameState.IS_WIN
-    if (board == 0).sum() == 0: return GameState.IS_DRAW #  TODO:  not only possibility for draw....
+    if (board == 0).sum() == 0: return GameState.IS_DRAW
     return GameState.STILL_PLAYING
