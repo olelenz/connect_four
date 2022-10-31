@@ -149,5 +149,15 @@ def test_connected_four():
     assert not ret
 
 
+def test_check_end_state():
+    from agents.game_utils import initialize_game_state, check_end_state, GameState
 
+    board = initialize_game_state()
 
+    board[0, 3] = PLAYER1
+    board[0, 2] = PLAYER2
+
+    ret = check_end_state(board, PLAYER1)
+
+    assert isinstance(ret, GameState)
+    assert ret == GameState.STILL_PLAYING

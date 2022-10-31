@@ -124,4 +124,6 @@ def check_end_state(board: np.ndarray, player: BoardPiece) -> GameState:
     action won (GameState.IS_WIN) or drawn (GameState.IS_DRAW) the game,
     or is play still on-going (GameState.STILL_PLAYING)?
     """
-    raise NotImplementedError()
+    if connected_four(board, player): return GameState.IS_WIN
+    if (board == 0).sum() == 0: return GameState.IS_DRAW #  TODO:  not only possibility for draw....
+    return GameState.STILL_PLAYING
