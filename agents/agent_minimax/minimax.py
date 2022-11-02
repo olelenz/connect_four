@@ -65,7 +65,10 @@ def evaluate_position(board: np.ndarray, player: BoardPiece) -> [int]:
     output: int = 0
     if player == PLAYER2:
         if connected_four(board, PLAYER1): return[1_000_000_000_000]
-    elif connected_four(board, PLAYER2): return[-1_000_000_000_000]
+        if connected_four(board, PLAYER2): return[-1_000_000_000_000]
+    else:
+        if connected_four(board, PLAYER2): return[-1_000_000_000_000]
+        if connected_four(board, PLAYER1): return [1_000_000_000_000]
     evaluation_board = initialize_game_state()
     for row in range(6):
         for column in range(7):
@@ -77,7 +80,6 @@ def evaluate_position(board: np.ndarray, player: BoardPiece) -> [int]:
     convolve_2nds = [[[1, 1]], [[1], [1]], np.identity(2), np.flip(np.identity(2), 1)]
     for snd in convolve_2nds:
         output += int(sum(sum(signal.convolve2d(evaluation_board, snd, mode="valid"))))
-    print(output)
     return [output]
 
 
