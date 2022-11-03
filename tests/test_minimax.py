@@ -5,12 +5,13 @@ def test_generate_move():
     board = initialize_game_state()
     ret = generate_move_minimax(board, PLAYER1, None, 2)
 
+
 def test_evaluate_position():
     from agents.agent_minimax import evaluate_position
-    from agents.game_utils import initialize_game_state, PLAYER1
+    from agents.game_utils import initialize_game_state
 
     board = initialize_game_state()
     ret = evaluate_position(board)
 
-    assert isinstance(ret[0], int)
-    assert ret[0] == 0
+    assert isinstance(ret, int)
+    assert ret == 0
