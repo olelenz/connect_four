@@ -11,12 +11,33 @@ from agents.game_utils import BoardPiece, SavedState, PlayerAction, NO_PLAYER, a
 def generate_move_minimax(board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState], depth: int = 4) -> Tuple[
     PlayerAction, Optional[SavedState]]:
     if player == PLAYER1:
-        evaluation = max_rec(0, depth, board, player)
+        evaluation = minimax_rec(0, depth, board, player, True)
     else:
-        evaluation = min_rec(0, depth, board, player)
+        evaluation = minimax_rec(0, depth, board, player, False)
     print("final eval is: " + str(evaluation))
     print("play the move: "+str(evaluation[1]))
     return PlayerAction(evaluation[1]), None
+
+
+def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarray, player: BoardPiece, maximize: bool) -> [(int, PlayerAction)]:
+    evaluations: [(int, PlayerAction)] = []
+    possible_moves: [int] = get_possible_moves(current_board)
+
+    if len(possible_moves) == 0 or current_depth == desired_depth:
+        evaluation: [int] = evaluate_position(current_board)
+        return [evaluation[0], -1]
+
+    for move in possible_moves:
+        new_board = apply_player_action(current_board, move, player)
+        if player == PLAYER1:
+            evaluations.append((minimax_rec(current_depth + 1, desired_depth, new_board, PLAYER2, not maximize)[0], move))
+        else:
+            evaluations.append((minimax_rec(current_depth + 1, desired_depth, new_board, PLAYER1, not maximize)[0], move))
+
+    if maximize:
+        return max(evaluations)
+    else:
+        return min(evaluations)
 
 
 def min_rec(current_depth: int, desired_depth: int, current_board: np.ndarray, player: BoardPiece):
