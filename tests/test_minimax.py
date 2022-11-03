@@ -10,7 +10,7 @@ def test_evaluate_position():
     from agents.game_utils import initialize_game_state, PLAYER1
 
     board = initialize_game_state()
-    ret = evaluate_position(board, PLAYER1)
+    ret = evaluate_position(board)
 
     assert isinstance(ret[0], int)
     assert ret[0] == 0

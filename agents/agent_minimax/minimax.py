@@ -21,13 +21,14 @@ def generate_move_minimax(board: np.ndarray, player: BoardPiece, saved_state: Op
 
 def min_rec(current_depth: int, desired_depth: int, current_board: np.ndarray, player: BoardPiece):
     evaluations: [(int, PlayerAction)] = []
-    if current_depth == desired_depth:
+    possible_moves: [int] = get_possible_moves(current_board)
+    if len(possible_moves) == 0 or current_depth == desired_depth:
         # calculate value for current position
-        evaluation: [int] = evaluate_position(current_board, player)
+        evaluation: [int] = evaluate_position(current_board)
         #print("yay eval is: "+str(evaluation))
         return evaluation
 
-    for move in get_possible_moves(current_board):
+    for move in possible_moves:
         new_board = apply_player_action(current_board, move, player)
         #print("------------------------------------------")
         #print("move to be played by "+str(player)+": "+str(move))
@@ -42,13 +43,14 @@ def min_rec(current_depth: int, desired_depth: int, current_board: np.ndarray, p
 
 def max_rec(current_depth: int, desired_depth: int, current_board: np.ndarray, player: BoardPiece):
     evaluations: [(int, PlayerAction)] = []
-    if current_depth == desired_depth:
+    possible_moves: [int] = get_possible_moves(current_board)
+    if len(possible_moves) == 0 or current_depth == desired_depth:
         # calculate value for current position
-        evaluation: [int] = evaluate_position(current_board, player)
+        evaluation: [int] = evaluate_position(current_board)
         #print("uuh eval is: " + str(evaluation))
         return evaluation
 
-    for move in get_possible_moves(current_board):
+    for move in possible_moves:
         #print("------------------------------------------")
         #print("move to be played by " + str(player) + ": " + str(move))
         new_board = apply_player_action(current_board, move, player)
@@ -61,14 +63,10 @@ def max_rec(current_depth: int, desired_depth: int, current_board: np.ndarray, p
     return max(evaluations)
 
 
-def evaluate_position(board: np.ndarray, player: BoardPiece) -> [int]:
+def evaluate_position(board: np.ndarray) -> [int]:
     output: int = 0
-    if player == PLAYER2:
-        if connected_four(board, PLAYER1): return[1_000_000_000_000]
-        if connected_four(board, PLAYER2): return[-1_000_000_000_000]
-    else:
-        if connected_four(board, PLAYER2): return[-1_000_000_000_000]
-        if connected_four(board, PLAYER1): return [1_000_000_000_000]
+    if connected_four(board, PLAYER1): return[1_000_000_000_000]
+    if connected_four(board, PLAYER2): return[-1_000_000_000_000]
     evaluation_board = initialize_game_state()
     for row in range(6):
         for column in range(7):
@@ -85,6 +83,7 @@ def evaluate_position(board: np.ndarray, player: BoardPiece) -> [int]:
 
 def get_possible_moves(board: np.ndarray) -> [PlayerAction]:
     out: [PlayerAction] = []
+    if connected_four(board, PLAYER1) or connected_four(board, PLAYER2): return []
     for i in range(0, 7):
         if board[5][i] == NO_PLAYER:
             out.append(PlayerAction(i))
