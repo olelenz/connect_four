@@ -35,9 +35,9 @@ def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarra
             evaluations.append((minimax_rec(current_depth + 1, desired_depth, new_board, PLAYER1, not maximize)[0], move))
 
     if maximize:
-        return max(evaluations)
+        return max(evaluations, key=lambda x: x[0])
     else:
-        return min(evaluations)
+        return min(evaluations, key=lambda x: x[0])
 
 
 def evaluate_position(board: np.ndarray) -> int:
