@@ -139,3 +139,13 @@ def check_end_state(board: np.ndarray, player: BoardPiece) -> GameState:
     if connected_four(board, player): return GameState.IS_WIN
     if (board == 0).sum() == 0: return GameState.IS_DRAW
     return GameState.STILL_PLAYING
+
+
+def get_possible_moves(board: np.ndarray) -> [PlayerAction]:
+    out: [PlayerAction] = []
+    if connected_four(board, PLAYER1) or connected_four(board, PLAYER2): return []
+    for i in range(0, 7):
+        if board[5][i] == NO_PLAYER:
+            out.append(PlayerAction(i))
+    return out
+

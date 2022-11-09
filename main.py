@@ -1,4 +1,6 @@
 from typing import Callable
+
+from agents.agent_mcts import generate_move_mcts
 from agents.game_utils import GenMove
 from agents.agent_human_user import user_move
 from agents.agent_random import generate_move
@@ -115,6 +117,7 @@ if __name__ == "__main__":
     # human_vs_agent(user_move)
     # human_vs_agent(generate_move)
     # human_vs_agent(generate_move_minimax)
-    agent_vs_agent(generate_move, generate_move_minimax)
+    #agent_vs_agent(generate_move, generate_move_minimax)
     # agent_vs_agent(generate_move_minimax, generate_move_minimax)
     # agent_vs_agent(generate_move, generate_move)
+    human_vs_agent(generate_move_mcts)

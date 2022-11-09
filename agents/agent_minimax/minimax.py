@@ -5,7 +5,7 @@ import random as rd
 from scipy import signal
 
 from agents.game_utils import BoardPiece, SavedState, PlayerAction, NO_PLAYER, apply_player_action, PLAYER1, PLAYER2, \
-    initialize_game_state, connected_four
+    initialize_game_state, connected_four, get_possible_moves
 
 
 def generate_move_minimax(board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState], depth: int = 4) -> Tuple[
@@ -56,12 +56,3 @@ def evaluate_position(board: np.ndarray) -> int:
     for snd in convolve_2nds:
         output += int(sum(sum(signal.convolve2d(evaluation_board, snd, mode="valid"))))
     return output
-
-
-def get_possible_moves(board: np.ndarray) -> [PlayerAction]:
-    out: [PlayerAction] = []
-    if connected_four(board, PLAYER1) or connected_four(board, PLAYER2): return []
-    for i in range(0, 7):
-        if board[5][i] == NO_PLAYER:
-            out.append(PlayerAction(i))
-    return out
