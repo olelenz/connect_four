@@ -2,7 +2,8 @@ import numpy as np
 import random as rd
 from typing import Tuple, Optional
 
-from agents.game_utils import BoardPiece, SavedState, PlayerAction, NO_PLAYER
+from agents.game_utils import BoardPiece, PlayerAction, NO_PLAYER
+from agents.saved_state import SavedState
 
 
 def generate_move_random(

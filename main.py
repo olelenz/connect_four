@@ -120,4 +120,6 @@ if __name__ == "__main__":
     #agent_vs_agent(generate_move, generate_move_minimax)
     # agent_vs_agent(generate_move_minimax, generate_move_minimax)
     # agent_vs_agent(generate_move, generate_move)
-    human_vs_agent(generate_move_mcts)
+    # human_vs_agent(generate_move_mcts)
+    # agent_vs_agent(generate_move_minimax, generate_move_mcts)
+    agent_vs_agent(generate_move, generate_move_mcts)

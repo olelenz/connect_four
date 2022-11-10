@@ -4,20 +4,31 @@ import time
 import random as rd
 
 from agents.agent_minimax.mcts_tree import MctsTree
-from agents.game_utils import PlayerAction, BoardPiece, SavedState, get_possible_moves, apply_player_action, PLAYER1, \
+from agents.game_utils import PlayerAction, BoardPiece, get_possible_moves, apply_player_action, PLAYER1, \
     PLAYER2, check_end_state, GameState, pretty_print_board, connected_four
+from agents.saved_state import SavedState
 
 
-def generate_move_mcts(board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState], seconds: int = 5) -> \
+def generate_move_mcts(board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState], seconds: int = 10) -> \
         Tuple[
             PlayerAction, Optional[SavedState]]:
     start_time = time.time()
 
     game_tree: MctsTree = MctsTree(None, board, player, None)
-    current_node: MctsTree = game_tree
+    if saved_state is not None:
+        board_string = pretty_print_board(board)
+        children: List[MctsTree] = saved_state.get_tree().get_child_trees()
+        for child in children:
+            if board_string == pretty_print_board(child.get_board()):
+                game_tree = child
+                print("I found recent information!: "+str(child.get_last_move()))
+                break
+    ite: int = 0
 
-    while time.time() - start_time < seconds:
-        current_node = selection(current_node)  # is a leaf-node
+    #while time.time() - start_time < seconds:
+    while ite < 1500:
+        ite = ite+1
+        current_node = selection(game_tree)  # is a leaf-node
         #  either direct rollout or add possible moves as children
 
         if current_node.get_n() != 0:
@@ -29,15 +40,18 @@ def generate_move_mcts(board: np.ndarray, player: BoardPiece, saved_state: Optio
         #  simulation
         result: int = simulation(current_node.get_board(), player)
         backpropagation(current_node, result)
+        pass
 
     children: List[MctsTree] = game_tree.get_child_trees()
+    if len(children) == 0:  # in case of only one iteration
+        raise Exception
     result_tree: MctsTree = children[0]
     for i in range(1, len(children)):
         if children[i].get_t() > result_tree.get_t():
             result_tree = children[i]
 
     print("hello: " + str(result_tree.get_last_move()))
-    return PlayerAction(result_tree.get_last_move()), None
+    return PlayerAction(result_tree.get_last_move()), SavedState(result_tree)
 
 
 def selection(current_node: MctsTree) -> MctsTree:
@@ -86,12 +100,9 @@ def simulation(board: np.ndarray, initial_player: BoardPiece) -> int:
     end: GameState = check_end_state(board, other_player)
     if end == GameState.IS_DRAW:
         return 0
-    if not connected_four(board, PLAYER1) and not connected_four(board, PLAYER2):
-        print(pretty_print_board(board))
-        raise Exception  # that should not happen
     if other_player == initial_player:
-        return 10
-    return -10
+        return 1
+    return -1
 
 
 def backpropagation(current_node: MctsTree, result: int):

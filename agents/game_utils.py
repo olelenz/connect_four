@@ -3,7 +3,7 @@ from scipy import signal
 import numpy as np
 from typing import Callable, Optional
 
-
+from agents.saved_state import SavedState
 
 BoardPiece = np.int8  # The data type (dtype) of the board
 NO_PLAYER = BoardPiece(0)  # board[i, j] == NO_PLAYER where the position is empty
@@ -22,10 +22,6 @@ class GameState(Enum):
     IS_WIN = 1
     IS_DRAW = -1
     STILL_PLAYING = 0
-
-
-class SavedState:
-    pass
 
 
 GenMove = Callable[

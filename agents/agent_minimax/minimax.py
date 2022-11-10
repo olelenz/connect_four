@@ -4,8 +4,9 @@ import random as rd
 
 from scipy import signal
 
-from agents.game_utils import BoardPiece, SavedState, PlayerAction, NO_PLAYER, apply_player_action, PLAYER1, PLAYER2, \
+from agents.game_utils import BoardPiece, PlayerAction, NO_PLAYER, apply_player_action, PLAYER1, PLAYER2, \
     initialize_game_state, connected_four, get_possible_moves
+from agents.saved_state import SavedState
 
 
 def generate_move_minimax(board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState], depth: int = 4) -> Tuple[

@@ -1,7 +1,9 @@
 import numpy as np
 
-from agents.game_utils import BoardPiece, PlayerAction, SavedState, NO_PLAYER
+from agents.game_utils import BoardPiece, PlayerAction, NO_PLAYER
 from typing import Optional, Callable
+
+from agents.saved_state import SavedState
 
 
 def user_move(board: np.ndarray,
