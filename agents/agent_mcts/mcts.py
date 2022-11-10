@@ -9,12 +9,12 @@ from agents.game_utils import PlayerAction, BoardPiece, get_possible_moves, appl
 from agents.saved_state import SavedState
 
 
-def generate_move_mcts(board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState], seconds: int = 10) -> \
+def generate_move_mcts(board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState], seconds: int = 1) -> \
         Tuple[
             PlayerAction, Optional[SavedState]]:
     start_time = time.time()
 
-    game_tree: MctsTree = MctsTree(None, board, player, None)
+    game_tree: MctsTree = MctsTree(None, board, None, player)
     if saved_state is not None:
         board_string = pretty_print_board(board)
         children: List[MctsTree] = saved_state.get_tree().get_child_trees()
@@ -25,8 +25,8 @@ def generate_move_mcts(board: np.ndarray, player: BoardPiece, saved_state: Optio
                 break
     ite: int = 0
 
-    #while time.time() - start_time < seconds:
-    while ite < 1500:
+    while time.time() - start_time < seconds:
+    #while ite < 1500:
         ite = ite+1
         current_node = selection(game_tree)  # is a leaf-node
         #  either direct rollout or add possible moves as children
@@ -38,7 +38,7 @@ def generate_move_mcts(board: np.ndarray, player: BoardPiece, saved_state: Optio
             if len(current_children) != 0:
                 current_node = current_children[0]  # check case where there are no more possible moves? -> or is that even needed?
         #  simulation
-        result: int = simulation(current_node.get_board(), player)
+        result: int = simulation(current_node.get_board(), player, current_node.get_player())
         backpropagation(current_node, result)
         pass
 
@@ -73,36 +73,24 @@ def selection(current_node: MctsTree) -> MctsTree:
 
 def expansion(leaf_node: MctsTree):
     current_board: np.ndarray = leaf_node.get_board()
-    if leaf_node.player == PLAYER1:
-        next_player: BoardPiece = PLAYER2
-    else:
-        next_player: BoardPiece = PLAYER1
     for move in get_possible_moves(current_board):
-        leaf_node.add_child_tree(MctsTree(leaf_node, apply_player_action(current_board, move, leaf_node.player),
-                                          next_player, move))
+        leaf_node.add_child_tree(MctsTree(leaf_node, apply_player_action(current_board, move, leaf_node.get_player()), move, BoardPiece(3-leaf_node.get_player())))
 
 
-def simulation(board: np.ndarray, initial_player: BoardPiece) -> int:
-    if initial_player == PLAYER1:
-        other_player: BoardPiece = PLAYER2
-    else:
-        other_player: BoardPiece = PLAYER1
+def simulation(board: np.ndarray, initial_player: BoardPiece, next_player: BoardPiece) -> int:
     moves: List[PlayerAction] = get_possible_moves(board)
     #while check_end_state(board, other_player) == GameState.STILL_PLAYING:
     while len(moves) != 0:
-        if other_player == PLAYER1:
-            other_player: BoardPiece = PLAYER2
-        else:
-            other_player: BoardPiece = PLAYER1
-        board = apply_player_action(board, rd.choice(get_possible_moves(board)), other_player)
+        board = apply_player_action(board, rd.choice(get_possible_moves(board)), next_player)
         moves = get_possible_moves(board)
+        next_player = BoardPiece(3-next_player)
 
-    end: GameState = check_end_state(board, other_player)
+    end: GameState = check_end_state(board, next_player)
     if end == GameState.IS_DRAW:
         return 0
-    if other_player == initial_player:
-        return 1
-    return -1
+    if next_player == initial_player:
+        return -1
+    return 1
 
 
 def backpropagation(current_node: MctsTree, result: int):

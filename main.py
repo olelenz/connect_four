@@ -3,7 +3,7 @@ from typing import Callable
 from agents.agent_mcts import generate_move_mcts
 from agents.game_utils import GenMove
 from agents.agent_human_user import user_move
-from agents.agent_random import generate_move
+from agents.agent_random import generate_move_random
 from agents.agent_minimax import generate_move_minimax
 
 
@@ -93,7 +93,7 @@ def agent_vs_agent(
                 t0 = time.time()
                 print(pretty_print_board(board))
                 print(
-                    f'{player_name} you are playing with {PLAYER1_PRINT if player == PLAYER1 else PLAYER2_PRINT}'
+                    f'{str(gen_move.__name__).split("_")[-1]} you are playing with {PLAYER1_PRINT if player == PLAYER1 else PLAYER2_PRINT}'
                 )
                 action, saved_state[player] = gen_move(
                     board.copy(), player, saved_state[player], *args
@@ -107,7 +107,7 @@ def agent_vs_agent(
                         print("Game ended in draw")
                     else:
                         print(
-                            f'{player_name} won playing {PLAYER1_PRINT if player == PLAYER1 else PLAYER2_PRINT}'
+                            f'{str(gen_move.__name__).split("_")[-1]} won playing {PLAYER1_PRINT if player == PLAYER1 else PLAYER2_PRINT}'
                         )
                     playing = False
                     break
@@ -115,11 +115,11 @@ def agent_vs_agent(
 
 if __name__ == "__main__":
     # human_vs_agent(user_move)
-    # human_vs_agent(generate_move)
+    # human_vs_agent(generate_move_random)
     # human_vs_agent(generate_move_minimax)
-    #agent_vs_agent(generate_move, generate_move_minimax)
+    #agent_vs_agent(generate_move_random, generate_move_minimax)
     # agent_vs_agent(generate_move_minimax, generate_move_minimax)
-    # agent_vs_agent(generate_move, generate_move)
+    # agent_vs_agent(generate_move_random, generate_move_random)
     # human_vs_agent(generate_move_mcts)
-    # agent_vs_agent(generate_move_minimax, generate_move_mcts)
-    agent_vs_agent(generate_move, generate_move_mcts)
+    agent_vs_agent(generate_move_minimax, generate_move_mcts)
+    # agent_vs_agent(generate_move_random, generate_move_mcts)

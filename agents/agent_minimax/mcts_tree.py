@@ -5,14 +5,17 @@ from agents.game_utils import BoardPiece, PlayerAction
 
 
 class MctsTree:
-    def __init__(self, parent_tree, board, player, last_move):
+    def __init__(self, parent_tree, board, last_move, player):
         self.parent_tree: 'MctsTree' = parent_tree
         self.t = 0
         self.n = 0
         self.child_trees: List['MctsTree'] = []
         self.board: np.ndarray = board
-        self.player: BoardPiece = player
         self.last_move: PlayerAction = last_move
+        self.player = player
+
+    def get_player(self):
+        return self.player
 
     def get_last_move(self):
         return self.last_move
