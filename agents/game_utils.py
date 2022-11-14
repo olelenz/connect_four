@@ -166,23 +166,11 @@ def connected_four(board: np.ndarray, player: BoardPiece) -> bool:
         in either a horizontal, vertical, or diagonal line. Returns False otherwise.
     """
     relevant_pieces = initialize_game_state()
-    for row in range(6):
-        for column in range(7):
-            if board[row, column] == player:
-                relevant_pieces[5 - row, column] = 1  # notice the flipped rows - only impacts on what is calculated
-                # when (diagonals are flipped otherwise)
-    convolve_2nds = [[[1, 1, 1, 1]], [[1], [1], [1], [1]], np.identity(4), np.flip(np.identity(4), 1)]  # all
-    # necessary convolution kernels
-    for snd in convolve_2nds:
-        if (signal.convolve2d(relevant_pieces, snd, mode="valid") == 4).any(): return True
+    relevant_pieces[board == player] = 1
+    for snd in [[[1, 1, 1, 1]], [[1], [1], [1], [1]], np.identity(4), np.identity(4)[::-1, ::]]:
+        if (signal.convolve2d(relevant_pieces, snd, mode="valid") == 4).any():
+            return True
     return False
-    # explanation:
-    # conv2d_horizontal = signal.convolve2d(relevant_pieces, [[1, 1, 1, 1]], mode="valid")
-    # conv2d_vertical = signal.convolve2d(relevant_pieces, [[1], [1], [1], [1]], mode="valid")
-    # conv2d_diagonal_left_top = signal.convolve2d(relevant_pieces, np.identity(4), mode="valid")
-    # conv2d_diagonal_right_top = signal.convolve2d(relevant_pieces, np.flip(np.identity(4), 1), mode="valid")
-    # return (conv2d_horizontal == 4).any() or (
-    # conv2d_vertical == 4).any() or (conv2d_diagonal_left_top == 4).any() or (conv2d_diagonal_right_top == 4).any()
 
 
 def check_end_state(board: np.ndarray, player: BoardPiece) -> GameState:

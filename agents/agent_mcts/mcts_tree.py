@@ -7,7 +7,7 @@ from agents.game_utils import BoardPiece, PlayerAction
 class MctsTree:
     def __init__(self, parent_tree, board, last_move, player):
         self.parent_tree: 'MctsTree' = parent_tree
-        self.t = 0
+        self.w = 0
         self.n = 0
         self.child_trees: List['MctsTree'] = []
         self.board: np.ndarray = board
@@ -29,16 +29,16 @@ class MctsTree:
     def get_ucb(self) -> float:
         if self.n == 0:
             return 1_000_000_000_000
-        return (self.t / self.n) + 20 * (np.log(self.parent_tree.n) / self.n) ** (1 / 2)
+        return (self.w / self.n) + 20 * (np.log(self.parent_tree.n) / self.n) ** (1 / 2)
 
     def increment_n(self) -> None:
         self.n = self.n + 1
 
-    def update_t(self, add_to_sum: int) -> None:
-        self.t = self.t + add_to_sum
+    def update_w(self, add_to_sum: int) -> None:
+        self.w = self.w + add_to_sum
 
-    def get_t(self) -> int:
-        return self.t
+    def get_w(self) -> int:
+        return self.w
 
     def get_n(self) -> int:
         return self.n

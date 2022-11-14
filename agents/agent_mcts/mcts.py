@@ -3,9 +3,8 @@ import numpy as np
 import time
 import random as rd
 
-from agents.agent_minimax.mcts_tree import MctsTree
-from agents.game_utils import PlayerAction, BoardPiece, get_possible_moves, apply_player_action, PLAYER1, \
-    PLAYER2, check_end_state, GameState, pretty_print_board, connected_four
+from agents.agent_mcts.mcts_tree import MctsTree
+from agents.game_utils import PlayerAction, BoardPiece, get_possible_moves, apply_player_action, check_end_state, GameState, pretty_print_board
 from agents.saved_state import SavedState
 
 
@@ -21,7 +20,7 @@ def generate_move_mcts(board: np.ndarray, player: BoardPiece, saved_state: Optio
         for child in children:
             if board_string == pretty_print_board(child.get_board()):
                 game_tree = child
-                print("I found recent information!: "+str(child.get_last_move())+" number of games: "+str(game_tree.get_n()))
+                #print("I found recent information!: "+str(child.get_last_move())+" number of games: "+str(game_tree.get_n()))
                 break
     ite: int = 0
 
@@ -47,10 +46,10 @@ def generate_move_mcts(board: np.ndarray, player: BoardPiece, saved_state: Optio
         raise Exception
     result_tree: MctsTree = children[0]
     for i in range(1, len(children)):
-        if children[i].get_t() > result_tree.get_t():
+        if children[i].get_w() > result_tree.get_w():
             result_tree = children[i]
 
-    print("hello: " + str(result_tree.get_last_move())+" simulated games: "+str(game_tree.get_n())+" iterations: "+str(ite))
+    print("to play: " + str(result_tree.get_last_move())+", simulated games: "+str(game_tree.get_n())+", iterations: "+str(ite))
     return PlayerAction(result_tree.get_last_move()), SavedState(result_tree)
 
 
@@ -96,5 +95,5 @@ def simulation(board: np.ndarray, initial_player: BoardPiece, next_player: Board
 def backpropagation(current_node: MctsTree, result: int):
     while current_node is not None:
         current_node.increment_n()
-        current_node.update_t(result)
+        current_node.update_w(result)
         current_node = current_node.get_parent_tree()

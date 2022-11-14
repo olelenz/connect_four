@@ -1,6 +1,5 @@
 import numpy as np
 from typing import Tuple, Optional
-import random as rd
 
 from scipy import signal
 
@@ -9,18 +8,17 @@ from agents.game_utils import BoardPiece, PlayerAction, NO_PLAYER, apply_player_
 from agents.saved_state import SavedState
 
 
-def generate_move_minimax(board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState], depth: int = 4) -> Tuple[
-    PlayerAction, Optional[SavedState]]:
+def generate_move_minimax(board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState], depth: int = 4) -> Tuple[PlayerAction, Optional[SavedState]]:
     if player == PLAYER1:
         evaluation = minimax_rec(0, depth, board, player, True)
     else:
         evaluation = minimax_rec(0, depth, board, player, False)
-    print("final eval is: " + str(evaluation))
-    print("play the move: "+str(evaluation[1]))
+    print("final eval is: " + str(evaluation)+", play the move: " + str(evaluation[1]))
     return PlayerAction(evaluation[1]), None
 
 
-def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarray, player: BoardPiece, maximize: bool) -> [(int, PlayerAction)]:
+def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarray, player: BoardPiece,
+                maximize: bool) -> [(int, PlayerAction)]:
     evaluations: [(int, PlayerAction)] = []
     possible_moves: [int] = get_possible_moves(current_board)
 
@@ -31,9 +29,11 @@ def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarra
     for move in possible_moves:
         new_board = apply_player_action(current_board, move, player)
         if player == PLAYER1:
-            evaluations.append((minimax_rec(current_depth + 1, desired_depth, new_board, PLAYER2, not maximize)[0], move))
+            evaluations.append(
+                (minimax_rec(current_depth + 1, desired_depth, new_board, PLAYER2, not maximize)[0], move))
         else:
-            evaluations.append((minimax_rec(current_depth + 1, desired_depth, new_board, PLAYER1, not maximize)[0], move))
+            evaluations.append(
+                (minimax_rec(current_depth + 1, desired_depth, new_board, PLAYER1, not maximize)[0], move))
 
     if maximize:
         return max(evaluations, key=lambda x: x[0])
@@ -46,14 +46,9 @@ def evaluate_position(board: np.ndarray) -> int:
     if connected_four(board, PLAYER1): return 1_000_000_000_000
     if connected_four(board, PLAYER2): return -1_000_000_000_000
     evaluation_board = initialize_game_state()
-    for row in range(6):
-        for column in range(7):
-            if board[row, column] == PLAYER1:
-                evaluation_board[5 - row, column] = 1
-            if board[row, column] == PLAYER2:
-                evaluation_board[5 - row, column] = -1
+    evaluation_board[board == PLAYER1] = 1
+    evaluation_board[board == PLAYER2] = -1
 
-    convolve_2nds = [[[1, 1]], [[1], [1]], np.identity(2), np.flip(np.identity(2), 1)]
-    for snd in convolve_2nds:
+    for snd in [[[1, 1]], [[1], [1]], np.identity(2), np.identity(2)[::-1, ::]]:
         output += int(sum(sum(signal.convolve2d(evaluation_board, snd, mode="valid"))))
     return output
