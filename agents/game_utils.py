@@ -76,7 +76,7 @@ def pretty_print_board(board: np.ndarray) -> str:
                 output += NO_PLAYER_PRINT
             elif entry == PLAYER1:
                 output += PLAYER1_PRINT
-            elif entry == PLAYER2:
+            else:
                 output += PLAYER2_PRINT
             output += " "
         output += "|\n"
