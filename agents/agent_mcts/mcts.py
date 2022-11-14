@@ -21,7 +21,7 @@ def generate_move_mcts(board: np.ndarray, player: BoardPiece, saved_state: Optio
         for child in children:
             if board_string == pretty_print_board(child.get_board()):
                 game_tree = child
-                print("I found recent information!: "+str(child.get_last_move()))
+                print("I found recent information!: "+str(child.get_last_move())+" number of games: "+str(game_tree.get_n()))
                 break
     ite: int = 0
 
@@ -50,7 +50,7 @@ def generate_move_mcts(board: np.ndarray, player: BoardPiece, saved_state: Optio
         if children[i].get_t() > result_tree.get_t():
             result_tree = children[i]
 
-    print("hello: " + str(result_tree.get_last_move()))
+    print("hello: " + str(result_tree.get_last_move())+" simulated games: "+str(game_tree.get_n())+" iterations: "+str(ite))
     return PlayerAction(result_tree.get_last_move()), SavedState(result_tree)
 
 
