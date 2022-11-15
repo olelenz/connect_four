@@ -29,15 +29,15 @@ def generate_move_minimax(board: np.ndarray, player: BoardPiece, saved_state: Op
         Tuple containing the move to play and the saved state.
     """
     if player == PLAYER1:
-        evaluation = minimax_rec(0, depth, board, player, True)
+        evaluation = minimax_rec(0, depth, board, player, True)  # start maximizing if PLAYER1 is to play
     else:
-        evaluation = minimax_rec(0, depth, board, player, False)
+        evaluation = minimax_rec(0, depth, board, player, False)  # start minimizing if PLAYER2 is to play
     print("final eval is: " + str(evaluation)+", play the move: " + str(evaluation[1]))
     return PlayerAction(evaluation[1]), None
 
 
 def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarray, player: BoardPiece,
-                maximize: bool) -> [(int, PlayerAction)]:
+                maximize: bool) -> (int, PlayerAction):
     """
     Recursive helper function for generate_move_minimax. Implements the minimax algorithm.
     
@@ -60,20 +60,20 @@ def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarra
 
     Returns
     -------
-    :[(int, PlayerAction)]
-        Array containing Tuples of the evaluation after playing the move, which is also returned in this Tuple.
+    :(int, PlayerAction)
+        Tuple of the evaluation after playing the move, which is also returned in this Tuple.
     """
-    # TODO: check return signature
-    evaluations: [(int, PlayerAction)] = []
+    evaluations: [(int, PlayerAction)] = []  # to store all possible moves from this positions paired with their
+    # evaluation
     possible_moves: [int] = get_possible_moves(current_board)
 
-    if len(possible_moves) == 0 or current_depth == desired_depth:
+    if len(possible_moves) == 0 or current_depth == desired_depth:  # no more moves or desired depth reached
         evaluation: int = evaluate_position(current_board)
-        return [evaluation, -1]
+        return evaluation, -1  # -1 because we do not know the last played move - will be added when closing recursion
 
     for move in possible_moves:
         new_board = apply_player_action(current_board, move, player)
-        if player == PLAYER1:
+        if player == PLAYER1:  # change player and change between maximizing and minimizing
             evaluations.append(
                 (minimax_rec(current_depth + 1, desired_depth, new_board, PLAYER2, not maximize)[0], move))
         else:
@@ -81,9 +81,9 @@ def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarra
                 (minimax_rec(current_depth + 1, desired_depth, new_board, PLAYER1, not maximize)[0], move))
 
     if maximize:
-        return max(evaluations, key=lambda x: x[0])
+        return max(evaluations, key=lambda x: x[0])  # get tuple with max evaluation
     else:
-        return min(evaluations, key=lambda x: x[0])
+        return min(evaluations, key=lambda x: x[0])  # get tuple with min evaluation
 
 
 def evaluate_position(board: np.ndarray) -> int:
