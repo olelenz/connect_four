@@ -8,6 +8,9 @@ def test_run_all():
     test_player2_start()
     test_evaluate_winning_position_1()
     test_evaluate_winning_position_2()
+    test_win_in_one_move()
+    test_prevent_opponent_win()
+    test_win_in_two_moves()
 
 
 def test_generate_move():
@@ -48,7 +51,7 @@ def test_player2_start():
 
 def test_evaluate_winning_position_1():
     board = initialize_game_state()
-    board[0:4] = PLAYER1
+    board[0, 0:4] = PLAYER1
     ret = evaluate_position(board)
 
     assert isinstance(ret, int)
@@ -57,10 +60,38 @@ def test_evaluate_winning_position_1():
 
 def test_evaluate_winning_position_2():
     board = initialize_game_state()
-    board[0:4] = PLAYER2
+    board[0, 0:4] = PLAYER2
     ret = evaluate_position(board)
 
     assert isinstance(ret, int)
     assert ret == -1_000_000_000_000
 
+
+def test_win_in_one_move():
+    board = initialize_game_state()
+    board[0, 0:3] = PLAYER2
+
+    ret = generate_move_minimax(board, PLAYER2, None, 1)
+    assert isinstance(ret[0], PlayerAction)
+    assert ret[0] == 3
+
+
+def test_prevent_opponent_win():
+    board = initialize_game_state()
+    board[0, 1:4] = PLAYER1
+    board[0, 0] = PLAYER2
+
+    ret = generate_move_minimax(board, PLAYER2, None, 2)
+    assert isinstance(ret[0], PlayerAction)
+    assert ret[0] == 4
+
+
+def test_win_in_two_moves():
+    board = initialize_game_state()
+    board[0, 1] = PLAYER2
+    board[0, 3] = PLAYER2
+
+    ret = generate_move_minimax(board, PLAYER2, None, 3)
+    assert isinstance(ret[0], PlayerAction)
+    assert ret[0] == 2
 

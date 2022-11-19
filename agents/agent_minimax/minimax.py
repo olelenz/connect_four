@@ -1,6 +1,7 @@
 import numpy as np
 from typing import Tuple, Optional
 from scipy import signal
+
 from agents.game_utils import BoardPiece, PlayerAction, apply_player_action, PLAYER1, PLAYER2, initialize_game_state, connected_four, get_possible_moves
 from agents.saved_state import SavedState
 
@@ -32,7 +33,6 @@ def generate_move_minimax(board: np.ndarray, player: BoardPiece, saved_state: Op
         evaluation = minimax_rec(0, depth, board, player, True)  # start maximizing if PLAYER1 is to play
     else:
         evaluation = minimax_rec(0, depth, board, player, False)  # start minimizing if PLAYER2 is to play
-    print("final eval is: " + str(evaluation)+", play the move: " + str(evaluation[1]))
     return PlayerAction(evaluation[1]), None
 
 
@@ -66,20 +66,15 @@ def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarra
     evaluations: [(int, PlayerAction)] = []  # to store all possible moves from this positions paired with their
     # evaluation
     possible_moves: [int] = get_possible_moves(current_board)
-
-    if len(possible_moves) == 0 or current_depth == desired_depth:  # no more moves or desired depth reached
+    if len(possible_moves) == 0 or current_depth == desired_depth:  # no more moves or desired depth reached -
+        # recursion anchor
         evaluation: int = evaluate_position(current_board)
         return evaluation, -1  # -1 because we do not know the last played move - will be added when closing recursion
 
     for move in possible_moves:
         new_board = apply_player_action(current_board, move, player)
-        if player == PLAYER1:  # change player and change between maximizing and minimizing
-            evaluations.append(
-                (minimax_rec(current_depth + 1, desired_depth, new_board, PLAYER2, not maximize)[0], move))
-        else:
-            evaluations.append(
-                (minimax_rec(current_depth + 1, desired_depth, new_board, PLAYER1, not maximize)[0], move))
-
+        evaluations.append(
+            (minimax_rec(current_depth + 1, desired_depth, new_board, BoardPiece(3-player), not maximize)[0], move))  # change player and change between maximizing and minimizing
     if maximize:
         return max(evaluations, key=lambda x: x[0])  # get tuple with max evaluation
     else:
