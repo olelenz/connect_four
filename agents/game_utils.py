@@ -95,12 +95,20 @@ def string_to_board(pp_board: str) -> np.ndarray:
     pp_board: str
         String-representation of the board-position.
 
+    Raises
+    ----------
+    AttributeError
+        If the input string is not representing a valid board state.
+
     Returns
     ----------
     numpy.ndarray
         The board generated from the input-String.
     """
+
     output: np.ndarray = initialize_game_state()
+    if len(pp_board.split("\n")) != 9:  # using regex would be way better
+        raise AttributeError
     for row, line in enumerate(pp_board.split("\n")[1:-2]):
         for column, entry in enumerate(line[1:-1:2]):
             if entry == PLAYER1_PRINT:
@@ -126,15 +134,15 @@ def apply_player_action(board: np.ndarray, action: PlayerAction, player: BoardPi
     player: BoardPiece
         The player which tries to make the desired move.
 
-    Returns
-    ----------
-    numpy.ndarray
-        Modified board-position if the move was legal.
-
     Raises
     ----------
     ValueError
         If the column in which the player wants to play is already filled.
+
+    Returns
+    ----------
+    numpy.ndarray
+        Modified board-position if the move was legal.
     """
     i: int = 0
     try:
@@ -191,6 +199,7 @@ def check_end_state(board: np.ndarray, player: BoardPiece) -> GameState:
     :GameState
         The current game-state - either IS_WIN, IS_DRAW or STILL_PLAYING.
     """
+
     if connected_four(board, player):
         return GameState.IS_WIN
     if (board == 0).sum() == 0:
@@ -221,4 +230,3 @@ def get_possible_moves(board: np.ndarray) -> [PlayerAction]:
         if board[5][i] == NO_PLAYER:
             out.append(PlayerAction(i))
     return out
-

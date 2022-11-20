@@ -1,7 +1,6 @@
-import numpy as np
 import pytest
 
-from agents.game_utils import BoardPiece, NO_PLAYER, PLAYER1, PLAYER2
+from agents.game_utils import *
 
 
 def test_run_all():
@@ -19,8 +18,6 @@ def test_run_all():
 
 
 def test_initialize_game_state():
-    from agents.game_utils import initialize_game_state
-
     ret = initialize_game_state()
 
     assert isinstance(ret, np.ndarray)
@@ -30,8 +27,6 @@ def test_initialize_game_state():
 
 
 def test_pretty_print_board():
-    from agents.game_utils import initialize_game_state, pretty_print_board
-
     board = initialize_game_state()
 
     board[0, 0] = PLAYER1
@@ -45,8 +40,6 @@ def test_pretty_print_board():
 
 
 def test_string_to_board():
-    from agents.game_utils import initialize_game_state, string_to_board
-
     board = initialize_game_state()
 
     board[0, 3] = PLAYER1
@@ -59,10 +52,11 @@ def test_string_to_board():
     assert isinstance(ret, np.ndarray)
     assert (ret == board).all()
 
+    with pytest.raises(AttributeError):
+        string_to_board("wrong format")
+
 
 def test_apply_player_action():
-    from agents.game_utils import initialize_game_state, apply_player_action
-
     board = initialize_game_state()
     board[0, 3] = PLAYER1
     board[1, 3] = PLAYER2
@@ -70,24 +64,23 @@ def test_apply_player_action():
     board[3, 3] = PLAYER2
     board[4, 3] = PLAYER1
 
-    ret = apply_player_action(board, 3, PLAYER2)
+    ret = apply_player_action(board, PlayerAction(3), PLAYER2)
 
     assert isinstance(ret, np.ndarray)
     assert (ret != board).any()
     board[5, 3] = PLAYER2
     assert (ret == board).all()
 
-    ret = apply_player_action(board, 2, PLAYER1)
+    ret = apply_player_action(board, PlayerAction(2), PLAYER1)
+
     board[0, 2] = PLAYER1
     assert (ret == board).all()
 
     with pytest.raises(ValueError):
-        apply_player_action(board, 3, PLAYER2)
+        apply_player_action(board, PlayerAction(3), PLAYER2)
 
 
 def test_connected_four_general():
-    from agents.game_utils import initialize_game_state, connected_four
-
     ret = connected_four(initialize_game_state(), PLAYER1)
     assert not ret
     ret = connected_four(initialize_game_state(), PLAYER2)
@@ -95,7 +88,6 @@ def test_connected_four_general():
 
 
 def test_connected_four_vertical():
-    from agents.game_utils import initialize_game_state, connected_four
     # vertical
     board_one = initialize_game_state()
     board_one[0, 3] = PLAYER1
@@ -110,8 +102,6 @@ def test_connected_four_vertical():
 
 
 def test_connected_four_horizontal():
-    from agents.game_utils import initialize_game_state, connected_four
-
     # horizontal
     board_two = initialize_game_state()
     board_two[0, 0] = PLAYER2
@@ -126,10 +116,7 @@ def test_connected_four_horizontal():
 
 
 def test_connected_four_diagonal_one():
-    from agents.game_utils import initialize_game_state, connected_four
-
     # diagonal left top
-    print("")
     board_three = initialize_game_state()
     board_three[0, 0] = PLAYER1
     board_three[0, 1] = PLAYER1
@@ -153,8 +140,6 @@ def test_connected_four_diagonal_one():
 
 
 def test_connected_four_diagonal_two():
-    from agents.game_utils import initialize_game_state, connected_four
-
     # diagonal right top
     board_three = initialize_game_state()
     board_three[3, 0] = PLAYER1
@@ -179,8 +164,6 @@ def test_connected_four_diagonal_two():
 
 
 def test_check_end_state():
-    from agents.game_utils import initialize_game_state, check_end_state, GameState, string_to_board
-
     board = initialize_game_state()
 
     board[0, 3] = PLAYER1
@@ -191,7 +174,7 @@ def test_check_end_state():
     assert isinstance(ret, GameState)
     assert ret == GameState.STILL_PLAYING
 
-    board[0:4] = PLAYER1
+    board[0, 0:4] = PLAYER1
 
     ret = check_end_state(board, PLAYER1)
 
@@ -209,12 +192,7 @@ def test_check_end_state():
 
 
 def test_get_possible_moves():
-    from agents.game_utils import initialize_game_state, GameState, string_to_board, PlayerAction, get_possible_moves
-
-    board = string_to_board(
-        "|==============|\n|O X O X O X O |\n|X X O O O X X |\n|O O X X X O O |\n|O O O X O O O |\n|X X O O "
-        "O X X |\n|X X X O O O X |\n|==============|\n|0 1 2 3 4 5 6 |")
-
+    board = string_to_board("|==============|\n|O X O X O X O |\n|X X O O O X X |\n|O O X X X O O |\n|O O O X O O O |\n|X X O O O X X |\n|X X X O O O X |\n|==============|\n|0 1 2 3 4 5 6 |")
     ret = get_possible_moves(board)
 
     assert ret == []

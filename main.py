@@ -62,15 +62,4 @@ def human_vs_agent(
 
 
 if __name__ == "__main__":
-    # cProfile.runctx("human_vs_agent(generate_move_minimax, generate_move_minimax)", globals(), locals())
-    # human_vs_agent(generate_move_random)
-    # human_vs_agent(user_move)
-    # human_vs_agent(generate_move_random)
-    # human_vs_agent(generate_move_minimax)
-    # human_vs_agent(generate_move_random, generate_move_minimax)
-    # human_vs_agent(generate_move_minimax, generate_move_minimax)
-    # human_vs_agent(generate_move_random, generate_move_random)
-    # human_vs_agent(generate_move_mcts)
-    # human_vs_agent(generate_move_minimax)
     human_vs_agent(generate_move_minimax, generate_move_mcts)
-    # human_vs_agent(generate_move_random, generate_move_mcts)

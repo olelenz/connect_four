@@ -41,10 +41,9 @@ def generate_move_mcts(board: np.ndarray, player: BoardPiece, saved_state: Optio
 
     game_tree: MctsTree = MctsTree(None, board, None, player)
     if saved_state is not None:
-        board_string = pretty_print_board(board)
         children: List[MctsTree] = saved_state.get_tree().get_child_trees()
         for child in children:
-            if board_string == pretty_print_board(child.get_board()):  # select correct state TODO: check board, dont use toString
+            if np.array_equal(board, child.get_board()):
                 game_tree = child
                 break
 
@@ -136,7 +135,7 @@ def simulation(board: np.ndarray, initial_player: BoardPiece, next_player: Board
 
     """
     moves: List[PlayerAction] = get_possible_moves(board)
-    while len(moves) != 0:  # is updated in the loop
+    while len(moves) != 0:  # is replaced in the loop
         board = apply_player_action(board, rd.choice(get_possible_moves(board)), next_player)
         moves = get_possible_moves(board)
         next_player = BoardPiece(3-next_player)
