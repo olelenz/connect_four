@@ -68,7 +68,7 @@ def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarra
     possible_moves: [int] = get_possible_moves(current_board)
     if len(possible_moves) == 0 or current_depth == desired_depth:  # no more moves or desired depth reached -
         # recursion anchor
-        evaluation: int = evaluate_position(current_board)
+        evaluation: int = evaluate_position(current_board, current_depth)
         return evaluation, -1  # -1 because we do not know the last played move - will be added when closing recursion
 
     for move in possible_moves:
@@ -81,7 +81,7 @@ def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarra
         return min(evaluations, key=lambda x: x[0])  # get tuple with min evaluation
 
 
-def evaluate_position(board: np.ndarray) -> int:
+def evaluate_position(board: np.ndarray, depth: int = 0) -> int:
     """
     Evaluates a board position. Use convolution to assess position (two pieces together are good, one piece near to
     an empty space is good, one piece next to a piece from the opponent is assessed as equal
@@ -91,15 +91,18 @@ def evaluate_position(board: np.ndarray) -> int:
     board: numpy.ndarray
         Board to be evaluated.
 
+    depth: int
+        Depth at evaluation -> earlier wins are better.
+
     Returns
     -------
     :int
         The evaluation of the position.
     """
     if connected_four(board, PLAYER1):  # PLAYER1 won
-        return 1_000_000_000_000
+        return int(1_000_000_000_000 * 10**(-depth))
     if connected_four(board, PLAYER2):  # PLAYER2 won
-        return -1_000_000_000_000
+        return int(-1_000_000_000_000 * 10**(-depth))
 
     evaluation_board = initialize_game_state()
     evaluation_board[board == PLAYER1] = 1  # set 1 for PLAYER1

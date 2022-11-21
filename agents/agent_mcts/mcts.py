@@ -4,11 +4,11 @@ import time
 import random as rd
 
 from agents.agent_mcts.mcts_tree import MctsTree
-from agents.game_utils import PlayerAction, BoardPiece, get_possible_moves, apply_player_action, check_end_state, GameState, pretty_print_board
+from agents.game_utils import PlayerAction, BoardPiece, get_possible_moves, apply_player_action, check_end_state, GameState
 from agents.saved_state import SavedState
 
 
-def generate_move_mcts(board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState], seconds: int = 1) -> \
+def generate_move_mcts(board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState], seconds: int = 5) -> \
         Tuple[PlayerAction, Optional[SavedState]]:
     """
     Function to calculate the next move to play using the mcts algorithm.

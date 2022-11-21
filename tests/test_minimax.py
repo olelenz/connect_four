@@ -1,5 +1,6 @@
 from agents.agent_minimax import generate_move_minimax, evaluate_position
-from agents.game_utils import initialize_game_state, PLAYER1, apply_player_action, PlayerAction, PLAYER2
+from agents.game_utils import initialize_game_state, PLAYER1, apply_player_action, PlayerAction, PLAYER2, \
+    string_to_board
 
 
 def test_run_all():
@@ -11,6 +12,7 @@ def test_run_all():
     test_win_in_one_move()
     test_prevent_opponent_win()
     test_win_in_two_moves()
+    test_game_losing_choose_most_moves_to_loss()
 
 
 def test_generate_move():
@@ -95,3 +97,11 @@ def test_win_in_two_moves():
     assert isinstance(ret[0], PlayerAction)
     assert ret[0] == 2
 
+
+def test_game_losing_choose_most_moves_to_loss():
+    board = string_to_board(
+        "|==============|\n|              |\n|            O |\n|          X X |\n|      O   X X |\n|      O O X O |\n|O     X X O X |\n|==============|\n|0 1 2 3 4 5 6 |")
+
+    ret = generate_move_minimax(board, PLAYER2, None, 4)
+    assert isinstance(ret[0], PlayerAction)
+    assert ret[0] == 5

@@ -10,7 +10,7 @@ class MctsTree:
 
     Methods
     ----------
-    __init__(self, parent_tree, board, last_move, player)
+    __init__(self, parent_tree: 'MctsTree', board: np.ndarray, last_move: PlayerAction, player: BoardPiece)
         Constructor of MctsTree class.
 
     get_parent_tree(self)
@@ -46,7 +46,7 @@ class MctsTree:
     add_child_tree(self, children: 'MctsTree')
         Adds a child tree to self.child_trees.
     """
-    def __init__(self, parent_tree, board, last_move, player):
+    def __init__(self, parent_tree: 'MctsTree', board: np.ndarray, last_move: PlayerAction, player: BoardPiece):
         """
         Constructor of MctsTree class.
 
@@ -161,7 +161,7 @@ class MctsTree:
         """
         if self.n == 0:
             return 1_000_000_000_000
-        return (self.w / self.n) + 20 * (np.log(self.parent_tree.n) / self.n) ** (1 / 2)
+        return (self.w / self.n) + 1 * (np.log(self.parent_tree.n) / self.n) ** (1 / 2)
 
     def increment_n(self) -> None:
         """

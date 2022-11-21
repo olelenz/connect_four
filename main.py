@@ -40,13 +40,14 @@ def human_vs_agent(
             ):
                 t0 = time.time()
                 print(pretty_print_board(board))
+                print("")
                 print(
                     f'{player_name+": "+str(gen_move.__name__).split("_")[-1]} you are playing with {PLAYER1_PRINT if player == PLAYER1 else PLAYER2_PRINT}'
                 )
                 action, saved_state[player] = gen_move(
                     board.copy(), player, saved_state[player], *args
                 )
-                print(f"Move time: {time.time() - t0:.3f}s")
+                print(f"Move time: {time.time() - t0:.3f}s for move {action}")
                 board = apply_player_action(board, action, player)
                 end_state = check_end_state(board, player)
                 if end_state != GameState.STILL_PLAYING:
@@ -62,4 +63,5 @@ def human_vs_agent(
 
 
 if __name__ == "__main__":
-    human_vs_agent(generate_move_minimax, generate_move_mcts)
+    # human_vs_agent(generate_move_minimax, generate_move_mcts)
+    human_vs_agent(generate_move_minimax)

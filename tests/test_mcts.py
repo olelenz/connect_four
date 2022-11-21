@@ -2,7 +2,8 @@ import pytest
 
 from agents.agent_mcts.mcts import selection, expansion, simulation, backpropagation, generate_move_mcts
 from agents.agent_mcts.mcts_tree import MctsTree
-from agents.game_utils import initialize_game_state, PLAYER2, PlayerAction, PLAYER1, apply_player_action, pretty_print_board
+from agents.game_utils import initialize_game_state, PLAYER2, PlayerAction, PLAYER1, apply_player_action, \
+    pretty_print_board
 from agents.saved_state import SavedState
 
 
