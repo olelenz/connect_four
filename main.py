@@ -8,6 +8,7 @@ from agents.agent_human_user import user_move
 from agents.agent_random import generate_move_random
 from agents.agent_minimax import generate_move_minimax
 
+
 def human_vs_agent(
         generate_move_1: GenMove,
         generate_move_2: GenMove = user_move,

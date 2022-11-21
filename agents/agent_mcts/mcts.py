@@ -54,8 +54,8 @@ def generate_move_mcts(board: np.ndarray, player: BoardPiece, saved_state: Optio
             # add possible moves as children, set current node to first children -> expansion
             expansion(current_node)
             current_children = current_node.get_child_trees()
-            if len(current_children) != 0:
-                current_node = current_children[0]  # check case where there are no more possible moves? -> or is that even needed?
+            if len(current_children) != 0:  # check case where there are no more possible moves
+                current_node = current_children[0]
         result: int = simulation(current_node.get_board(), player, current_node.get_player())  # simulation
         backpropagation(current_node, result)
 

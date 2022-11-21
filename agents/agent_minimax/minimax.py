@@ -71,7 +71,6 @@ def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarra
     :(int, PlayerAction)
         Tuple of the evaluation after playing the move, which is also returned in this Tuple.
     """
-    # evaluation
     possible_moves: [int] = get_possible_moves(current_board)
     if len(possible_moves) == 0 or current_depth == desired_depth:  # no more moves or desired depth reached -
         # recursion anchor
