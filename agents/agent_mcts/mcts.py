@@ -8,7 +8,7 @@ from agents.game_utils import PlayerAction, BoardPiece, get_possible_moves, appl
 from agents.saved_state import SavedState
 
 
-def generate_move_mcts(board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState], seconds: int = 5) -> \
+def generate_move_mcts(board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState], seconds: int = 4) -> \
         Tuple[PlayerAction, Optional[SavedState]]:
     """
     Function to calculate the next move to play using the mcts algorithm.

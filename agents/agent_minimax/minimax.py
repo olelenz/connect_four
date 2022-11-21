@@ -6,7 +6,7 @@ from agents.game_utils import BoardPiece, PlayerAction, apply_player_action, PLA
 from agents.saved_state import SavedState
 
 
-def generate_move_minimax(board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState], depth: int = 4) -> Tuple[PlayerAction, Optional[SavedState]]:
+def generate_move_minimax(board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState], depth: int = 6) -> Tuple[PlayerAction, Optional[SavedState]]:
     """
     Generates the next move using the minimax algorithm.
 
@@ -29,15 +29,17 @@ def generate_move_minimax(board: np.ndarray, player: BoardPiece, saved_state: Op
     :Tuple[PlayerAction, Optional[SavedState]]
         Tuple containing the move to play and the saved state.
     """
+    alpha: (int, PlayerAction) = (-1_000_000_000_000, PlayerAction(-1))
+    beta: (int, PlayerAction) = (1_000_000_000_000, PlayerAction(-1))
     if player == PLAYER1:
-        evaluation = minimax_rec(0, depth, board, player, True)  # start maximizing if PLAYER1 is to play
+        evaluation = minimax_rec(0, depth, board, player, True, alpha, beta)  # start maximizing if PLAYER1 is to play
     else:
-        evaluation = minimax_rec(0, depth, board, player, False)  # start minimizing if PLAYER2 is to play
+        evaluation = minimax_rec(0, depth, board, player, False, alpha, beta)  # start minimizing if PLAYER2 is to play
     return PlayerAction(evaluation[1]), None
 
 
 def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarray, player: BoardPiece,
-                maximize: bool) -> (int, PlayerAction):
+                maximize: bool, alpha: (int, PlayerAction), beta: (int, PlayerAction)) -> (int, PlayerAction):
     """
     Recursive helper function for generate_move_minimax. Implements the minimax algorithm.
     
@@ -58,12 +60,17 @@ def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarra
     maximize: bool
         True if the current player is maximizing, false if he is minimizing.
 
+    alpha: (int, PlayerAction)
+        Initial alpha value (very small) for alpha beta pruning and initial PlayerAction to be overwritten.
+
+    beta: (int, PlayerAction)
+        Initial beta value (very big) for alpha beta pruning and initial PlayerAction to be overwritten.
+
     Returns
     -------
     :(int, PlayerAction)
         Tuple of the evaluation after playing the move, which is also returned in this Tuple.
     """
-    evaluations: [(int, PlayerAction)] = []  # to store all possible moves from this positions paired with their
     # evaluation
     possible_moves: [int] = get_possible_moves(current_board)
     if len(possible_moves) == 0 or current_depth == desired_depth:  # no more moves or desired depth reached -
@@ -71,14 +78,23 @@ def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarra
         evaluation: int = evaluate_position(current_board, current_depth)
         return evaluation, -1  # -1 because we do not know the last played move - will be added when closing recursion
 
-    for move in possible_moves:
-        new_board = apply_player_action(current_board, move, player)
-        evaluations.append(
-            (minimax_rec(current_depth + 1, desired_depth, new_board, BoardPiece(3-player), not maximize)[0], move))  # change player and change between maximizing and minimizing
     if maximize:
-        return max(evaluations, key=lambda x: x[0])  # get tuple with max evaluation
+        for move in possible_moves:
+            new_board = apply_player_action(current_board, move, player)
+            alpha = max([alpha, (minimax_rec(current_depth + 1, desired_depth, new_board, BoardPiece(3-player), not maximize, alpha, beta)[0], move)], key=lambda x: x[0])
+            if beta <= alpha:
+                return alpha
     else:
-        return min(evaluations, key=lambda x: x[0])  # get tuple with min evaluation
+        for move in possible_moves:
+            new_board = apply_player_action(current_board, move, player)
+            beta = min([beta, (minimax_rec(current_depth + 1, desired_depth, new_board, BoardPiece(3 - player), not maximize, alpha, beta)[
+                0], move)], key=lambda x: x[0])
+            if beta <= alpha:
+                return beta
+    if maximize:
+        return alpha
+    else:
+        return beta
 
 
 def evaluate_position(board: np.ndarray, depth: int = 0) -> int:

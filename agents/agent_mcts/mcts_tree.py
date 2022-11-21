@@ -155,13 +155,13 @@ class MctsTree:
         Method to calculate current ucb value.
 
         Returns
-        -------
+        ----------
         :float
             Resulting ucb value.
         """
         if self.n == 0:
             return 1_000_000_000_000
-        return (self.w / self.n) + 1 * (np.log(self.parent_tree.n) / self.n) ** (1 / 2)
+        return (self.w / self.n) + (2**(1/2)) * (np.log(self.parent_tree.n) / self.n) ** (1 / 2)
 
     def increment_n(self) -> None:
         """
