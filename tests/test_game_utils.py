@@ -202,7 +202,7 @@ def test_get_possible_moves():
     ret = get_possible_moves(board)
 
     assert isinstance(ret[0], PlayerAction)
-    assert ret == [0, 1, 2, 3, 4, 5, 6]
+    assert ret == [3, 2, 4, 1, 5, 0, 6]
 
     board[0:3, 3] = PLAYER1
     board[3:6, 3] = PLAYER2
@@ -210,4 +210,4 @@ def test_get_possible_moves():
     ret = get_possible_moves(board)
 
     assert isinstance(ret[0], PlayerAction)
-    assert ret == [0, 1, 2, 4, 5, 6]
+    assert ret == [2, 4, 1, 5, 0, 6]

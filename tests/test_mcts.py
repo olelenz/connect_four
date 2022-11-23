@@ -27,7 +27,7 @@ def test_win_in_one_move():
     board = initialize_game_state()
     board[0, 0:3] = PLAYER2
 
-    ret = generate_move_mcts(board, PLAYER2, None, 5)  # not deterministic...
+    ret = generate_move_mcts(board, PLAYER2, None, 6)  # not deterministic...
     assert isinstance(ret[0], PlayerAction)
     assert ret[0] == 3
 
@@ -37,7 +37,7 @@ def test_prevent_opponent_win():
     board[0, 1:4] = PLAYER1
     board[0, 0] = PLAYER2
 
-    ret = generate_move_mcts(board, PLAYER2, None, 5)  # not deterministic...
+    ret = generate_move_mcts(board, PLAYER2, None, 6)  # not deterministic...
     assert isinstance(ret[0], PlayerAction)
     assert ret[0] == 4
 
@@ -47,7 +47,7 @@ def test_win_in_two_moves():
     board[0, 1] = PLAYER2
     board[0, 3] = PLAYER2
 
-    ret = generate_move_mcts(board, PLAYER2, None, 5)  # not deterministic...
+    ret = generate_move_mcts(board, PLAYER2, None, 6)  # not deterministic...
     assert isinstance(ret[0], PlayerAction)
     assert ret[0] == 2
 
@@ -75,7 +75,7 @@ def test_expansion():
     starting_node = MctsTree(None, board, None, PLAYER1)
     comp_node = MctsTree(None, board, None, PLAYER1)
     starting_node.increment_n()
-    for i in range(7):
+    for i in [3, 2, 4, 1, 5, 0, 6]:
         new_tree = MctsTree(starting_node, apply_player_action(board, PlayerAction(i), PLAYER1), PlayerAction(i), PLAYER1)
         starting_node.add_child_tree(new_tree)
     expansion(comp_node)

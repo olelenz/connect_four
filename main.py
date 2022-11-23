@@ -1,12 +1,7 @@
 from typing import Callable
-import cProfile
 
-import agents.game_utils
-from agents.agent_mcts import generate_move_mcts
+from agents import generate_move_minimax, generate_move_mcts, generate_move_random, user_move
 from agents.game_utils import GenMove
-from agents.agent_human_user import user_move
-from agents.agent_random import generate_move_random
-from agents.agent_minimax import generate_move_minimax
 
 
 def human_vs_agent(
@@ -64,5 +59,6 @@ def human_vs_agent(
 
 
 if __name__ == "__main__":
-    human_vs_agent(generate_move_minimax, generate_move_mcts)
-    # human_vs_agent(generate_move_minimax)
+    # human_vs_agent(generate_move_minimax, generate_move_mcts)
+    human_vs_agent(generate_move_minimax)
+    # human_vs_agent(generate_move_minimax, generate_move_minimax)

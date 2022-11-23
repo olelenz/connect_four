@@ -226,7 +226,8 @@ def get_possible_moves(board: np.ndarray) -> [PlayerAction]:
     if connected_four(board, PLAYER1) or connected_four(board, PLAYER2):  # no moves are possible if either player
         # has already won
         return []
-    for i in range(0, 7):
+    for i in [3, 2, 4, 1, 5, 0, 6]:  # standard: range(0,7), better moves in the middle -> check first: [3, 2, 4, 1, 5, 0, 6]
+        # minimax from 2.475s to 0.22s (depth 6) and from 51.605s to 18.963s (depth 7) - first move
         if board[5][i] == NO_PLAYER:
             out.append(PlayerAction(i))
     return out

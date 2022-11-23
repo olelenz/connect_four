@@ -5,4 +5,4 @@ def test_all():
     test_game_utils.test_run_all()
     test_random.test_run_all()
     test_minimax.test_run_all()
-    test_mcts.test_run_all()
+    test_mcts.test_run_all()  # some tests not deterministic, might fail
