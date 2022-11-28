@@ -3,3 +3,5 @@
 ideas:
 
 -> bit representation of board
+
+-> transposition table
