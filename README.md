@@ -2,7 +2,7 @@
 
 ideas:
 
--> bit representation of board
+-> bit representation of board, started
 
 -> transposition table
 
