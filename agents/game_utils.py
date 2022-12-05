@@ -1,7 +1,7 @@
 from enum import Enum
 from scipy import signal
 import numpy as np
-from typing import Callable, Optional
+from typing import Callable, Optional, Tuple
 
 from agents.saved_state import SavedState
 
@@ -30,19 +30,37 @@ GenMove = Callable[
 ]
 
 
-def initialize_game_state() -> np.ndarray:
+def initialize_game_state() -> tuple[int, int]:  # TODO: change to binary
     """
-    Returns an ndarray, shape (6, 7) and data type (dtype) BoardPiece, initialized to 0 (NO_PLAYER).
+    Returns a tuple containing a number for PLAYER1 and a second number for PLAYER2 , shape (7, 7), initialized to 0 (NO_PLAYER).
 
     Returns
     ----------
-    numpy.ndarray
+    tuple[int, int]
         Initial game state.
     """
-    return np.zeros((6, 7), BoardPiece)
+    return 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000, 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
 
 
-def pretty_print_board(board: np.ndarray) -> str:
+def to_array(bitboard: int) -> np.ndarray:
+    """
+    Parameters
+    ----------
+    bitboard: int
+        Bitboard to convert to an array.
+
+    Returns
+    -------
+    :np.ndarray
+        Bitboard as an array.
+    """
+
+    lst = str(bin(bitboard))[2:].rjust(49, '0')
+    lst = np.reshape(list(lst), (7, 7))[::-1].T
+    return np.array(lst, dtype=int)
+
+
+def pretty_print_board(board_player_one: int, board_player_two: int) -> str:
     """
     Should return `board` converted to a human readable string representation,
     to be used when playing or printing diagnostics to the console (stdout). The piece in
@@ -60,14 +78,18 @@ def pretty_print_board(board: np.ndarray) -> str:
 
     Parameters
     ----------
-    board: numpy.ndarray
-        Board to be converted to a String.
+    board_player_one: int
+        Board PLAYER1 to be converted to a String.
+
+    board_player_two: int
+        Board PLAYER2 to be converted to a String.
 
     Returns
     ----------
     str
         String representation of the board.
     """
+    board = (np.add(to_array(board_player_one), to_array(board_player_two)*2))[1::][::-1]
     output: str = "|==============|\n"
     for line in board[::-1]:
         output += "|"
@@ -84,7 +106,7 @@ def pretty_print_board(board: np.ndarray) -> str:
     return output
 
 
-def string_to_board(pp_board: str) -> np.ndarray:
+def string_to_board(pp_board: str) -> np.ndarray:  # TODO: change to binary
     """
     Takes the output of pretty_print_board and turns it back into an ndarray.
     This is quite useful for debugging, when the agent crashed and you have the last
@@ -118,7 +140,7 @@ def string_to_board(pp_board: str) -> np.ndarray:
     return output
 
 
-def apply_player_action(board: np.ndarray, action: PlayerAction, player: BoardPiece) -> np.ndarray:
+def apply_player_action(board: np.ndarray, action: PlayerAction, player: BoardPiece) -> np.ndarray:  # TODO: change to binary
     """
     Sets board[i, action] = player, where i is the lowest open row. Raises a ValueError
     if action is not a legal move. If it is a legal move, the modified version of the
@@ -155,7 +177,7 @@ def apply_player_action(board: np.ndarray, action: PlayerAction, player: BoardPi
     return output
 
 
-def connected_four(board: np.ndarray, player: BoardPiece) -> bool:
+def connected_four(board: np.ndarray, player: BoardPiece) -> bool:  # TODO: change to binary
     """
     Returns True if there are four adjacent pieces equal to `player` arranged
     in either a horizontal, vertical, or diagonal line. Returns False otherwise.
@@ -181,7 +203,7 @@ def connected_four(board: np.ndarray, player: BoardPiece) -> bool:
     return False
 
 
-def check_end_state(board: np.ndarray, player: BoardPiece) -> GameState:
+def check_end_state(board: np.ndarray, player: BoardPiece) -> GameState:  # TODO: change to binary
     """
     Returns the current game state for the current `player`, i.e. has their last
     action won (GameState.IS_WIN) or drawn (GameState.IS_DRAW) the game,
@@ -207,7 +229,7 @@ def check_end_state(board: np.ndarray, player: BoardPiece) -> GameState:
     return GameState.STILL_PLAYING
 
 
-def get_possible_moves(board: np.ndarray) -> [PlayerAction]:
+def get_possible_moves(board: np.ndarray) -> [PlayerAction]:  # TODO: change to binary
     """
     Calculates all possible moves from a give board-position.
 
