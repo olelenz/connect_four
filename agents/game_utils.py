@@ -229,14 +229,17 @@ def check_end_state(board: int, board_all_pieces: int) -> GameState:
     return GameState.STILL_PLAYING
 
 
-def get_possible_moves(board: np.ndarray) -> [PlayerAction]:  # TODO: change to binary
+def get_possible_moves(board_player_one: int, board_player_two: int) -> [PlayerAction]:
     """
     Calculates all possible moves from a give board-position.
 
     Parameters
     ----------
-    board: numpy.ndarray
-        The moves are calculated from this board-position.
+    board_player_one: int
+        Board PLAYER1.
+
+    board_player_two: int
+        Board PLAYER2.
 
     Returns
     -------
@@ -244,12 +247,12 @@ def get_possible_moves(board: np.ndarray) -> [PlayerAction]:  # TODO: change to 
         A list containing all possible moves.
 
     """
-    out: [PlayerAction] = []
-    if connected_four(board, PLAYER1) or connected_four(board, PLAYER2):  # no moves are possible if either player
+    if connected_four(board_player_one) or connected_four(board_player_two):  # no moves are possible if either player
         # has already won
         return []
-    for i in [3, 2, 4, 1, 5, 0, 6]:  # standard: range(0,7), better moves in the middle -> check first: [3, 2, 4, 1, 5, 0, 6]
-        # minimax from 2.475s to 0.22s (depth 6) and from 51.605s to 18.963s (depth 7) - first move
-        if board[5][i] == NO_PLAYER:
-            out.append(PlayerAction(i))
+    board_full = board_player_one | board_player_two
+    out: [PlayerAction] = [3, 2, 4, 1, 5, 0, 6]
+    for i in [3, 2, 4, 1, 5, 0, 6]:
+        if board_full & (1 << (i*7 + 6)):
+            out.remove(i)
     return out
