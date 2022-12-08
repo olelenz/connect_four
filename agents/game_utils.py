@@ -168,8 +168,8 @@ def apply_player_action(board_player_one: int, board_player_two: int, action: Pl
 
     Returns
     ----------
-    numpy.ndarray
-        Modified board-position if the move was legal.
+    :tuple[int, int]
+        Modified board-positions if the move was legal.
     """
     move_board = ((board_player_one | board_player_two) + (1 << action * 7))
     if move_board & (1 << (action*7 + 6)):
@@ -180,30 +180,27 @@ def apply_player_action(board_player_one: int, board_player_two: int, action: Pl
         return board_player_one, (move_board - board_player_one) | board_player_two
 
 
-def connected_four(board: np.ndarray, player: BoardPiece) -> bool:  # TODO: change to binary
+def connected_four(board: int) -> bool:
     """
     Returns True if there are four adjacent pieces equal to `player` arranged
     in either a horizontal, vertical, or diagonal line. Returns False otherwise.
 
     Parameters
     ----------
-    board: numpy.ndarray
-        The board to check connected four on.
-    player: BoardPiece
-        Checks connected four for this player.
-
+    board: int
+        Board for the player to check connected four on.
     Returns
     ----------
     :bool
         Returns True if there are four adjacent pieces equal to `player` arranged
         in either a horizontal, vertical, or diagonal line. Returns False otherwise.
     """
-    relevant_pieces = initialize_game_state()
-    relevant_pieces[board == player] = 1
-    for snd in [[[1, 1, 1, 1]], [[1], [1], [1], [1]], np.identity(4), np.identity(4)[::-1, ::]]:
-        if (signal.convolve2d(relevant_pieces, snd, mode="valid") == 4).any():
+    for i in [1, 6, 7, 8]:
+        temp_bitboard = board & (board >> i)
+        if temp_bitboard & (temp_bitboard >> 2*i):
             return True
     return False
+
 
 
 def check_end_state(board: np.ndarray, player: BoardPiece) -> GameState:  # TODO: change to binary
