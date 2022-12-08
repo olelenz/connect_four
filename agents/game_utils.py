@@ -202,8 +202,7 @@ def connected_four(board: int) -> bool:
     return False
 
 
-
-def check_end_state(board: np.ndarray, player: BoardPiece) -> GameState:  # TODO: change to binary
+def check_end_state(board: int, board_all_pieces: int) -> GameState:
     """
     Returns the current game state for the current `player`, i.e. has their last
     action won (GameState.IS_WIN) or drawn (GameState.IS_DRAW) the game,
@@ -211,10 +210,11 @@ def check_end_state(board: np.ndarray, player: BoardPiece) -> GameState:  # TODO
 
     Parameters
     ----------
-    board: numpy.ndarray
+    board: int
         The board to check the end state on.
-    player: BoardPiece
-        Checks the end-state for this player.
+
+    board_all_pieces: int
+        The board containing all pieces to check the draw on.
 
     Returns
     ----------
@@ -222,9 +222,9 @@ def check_end_state(board: np.ndarray, player: BoardPiece) -> GameState:  # TODO
         The current game-state - either IS_WIN, IS_DRAW or STILL_PLAYING.
     """
 
-    if connected_four(board, player):
+    if connected_four(board):
         return GameState.IS_WIN
-    if (board == 0).sum() == 0:
+    if board_all_pieces & 0b0100000_0100000_0100000_0100000_0100000_0100000_0100000:
         return GameState.IS_DRAW
     return GameState.STILL_PLAYING
 
