@@ -30,7 +30,7 @@ GenMove = Callable[
 ]
 
 
-def initialize_game_state() -> tuple[int, int]:  # TODO: change to binary
+def initialize_game_state() -> tuple[int, int]:
     """
     Returns a tuple containing a number for PLAYER1 and a second number for PLAYER2 , shape (7, 7), initialized to 0 (NO_PLAYER).
 
@@ -140,7 +140,7 @@ def string_to_board(pp_board: str) -> np.ndarray:  # TODO: change to binary
     return output
 
 
-def apply_player_action(board: np.ndarray, action: PlayerAction, player: BoardPiece) -> np.ndarray:  # TODO: change to binary
+def apply_player_action(board_player_one: int, board_player_two: int, action: PlayerAction, player: BoardPiece) -> tuple[int, int]:
     """
     Sets board[i, action] = player, where i is the lowest open row. Raises a ValueError
     if action is not a legal move. If it is a legal move, the modified version of the
@@ -149,10 +149,15 @@ def apply_player_action(board: np.ndarray, action: PlayerAction, player: BoardPi
 
     Parameters
     ----------
-    board: numpy.ndarray
-        The board-state to apply the action on.
+    board_player_one: int
+        Board PLAYER1.
+
+    board_player_two: int
+        Board PLAYER2.
+
     action: PlayerAction
         The action to be performed.
+
     player: BoardPiece
         The player which tries to make the desired move.
 
@@ -166,15 +171,13 @@ def apply_player_action(board: np.ndarray, action: PlayerAction, player: BoardPi
     numpy.ndarray
         Modified board-position if the move was legal.
     """
-    i: int = 0
-    try:
-        while board[i, action] != NO_PLAYER:
-            i += 1
-    except IndexError:
+    move_board = ((board_player_one | board_player_two) + (1 << action * 7))
+    if move_board & (1 << (action*7 + 6)):
         raise ValueError
-    output: np.ndarray = board.copy()  # deep copy
-    output[i, action] = player
-    return output
+    if player == PLAYER1:
+        return (move_board - board_player_two) | board_player_one, board_player_two
+    else:
+        return board_player_one, (move_board - board_player_one) | board_player_two
 
 
 def connected_four(board: np.ndarray, player: BoardPiece) -> bool:  # TODO: change to binary
