@@ -40,18 +40,16 @@ def test_pretty_print_board():
 
 
 def test_string_to_board():
-    board = initialize_game_state()
-
-    board[0, 3] = PLAYER1
-    board[0, 2] = PLAYER2
+    board = 0b0000000_0000000_0000000_0100000_0000000_0000000_0000000, \
+            0b0000000_0000000_0100000_0000000_0000000_0000000_0000000
 
     ret = string_to_board(
         "|==============|\n|              |\n|              |\n|              |\n|              |\n|        "
         "      |\n|    O X       |\n|==============|\n|0 1 2 3 4 5 6 |")
 
-    assert isinstance(ret, np.ndarray)
-    assert (ret == board).all()
-
+    # assert isinstance(ret, np.ndarray)
+    # assert (ret == board).all()
+    assert ret == board
     with pytest.raises(AttributeError):
         string_to_board("wrong format")
 
