@@ -106,7 +106,7 @@ def pretty_print_board(board_player_one: int, board_player_two: int) -> str:
     return output
 
 
-def string_to_board(pp_board: str) -> np.ndarray:  # TODO: change to binary
+def string_to_board(pp_board: str) -> tuple[int, int]:  # TODO: change to binary
     """
     Takes the output of pretty_print_board and turns it back into an ndarray.
     This is quite useful for debugging, when the agent crashed and you have the last
