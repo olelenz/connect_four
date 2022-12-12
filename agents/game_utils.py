@@ -89,7 +89,7 @@ def pretty_print_board(board_player_one: int, board_player_two: int) -> str:
     str
         String representation of the board.
     """
-    board = (np.add(to_array(board_player_one), to_array(board_player_two)*2))[1::][::-1]
+    board = (np.add(to_array(board_player_one), to_array(board_player_two) * 2))[1::][::-1]
     output: str = "|==============|\n"
     for line in board[::-1]:
         output += "|"
@@ -106,7 +106,7 @@ def pretty_print_board(board_player_one: int, board_player_two: int) -> str:
     return output
 
 
-def string_to_board(pp_board: str) -> np.ndarray:  # TODO: change to binary
+def string_to_board(pp_board: str) -> tuple[bin, bin]:  # TODO: change to binary
     """
     Takes the output of pretty_print_board and turns it back into an ndarray.
     This is quite useful for debugging, when the agent crashed and you have the last
@@ -128,19 +128,23 @@ def string_to_board(pp_board: str) -> np.ndarray:  # TODO: change to binary
         The board generated from the input-String.
     """
 
-    output: np.ndarray = initialize_game_state()
     if len(pp_board.split("\n")) != 9:  # using regex would be way better
         raise AttributeError
+    output_player1 = list("0000000_0000000_0000000_0000000_0000000_0000000_0000000")
+    output_player2 = list("0000000_0000000_0000000_0000000_0000000_0000000_0000000")
     for row, line in enumerate(pp_board.split("\n")[1:-2]):
         for column, entry in enumerate(line[1:-1:2]):
             if entry == PLAYER1_PRINT:
-                output[5 - row, column] = PLAYER1
+                output_player1[6 - row + 8 * column] = "1"
             elif entry == PLAYER2_PRINT:
-                output[5 - row, column] = PLAYER2
-    return output
+                output_player2[6 - row + 8 * column] = "1"
+    output1 = "".join(output_player1)
+    output2 = "".join(output_player2)
+    return bin(int(output1, 2)), bin(int(output2, 2))
 
 
-def apply_player_action(board_player_one: int, board_player_two: int, action: PlayerAction, player: BoardPiece) -> tuple[int, int]:
+def apply_player_action(board_player_one: int, board_player_two: int, action: PlayerAction, player: BoardPiece) -> \
+tuple[int, int]:
     """
     Sets board[i, action] = player, where i is the lowest open row. Raises a ValueError
     if action is not a legal move. If it is a legal move, the modified version of the
@@ -172,7 +176,7 @@ def apply_player_action(board_player_one: int, board_player_two: int, action: Pl
         Modified board-positions if the move was legal.
     """
     move_board = ((board_player_one | board_player_two) + (1 << action * 7))
-    if move_board & (1 << (action*7 + 6)):
+    if move_board & (1 << (action * 7 + 6)):
         raise ValueError
     if player == PLAYER1:
         return (move_board - board_player_two) | board_player_one, board_player_two
@@ -197,7 +201,7 @@ def connected_four(board: int) -> bool:
     """
     for i in [1, 6, 7, 8]:
         temp_bitboard = board & (board >> i)
-        if temp_bitboard & (temp_bitboard >> 2*i):
+        if temp_bitboard & (temp_bitboard >> 2 * i):
             return True
     return False
 
@@ -253,6 +257,6 @@ def get_possible_moves(board_player_one: int, board_player_two: int) -> [PlayerA
     board_full = board_player_one | board_player_two
     out: [PlayerAction] = [3, 2, 4, 1, 5, 0, 6]
     for i in [3, 2, 4, 1, 5, 0, 6]:
-        if board_full & (1 << (i*7 + 6)):
+        if board_full & (1 << (i * 7 + 6)):
             out.remove(i)
     return out
