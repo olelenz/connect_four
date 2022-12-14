@@ -144,7 +144,7 @@ def string_to_board(pp_board: str) -> tuple[int, int]:  # TODO: change to binary
 
 
 def apply_player_action(board_player_one: int, board_player_two: int, action: PlayerAction, player: BoardPiece) -> \
-tuple[int, int]:
+        tuple[int, int]:
     """
     Sets board[i, action] = player, where i is the lowest open row. Raises a ValueError
     if action is not a legal move. If it is a legal move, the modified version of the

@@ -54,110 +54,45 @@ def test_string_to_board():
 
 
 def test_apply_player_action():  # TODO: adjust to binary
-    board = initialize_game_state()
-    board[0, 3] = PLAYER1
-    board[1, 3] = PLAYER2
-    board[2, 3] = PLAYER1
-    board[3, 3] = PLAYER2
-    board[4, 3] = PLAYER1
+    board_p1 = 0b0000000_0000000_0000000_0010101_0000000_0000000_0000000
+    board_p2 = 0b0000000_0000000_0000000_0001010_0000000_0000000_0000000
 
-    ret = apply_player_action(board, PlayerAction(3), PLAYER2)
+    ret = apply_player_action(board_p1, board_p2, PlayerAction(3), PLAYER2)
+    assert isinstance(ret[0], int)
+    assert ret[1] != board_p2
+    assert ret[1] == 0b0000000_0000000_0000000_0101010_0000000_0000000_0000000  # FIXME: fix apply_player_Action function
 
-    assert isinstance(ret, np.ndarray)
-    assert (ret != board).any()
-    board[5, 3] = PLAYER2
-    assert (ret == board).all()
-
-    ret = apply_player_action(board, PlayerAction(2), PLAYER1)
-
-    board[0, 2] = PLAYER1
-    assert (ret == board).all()
-
-    with pytest.raises(ValueError):
-        apply_player_action(board, PlayerAction(3), PLAYER2)
+    # with pytest.raises(ValueError):
+    #     apply_player_action(board, PlayerAction(3), PLAYER2)
 
 
-def test_connected_four_general():  # TODO: adjust to binary
-    ret = connected_four(initialize_game_state(), PLAYER1)
-    assert not ret
-    ret = connected_four(initialize_game_state(), PLAYER2)
+def test_connected_four_general():
+    ret = connected_four(0b0000000_0000000_0000000_00000000_0000000_0000000_0000000)
     assert not ret
 
 
-def test_connected_four_vertical():  # TODO: adjust to binary
+def test_connected_four_vertical():
     # vertical
-    board_one = initialize_game_state()
-    board_one[0, 3] = PLAYER1
-    board_one[1, 3] = PLAYER1
-    board_one[2, 3] = PLAYER1
-    board_one[3, 3] = PLAYER1
-
-    ret = connected_four(board_one, PLAYER1)
+    ret = connected_four(0b0000000_0000000_0000000_0000000_0000000_0000000_0001111)
     assert ret
-    ret = connected_four(board_one, PLAYER2)
-    assert not ret
 
 
-def test_connected_four_horizontal():  # TODO: adjust to binary
+def test_connected_four_horizontal():
     # horizontal
-    board_two = initialize_game_state()
-    board_two[0, 0] = PLAYER2
-    board_two[0, 1] = PLAYER2
-    board_two[0, 2] = PLAYER2
-    board_two[0, 3] = PLAYER2
-
-    ret = connected_four(board_two, PLAYER2)
+    ret = connected_four(0b0000000_0000000_0000000_0000001_0000001_0000001_0000001)
     assert ret
-    ret = connected_four(board_two, PLAYER1)
-    assert not ret
 
 
-def test_connected_four_diagonal_one():  # TODO: adjust to binary
+def test_connected_four_diagonal_one():
     # diagonal left top
-    board_three = initialize_game_state()
-    board_three[0, 0] = PLAYER1
-    board_three[0, 1] = PLAYER1
-    board_three[0, 2] = PLAYER2
-    board_three[0, 3] = PLAYER1
-
-    board_three[1, 0] = PLAYER2
-    board_three[1, 1] = PLAYER2
-    board_three[1, 2] = PLAYER1
-
-    board_three[2, 0] = PLAYER2
-    board_three[2, 1] = PLAYER1
-    board_three[2, 2] = PLAYER2
-
-    board_three[3, 0] = PLAYER1
-
-    ret = connected_four(board_three, PLAYER1)
+    ret = connected_four(0b0000000_0000000_0000000_0000001_0000010_0000100_0001000)
     assert ret
-    ret = connected_four(board_three, PLAYER2)
-    assert not ret
 
 
-def test_connected_four_diagonal_two():  # TODO: adjust to binary
+def test_connected_four_diagonal_two():
     # diagonal right top
-    board_three = initialize_game_state()
-    board_three[3, 0] = PLAYER1
-    board_three[3, 1] = PLAYER1
-    board_three[3, 2] = PLAYER2
-    board_three[3, 3] = PLAYER1
-
-    board_three[2, 0] = PLAYER2
-    board_three[2, 1] = PLAYER2
-    board_three[2, 2] = PLAYER1
-
-    board_three[1, 0] = PLAYER2
-    board_three[1, 1] = PLAYER1
-    board_three[1, 2] = PLAYER2
-
-    board_three[0, 0] = PLAYER1
-
-    ret = connected_four(board_three, PLAYER1)
+    ret = connected_four(0b0000000_0000000_0000000_0001000_0000100_0000010_0000001)
     assert ret
-    ret = connected_four(board_three, PLAYER2)
-    assert not ret
 
 
 def test_check_end_state():  # TODO: adjust to binary
