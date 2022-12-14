@@ -53,17 +53,21 @@ def test_string_to_board():
         string_to_board("wrong format")
 
 
-def test_apply_player_action():  # TODO: adjust to binary
+def test_apply_player_action():
     board_p1 = 0b0000000_0000000_0000000_0010101_0000000_0000000_0000000
     board_p2 = 0b0000000_0000000_0000000_0001010_0000000_0000000_0000000
 
     ret = apply_player_action(board_p1, board_p2, PlayerAction(3), PLAYER2)
     assert isinstance(ret[0], int)
     assert ret[1] != board_p2
-    assert ret[1] == 0b0000000_0000000_0000000_0101010_0000000_0000000_0000000  # FIXME: fix apply_player_Action function
+    assert ret[1] == 0b0000000_0000000_0000000_0101010_0000000_0000000_0000000
 
-    # with pytest.raises(ValueError):
-    #     apply_player_action(board, PlayerAction(3), PLAYER2)
+    ret = apply_player_action(board_p1, board_p2, PlayerAction(2), PLAYER1)
+    assert ret[0] == 0b0000000_0000000_0000000_0010101_0000001_0000000_0000000
+
+    board_p2 = 0b0000000_0000000_0000000_0101010_0000000_0000000_0000000
+    with pytest.raises(ValueError):
+        apply_player_action(board_p1, board_p2, PlayerAction(3), PLAYER1)
 
 
 def test_connected_four_general():
@@ -95,51 +99,53 @@ def test_connected_four_diagonal_two():
     assert ret
 
 
-def test_check_end_state():  # TODO: adjust to binary
-    board = initialize_game_state()
+def test_check_end_state():
+    board_p1 = 0b0000000_0000000_0000000_0000000_0000001_0000000_0000000
+    board_p2 = 0b0000000_0000000_0000000_0000000_0000000_0000001_0000000
 
-    board[0, 3] = PLAYER1
-    board[0, 2] = PLAYER2
-
-    ret = check_end_state(board, PLAYER1)
+    ret = check_end_state(board_p1, board_p1 | board_p2)
 
     assert isinstance(ret, GameState)
     assert ret == GameState.STILL_PLAYING
 
-    board[0, 0:4] = PLAYER1
+    board_p1 = 0b0000000_0000000_0000000_0000000_0001111_0000000_0000000
 
-    ret = check_end_state(board, PLAYER1)
+    ret = check_end_state(board_p1, board_p1 | board_p2)
 
     assert isinstance(ret, GameState)
     assert ret == GameState.IS_WIN
 
-    board = string_to_board(
-        "|==============|\n|O X O X O X O |\n|X X O O O X X |\n|O O X X X O O |\n|O O O X O O O |\n|X X O O "
-        "O X X |\n|X X X O O O X |\n|==============|\n|0 1 2 3 4 5 6 |")
+    board_p1 = 0b0100000_0000000_0100000_0000000_0100000_0000000_0100000
+    board_p2 = 0b0000000_0100000_0000000_0100000_0000000_0100000_0000000
 
-    ret = check_end_state(board, PLAYER1)
+    ret = check_end_state(board_p1, board_p1 | board_p2)
 
     assert isinstance(ret, GameState)
     assert ret == GameState.IS_DRAW
 
 
-def test_get_possible_moves():  # TODO: adjust to binary
-    board = string_to_board("|==============|\n|O X O X O X O |\n|X X O O O X X |\n|O O X X X O O |\n|O O O X O O O |\n|X X O O O X X |\n|X X X O O O X |\n|==============|\n|0 1 2 3 4 5 6 |")
-    ret = get_possible_moves(board)
+def test_get_possible_moves():
+    board_p1 = 0b0100000_0000000_0100000_0000000_0100000_0000000_0100000
+    board_p2 = 0b0000000_0100000_0000000_0100000_0000000_0100000_0000000
+    ret = get_possible_moves(board_p1, board_p2)
 
     assert ret == []
 
-    board = initialize_game_state()
+    board_p1 = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
+    board_p2 = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
 
-    ret = get_possible_moves(board)
-
-    assert isinstance(ret[0], PlayerAction)
+    ret = get_possible_moves(board_p1, board_p2)
     assert ret == [3, 2, 4, 1, 5, 0, 6]
 
-    board[0:3, 3] = PLAYER1
-    board[3:6, 3] = PLAYER2
+    board_p1 = 0b0000000_0000000_0000000_0000111_0000000_0000000_0000000
+    board_p2 = 0b0000000_0000000_0000000_0111000_0000000_0000000_0000000
 
-    ret = get_possible_moves(board)
+    ret = get_possible_moves(board_p1, board_p2)
 
-    assert isinstance(ret[0], PlayerAction)
     assert ret == [2, 4, 1, 5, 0, 6]
+
+    board_p1 = 0b0000000_0000000_0000000_0000111_0001111_0000000_0000000
+
+    ret = get_possible_moves(board_p1, board_p2)
+    assert ret == []
+

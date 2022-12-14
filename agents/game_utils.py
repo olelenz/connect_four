@@ -179,9 +179,9 @@ def apply_player_action(board_player_one: int, board_player_two: int, action: Pl
     if move_board & (1 << (action * 7 + 6)):
         raise ValueError
     if player == PLAYER1:
-        return (move_board - board_player_two) | board_player_one, board_player_two
+        return (move_board & ~board_player_two) | board_player_one, board_player_two
     else:
-        return board_player_one, (move_board - board_player_one) | board_player_two
+        return board_player_one, (move_board & ~board_player_one) | board_player_two
 
 
 def connected_four(board: int) -> bool:
@@ -257,6 +257,6 @@ def get_possible_moves(board_player_one: int, board_player_two: int) -> [PlayerA
     board_full = board_player_one | board_player_two
     out: [PlayerAction] = [3, 2, 4, 1, 5, 0, 6]
     for i in [3, 2, 4, 1, 5, 0, 6]:
-        if board_full & (1 << (i * 7 + 6)):
+        if board_full & (1 << (i * 7 + 5)):
             out.remove(i)
     return out
