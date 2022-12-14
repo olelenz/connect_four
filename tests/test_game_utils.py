@@ -1,6 +1,7 @@
 import pytest
 
 from agents.game_utils import *
+import numpy as np
 
 
 def test_run_all():
@@ -20,19 +21,19 @@ def test_run_all():
 def test_initialize_game_state():
     ret = initialize_game_state()
 
-    assert isinstance(ret, np.ndarray)
-    assert ret.dtype == BoardPiece
-    assert ret.shape == (6, 7)
-    assert np.all(ret == NO_PLAYER)
+    assert isinstance(ret[0], int)
+    assert isinstance(ret[1], int)
+    assert np.all(ret[0] == 0)
+    assert np.all(ret[1] == 0)
 
 
 def test_pretty_print_board():
-    board = initialize_game_state()
+    board_p1, board_p2 = initialize_game_state()
 
-    board[0, 0] = PLAYER1
-    board[0, 1] = PLAYER2
+    board_p1 = board_p1 | 0b1
+    board_p2 = board_p2 | 0b1_0000000
 
-    ret = pretty_print_board(board)
+    ret = pretty_print_board(board_p1, board_p2)
 
     assert isinstance(ret, str)
     assert ret == "|==============|\n|              |\n|              |\n|              |\n|              |\n|        " \
@@ -40,21 +41,19 @@ def test_pretty_print_board():
 
 
 def test_string_to_board():
-    board = 0b0000000_0000000_0000000_0100000_0000000_0000000_0000000, \
-            0b0000000_0000000_0100000_0000000_0000000_0000000_0000000
-
+    board = 0b0000000_0000000_0000000_0000001_0000000_0000000_0000000, \
+            0b0000000_0000000_0000000_0000000_0000001_0000000_0000000
     ret = string_to_board(
         "|==============|\n|              |\n|              |\n|              |\n|              |\n|        "
         "      |\n|    O X       |\n|==============|\n|0 1 2 3 4 5 6 |")
-
-    # assert isinstance(ret, np.ndarray)
-    # assert (ret == board).all()
+    print(bin(ret[0]))
+    assert isinstance(ret[0], int)
     assert ret == board
     with pytest.raises(AttributeError):
         string_to_board("wrong format")
 
 
-def test_apply_player_action():
+def test_apply_player_action():  # TODO: adjust to binary
     board = initialize_game_state()
     board[0, 3] = PLAYER1
     board[1, 3] = PLAYER2
@@ -78,14 +77,14 @@ def test_apply_player_action():
         apply_player_action(board, PlayerAction(3), PLAYER2)
 
 
-def test_connected_four_general():
+def test_connected_four_general():  # TODO: adjust to binary
     ret = connected_four(initialize_game_state(), PLAYER1)
     assert not ret
     ret = connected_four(initialize_game_state(), PLAYER2)
     assert not ret
 
 
-def test_connected_four_vertical():
+def test_connected_four_vertical():  # TODO: adjust to binary
     # vertical
     board_one = initialize_game_state()
     board_one[0, 3] = PLAYER1
@@ -99,7 +98,7 @@ def test_connected_four_vertical():
     assert not ret
 
 
-def test_connected_four_horizontal():
+def test_connected_four_horizontal():  # TODO: adjust to binary
     # horizontal
     board_two = initialize_game_state()
     board_two[0, 0] = PLAYER2
@@ -113,7 +112,7 @@ def test_connected_four_horizontal():
     assert not ret
 
 
-def test_connected_four_diagonal_one():
+def test_connected_four_diagonal_one():  # TODO: adjust to binary
     # diagonal left top
     board_three = initialize_game_state()
     board_three[0, 0] = PLAYER1
@@ -137,7 +136,7 @@ def test_connected_four_diagonal_one():
     assert not ret
 
 
-def test_connected_four_diagonal_two():
+def test_connected_four_diagonal_two():  # TODO: adjust to binary
     # diagonal right top
     board_three = initialize_game_state()
     board_three[3, 0] = PLAYER1
@@ -161,7 +160,7 @@ def test_connected_four_diagonal_two():
     assert not ret
 
 
-def test_check_end_state():
+def test_check_end_state():  # TODO: adjust to binary
     board = initialize_game_state()
 
     board[0, 3] = PLAYER1
@@ -189,7 +188,7 @@ def test_check_end_state():
     assert ret == GameState.IS_DRAW
 
 
-def test_get_possible_moves():
+def test_get_possible_moves():  # TODO: adjust to binary
     board = string_to_board("|==============|\n|O X O X O X O |\n|X X O O O X X |\n|O O X X X O O |\n|O O O X O O O |\n|X X O O O X X |\n|X X X O O O X |\n|==============|\n|0 1 2 3 4 5 6 |")
     ret = get_possible_moves(board)
 

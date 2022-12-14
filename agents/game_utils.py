@@ -106,7 +106,7 @@ def pretty_print_board(board_player_one: int, board_player_two: int) -> str:
     return output
 
 
-def string_to_board(pp_board: str) -> tuple[bin, bin]:  # TODO: change to binary
+def string_to_board(pp_board: str) -> tuple[int, int]:  # TODO: change to binary
     """
     Takes the output of pretty_print_board and turns it back into an ndarray.
     This is quite useful for debugging, when the agent crashed and you have the last
@@ -124,23 +124,23 @@ def string_to_board(pp_board: str) -> tuple[bin, bin]:  # TODO: change to binary
 
     Returns
     ----------
-    numpy.ndarray
-        The board generated from the input-String.
+    :tuple[int, int]
+        Board-positions as binary numbers.
     """
 
     if len(pp_board.split("\n")) != 9:  # using regex would be way better
         raise AttributeError
-    output_player1 = list("0000000_0000000_0000000_0000000_0000000_0000000_0000000")
-    output_player2 = list("0000000_0000000_0000000_0000000_0000000_0000000_0000000")
+    output_player1 = ["0" for _ in range(49)]  # list("0000000_0000000_0000000_0000000_0000000_0000000_0000000")
+    output_player2 = ["0" for _ in range(49)]  # list("0000000_0000000_0000000_0000000_0000000_0000000_0000000")
     for row, line in enumerate(pp_board.split("\n")[1:-2]):
         for column, entry in enumerate(line[1:-1:2]):
             if entry == PLAYER1_PRINT:
-                output_player1[6 - row + 8 * column] = "1"
+                output_player1[5 - row + 7 * column] = "1"  # 5 - row because string is bein looked at from the top
             elif entry == PLAYER2_PRINT:
-                output_player2[6 - row + 8 * column] = "1"
-    output1 = "".join(output_player1)
-    output2 = "".join(output_player2)
-    return bin(int(output1, 2)), bin(int(output2, 2))
+                output_player2[5 - row + 7 * column] = "1"  # 7 * colum to jump columns
+    output1 = "".join(output_player1[::-1])  # flip because binary is indexed from the first bit on the right
+    output2 = "".join(output_player2[::-1])
+    return int(output1, 2), int(output2, 2)
 
 
 def apply_player_action(board_player_one: int, board_player_two: int, action: PlayerAction, player: BoardPiece) -> \
