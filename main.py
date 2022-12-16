@@ -24,7 +24,7 @@ def human_vs_agent(
             init(initialize_game_state(), player)
 
         saved_state = {PLAYER1: None, PLAYER2: None}
-        board = initialize_game_state()
+        board_player_one, board_player_two = initialize_game_state()
         gen_moves = (generate_move_1, generate_move_2)[::play_first]
         player_names = (player_1, player_2)[::play_first]
         gen_args = (args_1, args_2)[::play_first]
@@ -35,19 +35,19 @@ def human_vs_agent(
                     players, player_names, gen_moves, gen_args,
             ):
                 t0 = time.time()
-                print(pretty_print_board(board))
+                print(pretty_print_board(board_player_one, board_player_two))
                 print("")
                 print(
                     f'{player_name+": "+str(gen_move.__name__).split("_")[-1]} you are playing with {PLAYER1_PRINT if player == PLAYER1 else PLAYER2_PRINT}'
                 )
                 action, saved_state[player] = gen_move(
-                    board.copy(), player, saved_state[player], *args
+                    board_player_one, board_player_two, player, saved_state[player], *args
                 )
                 print(f"Move time: {time.time() - t0:.3f}s for move {action}")
-                board = apply_player_action(board, action, player)
-                end_state = check_end_state(board, player)
+                board_player_one, board_player_two = apply_player_action(board_player_one, board_player_two, action, player)
+                end_state = check_end_state(board_player_one, board_player_two)
                 if end_state != GameState.STILL_PLAYING:
-                    print(pretty_print_board(board))
+                    print(pretty_print_board(board_player_one, board_player_two))
                     if end_state == GameState.IS_DRAW:
                         print("Game ended in draw")
                     else:
@@ -60,5 +60,5 @@ def human_vs_agent(
 
 if __name__ == "__main__":
     # human_vs_agent(generate_move_minimax, generate_move_mcts)
-    human_vs_agent(generate_move_minimax)
-    # human_vs_agent(generate_move_minimax, generate_move_minimax)
+    # human_vs_agent(generate_move_minimax)
+    human_vs_agent(generate_move_minimax, generate_move_minimax)

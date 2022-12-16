@@ -1,4 +1,7 @@
+import pytest
+
 from agents.agent_minimax import generate_move_minimax, evaluate_position
+from agents.agent_minimax.minimax import number_of_connected_n
 from agents.game_utils import initialize_game_state, PLAYER1, apply_player_action, PlayerAction, PLAYER2, \
     string_to_board
 
@@ -15,7 +18,7 @@ def test_run_all():
     test_game_losing_choose_most_moves_to_loss()
 
 
-def test_generate_move():
+def test_generate_move():  # TODO: change to binary
     board = initialize_game_state()
     ret = generate_move_minimax(board, PLAYER1, None, 2)
 
@@ -24,26 +27,26 @@ def test_generate_move():
 
 
 def test_evaluate_position():
-    board = initialize_game_state()
-    ret = evaluate_position(board)
+    board_player_one, board_player_two = initialize_game_state()
+    ret = evaluate_position(board_player_one, board_player_two)
 
     assert isinstance(ret, int)
     assert ret == 0
 
-    board = apply_player_action(board, PlayerAction(0), PLAYER1)
-    ret = evaluate_position(board)
+    board_player_one, board_player_two = apply_player_action(board_player_one, board_player_two, PlayerAction(0), PLAYER1)
+    ret = evaluate_position(board_player_one, board_player_two)
 
-    assert ret == 3
+    assert ret == 0
 
-    board2 = initialize_game_state()
-    board2 = apply_player_action(board2, PlayerAction(3), PLAYER1)
-    board2 = apply_player_action(board2, PlayerAction(4), PLAYER2)
-    ret = evaluate_position(board2)
+    board_player_one, board_player_two = initialize_game_state()
+    board_player_one, board_player_two = apply_player_action(board_player_one, board_player_two, PlayerAction(3), PLAYER1)
+    board_player_one, board_player_two = apply_player_action(board_player_one, board_player_two, PlayerAction(4), PLAYER2)
+    ret = evaluate_position(board_player_one, board_player_two)
 
     assert ret == 0
 
 
-def test_player2_start():
+def test_player2_start():  # TODO: change to binary
     board = initialize_game_state()
     ret = generate_move_minimax(board, PLAYER2, None, 4)
 
@@ -51,7 +54,7 @@ def test_player2_start():
     assert ret[0] in [0, 1, 2, 3, 4, 5, 6]
 
 
-def test_evaluate_winning_position_1():
+def test_evaluate_winning_position_1():  # TODO: change to binary
     board = initialize_game_state()
     board[0, 0:4] = PLAYER1
     ret = evaluate_position(board)
@@ -60,7 +63,7 @@ def test_evaluate_winning_position_1():
     assert ret == 1_000_000_000_000
 
 
-def test_evaluate_winning_position_2():
+def test_evaluate_winning_position_2():  # TODO: change to binary
     board = initialize_game_state()
     board[0, 0:4] = PLAYER2
     ret = evaluate_position(board)
@@ -69,7 +72,7 @@ def test_evaluate_winning_position_2():
     assert ret == -1_000_000_000_000
 
 
-def test_win_in_one_move():
+def test_win_in_one_move():  # TODO: change to binary
     board = initialize_game_state()
     board[0, 0:3] = PLAYER2
 
@@ -78,7 +81,7 @@ def test_win_in_one_move():
     assert ret[0] == 3
 
 
-def test_prevent_opponent_win():
+def test_prevent_opponent_win():  # TODO: change to binary
     board = initialize_game_state()
     board[0, 1:4] = PLAYER1
     board[0, 0] = PLAYER2
@@ -88,7 +91,7 @@ def test_prevent_opponent_win():
     assert ret[0] == 4
 
 
-def test_win_in_two_moves():
+def test_win_in_two_moves():  # TODO: change to binary
     board = initialize_game_state()
     board[0, 1] = PLAYER2
     board[0, 3] = PLAYER2
@@ -98,10 +101,38 @@ def test_win_in_two_moves():
     assert ret[0] == 2
 
 
-def test_game_losing_choose_most_moves_to_loss():
+def test_game_losing_choose_most_moves_to_loss():  # TODO: change to binary
     board = string_to_board(
         "|==============|\n|              |\n|            O |\n|          X X |\n|      O   X X |\n|      O O X O |\n|O     X X O X |\n|==============|\n|0 1 2 3 4 5 6 |")
 
     ret = generate_move_minimax(board, PLAYER2, None, 4)
     assert isinstance(ret[0], PlayerAction)
     assert ret[0] == 5
+
+
+def test_number_of_connected_n():
+    board = 0b0000000_0000000_0000000_0000111_0000000_0000000_0000000
+
+    ret = number_of_connected_n(board, 2)
+    assert isinstance(ret, int)
+    assert ret == 2
+
+    ret = number_of_connected_n(board, 3)
+    assert ret == 1
+
+    board = 0b0000000_0000000_0000010_0000001_0000001_0000001_0000000
+
+    with pytest.raises(AssertionError):
+        number_of_connected_n(board, 0)
+
+    ret = number_of_connected_n(board, 2)
+    assert ret == 3
+
+    ret = number_of_connected_n(board, 3)
+    assert ret == 1
+
+    board = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000001
+    ret = number_of_connected_n(board, 1)
+    assert ret == 4
+
+

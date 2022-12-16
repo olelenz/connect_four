@@ -6,14 +6,17 @@ from agents.game_utils import BoardPiece, PlayerAction, apply_player_action, PLA
 from agents.saved_state import SavedState
 
 
-def generate_move_minimax(board: np.ndarray, player: BoardPiece, saved_state: Optional[SavedState], depth: int = 6) -> Tuple[PlayerAction, Optional[SavedState]]:
+def generate_move_minimax(board_player_one: int, board_player_two: int, player: BoardPiece, saved_state: Optional[SavedState], depth: int = 8) -> Tuple[PlayerAction, Optional[SavedState]]:
     """
     Generates the next move using the minimax algorithm.
 
     Parameters
     ----------
-    board: np.ndarray
-        Board to start with.
+    board_player_one: int
+        Board PLAYER1.
+
+    board_player_two: int
+        Board PLAYER2.
 
     player: BoardPiece
         The next player to make a move.
@@ -32,13 +35,13 @@ def generate_move_minimax(board: np.ndarray, player: BoardPiece, saved_state: Op
     alpha: (int, PlayerAction) = (-1_000_000_000_000, PlayerAction(-1))
     beta: (int, PlayerAction) = (1_000_000_000_000, PlayerAction(-1))
     if player == PLAYER1:
-        evaluation = minimax_rec(0, depth, board, player, True, alpha, beta)  # start maximizing if PLAYER1 is to play
+        evaluation = minimax_rec(0, depth, board_player_one, board_player_two, player, True, alpha, beta)  # start maximizing if PLAYER1 is to play
     else:
-        evaluation = minimax_rec(0, depth, board, player, False, alpha, beta)  # start minimizing if PLAYER2 is to play
+        evaluation = minimax_rec(0, depth, board_player_one, board_player_two, player, False, alpha, beta)  # start minimizing if PLAYER2 is to play
     return PlayerAction(evaluation[1]), None
 
 
-def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarray, player: BoardPiece,
+def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, board_player_two: int, player: BoardPiece,
                 maximize: bool, alpha: (int, PlayerAction), beta: (int, PlayerAction)) -> (int, PlayerAction):
     """
     Recursive helper function for generate_move_minimax. Implements the minimax algorithm.
@@ -51,8 +54,11 @@ def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarra
     desired_depth: int
         The depth in the search tree to stop calculating.
 
-    current_board: numpy.ndarray
-        The current board of the game.
+    board_player_one: int
+        Board PLAYER1.
+
+    board_player_two: int
+        Board PLAYER2.
 
     player: BoardPiece
         The next player to make a move.
@@ -71,22 +77,22 @@ def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarra
     :(int, PlayerAction)
         Tuple of the evaluation after playing the move, which is also returned in this Tuple.
     """
-    possible_moves: [int] = get_possible_moves(current_board)
+    possible_moves: [int] = get_possible_moves(board_player_one, board_player_two)
     if len(possible_moves) == 0 or current_depth == desired_depth:  # no more moves or desired depth reached -
         # recursion anchor
-        evaluation: int = evaluate_position(current_board, current_depth)
+        evaluation: int = evaluate_position(board_player_one, board_player_two, current_depth)
         return evaluation, -1  # -1 because we do not know the last played move - will be added when closing recursion
 
     if maximize:
         for move in possible_moves:
-            new_board = apply_player_action(current_board, move, player)
-            alpha = max([alpha, (minimax_rec(current_depth + 1, desired_depth, new_board, BoardPiece(3-player), not maximize, alpha, beta)[0], move)], key=lambda x: x[0])
+            new_board_player_one, new_board_player_two = apply_player_action(board_player_one, board_player_two, move, player)
+            alpha = max([alpha, (minimax_rec(current_depth + 1, desired_depth, new_board_player_one, new_board_player_two, BoardPiece(3-player), not maximize, alpha, beta)[0], move)], key=lambda x: x[0])
             if beta <= alpha:
                 return alpha
     else:
         for move in possible_moves:
-            new_board = apply_player_action(current_board, move, player)
-            beta = min([beta, (minimax_rec(current_depth + 1, desired_depth, new_board, BoardPiece(3 - player), not maximize, alpha, beta)[
+            new_board_player_one, new_board_player_two = apply_player_action(board_player_one, board_player_two, move, player)
+            beta = min([beta, (minimax_rec(current_depth + 1, desired_depth, new_board_player_one, new_board_player_two, BoardPiece(3 - player), not maximize, alpha, beta)[
                 0], move)], key=lambda x: x[0])
             if beta <= alpha:
                 return beta
@@ -96,15 +102,18 @@ def minimax_rec(current_depth: int, desired_depth: int, current_board: np.ndarra
         return beta
 
 
-def evaluate_position(board: np.ndarray, depth: int = 0) -> int:
+def evaluate_position(board_player_one: int, board_player_two: int, depth: int = 0) -> int:
     """
     Evaluates a board position. Use convolution to assess position (two pieces together are good, one piece near to
     an empty space is good, one piece next to a piece from the opponent is assessed as equal
 
     Parameters
     ----------
-    board: numpy.ndarray
-        Board to be evaluated.
+    board_player_one: int
+        Board PLAYER1.
+
+    board_player_two: int
+        Board PLAYER2.
 
     depth: int
         Depth at evaluation -> earlier wins are better.
@@ -114,16 +123,42 @@ def evaluate_position(board: np.ndarray, depth: int = 0) -> int:
     :int
         The evaluation of the position.
     """
-    if connected_four(board, PLAYER1):  # PLAYER1 won
+    if connected_four(board_player_one):  # PLAYER1 won
         return int(1_000_000_000_000 * 10**(-depth))
-    if connected_four(board, PLAYER2):  # PLAYER2 won
+    if connected_four(board_player_two):  # PLAYER2 won
         return int(-1_000_000_000_000 * 10**(-depth))
 
-    evaluation_board = initialize_game_state()
-    evaluation_board[board == PLAYER1] = 1  # set 1 for PLAYER1
-    evaluation_board[board == PLAYER2] = -1  # set -1 for PLAYER2
-
     output: int = 0  # initial position evaluated as equal
-    for snd in [[[1, 1]], [[1], [1]], np.identity(2), np.identity(2)[::-1, ::]]:  # setup of kernels
-        output += int(sum(sum(signal.convolve2d(evaluation_board, snd, mode="valid"))))
+    p1_connected_two: int = number_of_connected_n(board_player_one, 2)
+    p2_connected_two: int = number_of_connected_n(board_player_two, 2)
+    connected_two_all_connection: int = number_of_connected_n(board_player_one | board_player_two, 2) - (p1_connected_two + p2_connected_two)
+    output += (p1_connected_two * 2 - connected_two_all_connection) + (p2_connected_two * -2 + connected_two_all_connection)
     return output
+
+
+def number_of_connected_n(board: int, connected: int) -> int:
+    """
+    Evaluates the number of connected-n in a bitboard.
+
+    Parameters
+    ----------
+    board: int
+        The bitboard to be evaluated.
+
+    connected: int
+        The number of connected pieces to check for.
+
+    Returns
+    -------
+    :int
+        Number of connected-n.
+
+    """
+    assert connected > 0
+    out: int = 0
+    for i in [1, 6, 7, 8]:
+        temp_board = board
+        for _ in range(connected-1):
+            temp_board = temp_board & (temp_board >> i)
+        out += bin(temp_board).count('1')
+    return out

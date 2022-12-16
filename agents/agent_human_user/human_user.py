@@ -6,14 +6,14 @@ from typing import Optional, Callable
 from agents.saved_state import SavedState
 
 
-def user_move(board: np.ndarray,
+def user_move(board_player_one: int, board_player_two: int,
               _player: BoardPiece,
               saved_state: Optional[SavedState]) -> tuple[PlayerAction, SavedState]:
     is_valid_move = False
     while not is_valid_move:
         input_move_string = query_user(input)
         try:
-            is_valid_move = handle_illegal_moves(board, input_move_string)
+            is_valid_move = handle_illegal_moves(board_player_one, board_player_two, input_move_string)
         except TypeError:
             print('Not the right format, try an integer.')
         except IndexError:
@@ -29,7 +29,7 @@ def query_user(prompt_function: Callable):
     return usr_input
 
 
-def handle_illegal_moves(board: np.ndarray, column: PlayerAction):
+def handle_illegal_moves(board_player_one: int, board_player_two: int, column: PlayerAction):
     try:
         column = PlayerAction(column)
     except:
@@ -39,8 +39,8 @@ def handle_illegal_moves(board: np.ndarray, column: PlayerAction):
     if not is_in_range:
         raise IndexError
 
-    is_open = board[-1, column] == NO_PLAYER
-    if not is_open:
+    is_closed = bool((board_player_one | board_player_two) & (1 << (column * 7 + 5)))
+    if is_closed:
         raise ValueError
 
     return True
