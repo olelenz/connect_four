@@ -2,6 +2,7 @@ import numpy as np
 from typing import Tuple, Optional
 from scipy import signal
 
+import agents.game_utils
 from agents.game_utils import BoardPiece, PlayerAction, apply_player_action, PLAYER1, PLAYER2, initialize_game_state, connected_four, get_possible_moves
 from agents.saved_state import SavedState
 
@@ -77,10 +78,16 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
     :(int, PlayerAction)
         Tuple of the evaluation after playing the move, which is also returned in this Tuple.
     """
+    dictionary = {}  # empty dictionary
     possible_moves: [int] = get_possible_moves(board_player_one, board_player_two)
     if len(possible_moves) == 0 or current_depth == desired_depth:  # no more moves or desired depth reached -
         # recursion anchor
-        evaluation: int = evaluate_position(board_player_one, board_player_two, current_depth)
+        key = agents.game_utils.create_dictionary_key(board_player_one, board_player_two)
+        try:
+            evaluation = dictionary[key]  # will throw KeyError if key does not exist in dictionary
+        except KeyError:
+            evaluation: int = evaluate_position(board_player_one, board_player_two, current_depth)
+            dictionary[key] = evaluation  # add key and evaluation to the dictionary
         return evaluation, -1  # -1 because we do not know the last played move - will be added when closing recursion
 
     if maximize:

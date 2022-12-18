@@ -260,3 +260,22 @@ def get_possible_moves(board_player_one: int, board_player_two: int) -> [PlayerA
         if board_full & (1 << (i * 7 + 5)):
             out.remove(i)
     return out
+
+
+def create_dictionary_key(board_player_one: bin, board_player_two: bin) -> bin:  # Datentyp binary?
+    """
+
+    Parameters
+    ----------
+    board_player_one: bin
+        Board PLAYER1.
+
+    board_player_two: bin
+        Board PLAYER2.
+
+    Returns
+    -------
+    :bin
+        Key for the dictionary
+    """
+    return (board_player_one << 49) + board_player_two
