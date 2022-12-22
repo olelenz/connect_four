@@ -279,3 +279,19 @@ def create_dictionary_key(board_player_one: bin, board_player_two: bin) -> bin: 
         Key for the dictionary
     """
     return (board_player_one << 49) + board_player_two
+
+
+def mirror_board(board_player1: bin, board_player2: bin) -> tuple[bin, bin]:
+    return mirror_player_board(board_player1), mirror_player_board(board_player2)
+
+
+def mirror_player_board(player_board) -> bin:
+    new_board = 0b1111111_0000000_0000000_0000000_0000000_0000000_0000000 & (player_board << 42)
+    + 0b0000000_1111111_0000000_0000000_0000000_0000000_0000000 & (player_board << 28)
+    + 0b0000000_0000000_1111111_0000000_0000000_0000000_0000000 & (player_board << 14)
+    + 0b0000000_0000000_0000000_1111111_0000000_0000000_0000000 & player_board
+    + 0b0000000_0000000_0000000_0000000_1111111_0000000_0000000 & (player_board >> 14)
+    + 0b0000000_0000000_0000000_0000000_0000000_1111111_0000000 & (player_board >> 28)
+    + 0b0000000_0000000_0000000_0000000_0000000_0000000_1111111 & (player_board >> 42)
+    return new_board
+
