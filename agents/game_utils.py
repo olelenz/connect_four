@@ -262,7 +262,7 @@ def get_possible_moves(board_player_one: int, board_player_two: int) -> [PlayerA
     return out
 
 
-def create_dictionary_key(board_player_one: bin, board_player_two: bin) -> bin:  # Datentyp binary?
+def create_dictionary_key(board_player_one: int, board_player_two: int) -> int:
     """
 
     Parameters
@@ -281,11 +281,11 @@ def create_dictionary_key(board_player_one: bin, board_player_two: bin) -> bin: 
     return (board_player_one << 49) + board_player_two
 
 
-def mirror_board(board_player1: bin, board_player2: bin) -> tuple[bin, bin]:
+def mirror_board(board_player1: int, board_player2: int) -> tuple[int, int]:
     return mirror_player_board(board_player1), mirror_player_board(board_player2)
 
 
-def mirror_player_board(player_board) -> bin:
+def mirror_player_board(player_board) -> int:
     new_board = 0b1111111_0000000_0000000_0000000_0000000_0000000_0000000 & (player_board << 42)
     + 0b0000000_1111111_0000000_0000000_0000000_0000000_0000000 & (player_board << 28)
     + 0b0000000_0000000_1111111_0000000_0000000_0000000_0000000 & (player_board << 14)
