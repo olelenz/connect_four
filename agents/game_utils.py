@@ -267,25 +267,54 @@ def create_dictionary_key(board_player_one: int, board_player_two: int) -> int:
 
     Parameters
     ----------
-    board_player_one: bin
+    board_player_one: int
         Board PLAYER1.
 
-    board_player_two: bin
+    board_player_two: int
         Board PLAYER2.
 
     Returns
     -------
-    :bin
+    :int
         Key for the dictionary
     """
     return (board_player_one << 49) + board_player_two
 
 
 def mirror_board(board_player1: int, board_player2: int) -> tuple[int, int]:
+    """
+    Mirrors the board by mirroring both player's board string
+
+    Parameters
+    ----------
+    board_player1: int
+        Board of player 1
+
+    board_player2: int
+        Board of player 2
+
+    Returns
+    -------
+    tuple[int, int]:
+        2 mirrored boards
+    """
     return mirror_player_board(board_player1), mirror_player_board(board_player2)
 
 
 def mirror_player_board(player_board) -> int:
+    """
+    Mirrors a single board string by bit shifting
+
+    Parameters
+    ----------
+    player_board:
+        The players board
+
+    Returns
+    -------
+    int:
+        The mirrored board
+    """
     new_board = 0b1111111_0000000_0000000_0000000_0000000_0000000_0000000 & (player_board << 42)
     + 0b0000000_1111111_0000000_0000000_0000000_0000000_0000000 & (player_board << 28)
     + 0b0000000_0000000_1111111_0000000_0000000_0000000_0000000 & (player_board << 14)
