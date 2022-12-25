@@ -103,7 +103,7 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
     else:
         for move in possible_moves:
             new_board_player_one, new_board_player_two = apply_player_action(board_player_one, board_player_two, move, player)
-            key = create_dictionary_key(board_player_one, board_player_two)
+            key = create_dictionary_key(new_board_player_one, new_board_player_two)
             try:
                 check_beta = dictionary[key]
                 if beta <= alpha:
