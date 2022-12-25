@@ -3,7 +3,7 @@ from typing import Tuple, Optional
 from scipy import signal
 
 import agents.game_utils
-from agents.game_utils import BoardPiece, PlayerAction, apply_player_action, PLAYER1, PLAYER2, initialize_game_state, connected_four, get_possible_moves
+from agents.game_utils import BoardPiece, PlayerAction, apply_player_action, PLAYER1, PLAYER2, initialize_game_state, connected_four, get_possible_moves, create_dictionary_key, add_mirror_to_dictionary
 from agents.saved_state import SavedState
 
 
@@ -83,27 +83,38 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
     possible_moves: [int] = get_possible_moves(board_player_one, board_player_two)
     if len(possible_moves) == 0 or current_depth == desired_depth:  # no more moves or desired depth reached -
         # recursion anchor
-        key = agents.game_utils.create_dictionary_key(board_player_one, board_player_two)
-        try:
-            evaluation = dictionary[key]  # will throw KeyError if key does not exist in dictionary
-        except KeyError:
-            evaluation: int = evaluate_position(board_player_one, board_player_two, current_depth)
-            dictionary[key] = evaluation  # add key and evaluation to the dictionary
+        evaluation: int = evaluate_position(board_player_one, board_player_two, current_depth)
         return evaluation, -1  # -1 because we do not know the last played move - will be added when closing recursion
 
     if maximize:
         for move in possible_moves:
             new_board_player_one, new_board_player_two = apply_player_action(board_player_one, board_player_two, move, player)
-            alpha = max([alpha, (minimax_rec(current_depth + 1, desired_depth, new_board_player_one, new_board_player_two, BoardPiece(3-player), not maximize, alpha, beta, dictionary)[0], move)], key=lambda x: x[0])
-            if beta <= alpha:
-                return alpha
+            key = create_dictionary_key(new_board_player_one, new_board_player_two)
+            try:
+                check_alpha = dictionary[key]  # not sure if needed to throw KeyError, because if clause might not throw KeyError if false?
+                if beta <= alpha:
+                    return check_alpha
+            except KeyError:
+                alpha = max([alpha, (minimax_rec(current_depth + 1, desired_depth, new_board_player_one, new_board_player_two, BoardPiece(3-player), not maximize, alpha, beta, dictionary)[0], move)], key=lambda x: x[0])
+                dictionary[key] = alpha
+                add_mirror_to_dictionary(new_board_player_one, new_board_player_two, dictionary, alpha)
+                if beta <= alpha:
+                    return alpha
     else:
         for move in possible_moves:
             new_board_player_one, new_board_player_two = apply_player_action(board_player_one, board_player_two, move, player)
-            beta = min([beta, (minimax_rec(current_depth + 1, desired_depth, new_board_player_one, new_board_player_two, BoardPiece(3 - player), not maximize, alpha, beta, dictionary)[
-                0], move)], key=lambda x: x[0])
-            if beta <= alpha:
-                return beta
+            key = create_dictionary_key(board_player_one, board_player_two)
+            try:
+                check_beta = dictionary[key]
+                if beta <= alpha:
+                    return check_beta
+            except KeyError:
+                beta = min([beta, (minimax_rec(current_depth + 1, desired_depth, new_board_player_one, new_board_player_two, BoardPiece(3 - player), not maximize, alpha, beta, dictionary)[
+                    0], move)], key=lambda x: x[0])
+                dictionary[key] = beta
+                add_mirror_to_dictionary(new_board_player_one, new_board_player_two, dictionary, beta)
+                if beta <= alpha:
+                    return beta
     if maximize:
         return alpha
     else:

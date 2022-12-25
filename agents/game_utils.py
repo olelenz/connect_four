@@ -324,3 +324,23 @@ def mirror_player_board(player_board) -> int:
     + 0b0000000_0000000_0000000_0000000_0000000_0000000_1111111 & (player_board >> 42)
     return new_board
 
+
+def add_mirror_to_dictionary(board_player1: int, board_player2: int, dictionary: {}, alpha_beta: tuple[int, int]):
+    """
+    Uses the mirror functions to add a mirrored board, its evaluation and playeraction to the dictionary.
+
+    Parameters
+    ----------
+    board_player1: int
+        Board player1
+    board_player2: int
+        Board player2
+    dictionary: {}
+        Dictionary  # should be reference of dictionary
+    alpha_beta
+        Tuple that contains evaluation and playeraction
+
+    """
+    mirror_board_player1, mirror_board_player2 = mirror_board(board_player1, board_player2)
+    mirror_key = create_dictionary_key(mirror_board_player1, mirror_board_player2)
+    dictionary[mirror_key] = alpha_beta
