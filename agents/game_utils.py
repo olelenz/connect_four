@@ -349,7 +349,7 @@ def add_mirror_to_dictionary(board_player1: int, board_player2: int, dictionary:
 def is_mirror_possible(board_player1: int, board_player2: int) -> bool:
     """
     Checks if the board could still have mirrored states in the future. E.g. if player1 has a piece in the bottom
-    left corner and player2 in the bottom right corner, the board is asymmetric and mirrored boards states
+    left corner and player2 in the bottom right corner, the board is asymmetric and mirrored board states
     will no longer occur.
     The goal is to not call mirror functions after this function returns False
 
@@ -365,4 +365,4 @@ def is_mirror_possible(board_player1: int, board_player2: int) -> bool:
     bool:
         if board can be mirrored of not
     """
-    return True if (board_player1 & mirror_player_board(board_player2) == 0) else False
+    return (board_player1 & mirror_player_board(board_player2)) == 0
