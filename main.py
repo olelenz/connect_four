@@ -45,7 +45,7 @@ def human_vs_agent(
                 )
                 print(f"Move time: {time.time() - t0:.3f}s for move {action}")
                 board_player_one, board_player_two = apply_player_action(board_player_one, board_player_two, action, player)
-                end_state = check_end_state(board_player_one, board_player_two)
+                end_state = check_end_state(board_player_one, board_player_two, player)
                 if end_state != GameState.STILL_PLAYING:
                     print(pretty_print_board(board_player_one, board_player_two))
                     if end_state == GameState.IS_DRAW:
@@ -60,5 +60,5 @@ def human_vs_agent(
 
 if __name__ == "__main__":
     # human_vs_agent(generate_move_minimax, generate_move_mcts)
-    # human_vs_agent(generate_move_minimax)
-    human_vs_agent(generate_move_minimax, generate_move_minimax)
+    human_vs_agent(generate_move_minimax)
+    # human_vs_agent(generate_move_minimax, generate_move_minimax)
