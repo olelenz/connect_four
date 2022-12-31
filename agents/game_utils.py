@@ -290,7 +290,7 @@ def create_dictionary_key(board_player_one: int, board_player_two: int) -> int:
     :int
         Key for the dictionary
     """
-    return (board_player_one << 49) + board_player_two
+    return (board_player_one << 49) | board_player_two
 
 
 def mirror_board(board_player1: int, board_player2: int) -> tuple[int, int]:
