@@ -43,6 +43,7 @@ def human_vs_agent(
                 action, saved_state[player] = gen_move(
                     board_player_one, board_player_two, player, saved_state[player], *args
                 )
+                print(bin(board_player_one), " --- ", bin(board_player_two), " --- ", player, " --- ", action)
                 print(f"Move time: {time.time() - t0:.3f}s for move {action}")
                 board_player_one, board_player_two = apply_player_action(board_player_one, board_player_two, action, player)
                 end_state = check_end_state(board_player_one, board_player_two, player)
@@ -60,5 +61,5 @@ def human_vs_agent(
 
 if __name__ == "__main__":
     # human_vs_agent(generate_move_minimax, generate_move_mcts)
-    human_vs_agent(generate_move_minimax)
-    # human_vs_agent(generate_move_minimax, generate_move_minimax)
+    # human_vs_agent(generate_move_minimax)
+    human_vs_agent(generate_move_minimax, generate_move_minimax)

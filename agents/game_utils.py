@@ -25,7 +25,7 @@ class GameState(Enum):
 
 
 GenMove = Callable[
-    [np.ndarray, BoardPiece, Optional[SavedState]],  # Arguments for the generate_move function
+    [int, int, BoardPiece, Optional[SavedState]],  # Arguments for the generate_move function
     tuple[PlayerAction, Optional[SavedState]]  # Return type of the generate_move function
 ]
 
