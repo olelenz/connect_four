@@ -9,7 +9,7 @@ from collections import defaultdict
 
 
 def generate_move_minimax(board_player_one: int, board_player_two: int, player: BoardPiece,
-                          saved_state: Optional[SavedState], depth: int = 12) -> Tuple[
+                          saved_state: Optional[SavedState], depth: int = 8) -> Tuple[
     PlayerAction, Optional[SavedState]]:
     """
     Generates the next move using the minimax algorithm.
