@@ -76,6 +76,7 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
     :(int, PlayerAction)
         Tuple of the evaluation after playing the move, which is also returned in this Tuple.
     """
+    # TODO: also return recent moves
     possible_moves: [int] = get_possible_moves(board_player_one, board_player_two, player)
     if not possible_moves:
         current_game_state: GameState = check_end_state(board_player_one, board_player_two, 3-player)  # check for the last player
