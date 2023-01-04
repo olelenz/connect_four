@@ -64,7 +64,6 @@ def test_win_in_one_move():
 def test_prevent_opponent_win():
     board_player_one = 0b0000000_0000000_0000000_0000001_0000001_0000001_0000000
     board_player_two = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000001
-    #1000000_0000000_0000000_0000000_0000000_0000000_0000001
 
     ret = generate_move_minimax(board_player_one, board_player_two, PLAYER2, None, 2)
     assert isinstance(ret[0], PlayerAction)
