@@ -167,3 +167,48 @@ def test_get_possible_moves():
     ret = get_possible_moves(board_p1, board_p2, PLAYER2)
     assert ret == []
 
+
+def test_create_dictionary_key():
+    board1 = 0b0000000_0000000_0000000_0000111_0001111_0000000_0000000
+    board2 = 0b0100000_0001000_0000000_0000111_0001001_0000000_0010000
+    test_board = 0b0000000_0000000_0000000_0000111_0001111_0000000_0000000_0100000_0001000_0000000_0000111_0001001_0000000_0010000
+    assert create_dictionary_key(board1, board2) == test_board
+
+
+def test_mirror_board():
+    board1 = 0b0000000_0111111_0001000_0000000_0000000_0000000_0111111
+    board2 = 0b0111111_0000000_0000000_0000000_0001000_0111111_0000000
+    assert mirror_board(board1, board2) == (board2, board1)
+
+
+def test_mirror_player_board():
+    board1 = 0b0000000_0111111_0000000_0100000_0111111_0000000_0111111
+    board2 = 0b0111111_0000000_0111111_0100000_0000000_0111111_0000000
+    assert mirror_player_board(board1) == board2
+
+
+def test_add_mirror_to_dictionary():
+    test_dict = {}
+    board1 = 0b_0100000_0000000_0000000_0000000_0000000_0000000_0000000
+    board2 = 0b_0000000_0100000_0000000_0000000_0000000_0000000_0000000
+
+    assert not test_dict.keys()  # empty and no keys
+
+    add_mirror_to_dictionary(board1, board2, test_dict, (1, -1))
+    assert test_dict.keys()  # not empty and key exists
+
+    mirror1, mirror2 = mirror_board(board1, board2)
+    key = create_dictionary_key(mirror1, mirror2)
+    assert test_dict[key] == (1, -1)
+
+
+def test_is_mirror_possible1():
+    board1 = 0b_0100000_0000000_0000000_0000000_0000000_0000000_0000000
+    board2 = 0b_0000000_0100000_0000000_0000000_0000000_0000000_0000000
+    assert is_mirror_possible(board1, board2)
+
+
+def test_is_mirror_possible2():
+    board1 = 0b_0100000_0000000_0000000_0000000_0000000_0000000_0000000
+    board2 = 0b_0000000_0100000_0000000_0000000_0000000_0000000_0100000
+    assert not is_mirror_possible(board1, board2)
