@@ -92,12 +92,12 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
                 evaluation: int = int(-1_000_000_000_000_000 * 10 ** (-current_depth))
             else:
                 evaluation: int = int(1_000_000_000_000_000 * 10 ** (-current_depth))
-            return evaluation, -1
+            return [(evaluation, -1)]
         if current_game_state == GameState.IS_DRAW:
-            return 0, -1
+            return [(0, -1)]
     if current_depth == desired_depth:  #desired depth reached - recursion anchor
         evaluation: int = evaluate_position(board_player_one, board_player_two)
-        return evaluation, -1  # -1 because we do not know the last played move - will be added when closing recursion
+        return [(evaluation, -1)]  # -1 because we do not know the last played move - will be added when closing recursion
 
     if maximize:
         for move in possible_moves:
@@ -113,7 +113,7 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
                 if use_mirror:
                     add_mirror_to_dictionary(board_player_one, board_player_two, dictionary, alpha)
             if beta[0] <= alpha[0]:
-                return alpha
+                return [(alpha[0], move)]+alpha
     else:
         for move in possible_moves:
             new_board_player_one, new_board_player_two = apply_player_action(board_player_one, board_player_two, move,
@@ -128,7 +128,7 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
                 if use_mirror:
                     add_mirror_to_dictionary(board_player_one, board_player_two, dictionary, beta)
             if beta[0] <= alpha[0]:
-                return beta
+                return [(beta[0], move)]+beta
     if maximize:
         return alpha
     else:
