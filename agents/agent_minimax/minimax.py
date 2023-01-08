@@ -34,20 +34,22 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
     beta: (int, PlayerAction) = (1_000_000_000_000_000, PlayerAction(-1))
     dictio_test_one = defaultdict(dict)
     dictio_test_two = defaultdict(dict)
+    use_mirror = is_mirror_possible(board_player_one, board_player_two)
+    # use_mirror = False  # toggle to test performance difference?
     if player == PLAYER1:
         evaluation = minimax_rec(0, depth, board_player_one, board_player_two, player, True, alpha,
-                                 beta, dictio_test_one)  # start maximizing if PLAYER1 is to play
+                                 beta, dictio_test_one, use_mirror)  # start maximizing if PLAYER1 is to play
         #for key in dictio_test_one.keys():
         #    print(dictio_test_one[key], "---", bin(key))
     else:
         evaluation = minimax_rec(0, depth, board_player_one, board_player_two, player, False, alpha,
-                                 beta, dictio_test_two)  # start minimizing if PLAYER2 is to play
+                                 beta, dictio_test_two, use_mirror)  # start minimizing if PLAYER2 is to play
     return PlayerAction(evaluation[1]), None
 
 
 def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, board_player_two: int,
                 player: BoardPiece,
-                maximize: bool, alpha: (int, PlayerAction), beta: (int, PlayerAction), dictionary: {}) -> (int, PlayerAction):
+                maximize: bool, alpha: (int, PlayerAction), beta: (int, PlayerAction), dictionary: {}, use_mirror: bool) -> (int, PlayerAction):
     """
     Recursive helper function for generate_move_minimax. Implements the minimax algorithm.
 
@@ -107,7 +109,9 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
                 alpha = max([alpha, (
                 minimax_rec(current_depth + 1, desired_depth, new_board_player_one, new_board_player_two,
                             BoardPiece(3 - player), not maximize, alpha, beta, dictionary)[0], move)], key=lambda x: x[0])
-                dictionary[new_board_player_one][new_board_player_two] = alpha
+                dictionary[create_dictionary_key(new_board_player_one, new_board_player_two)] = alpha
+                if use_mirror:
+                    add_mirror_to_dictionary(board_player_one, board_player_two, dictionary, alpha)
             if beta[0] <= alpha[0]:
                 return alpha
     else:
@@ -120,7 +124,9 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
                 beta = min([beta, (minimax_rec(current_depth + 1, desired_depth, new_board_player_one, new_board_player_two,
                                            BoardPiece(3 - player), not maximize, alpha, beta, dictionary)[
                                    0], move)], key=lambda x: x[0])
-                dictionary[new_board_player_one][new_board_player_two] = beta
+                dictionary[create_dictionary_key(new_board_player_one, new_board_player_two)] = beta
+                if use_mirror:
+                    add_mirror_to_dictionary(board_player_one, board_player_two, dictionary, beta)
             if beta[0] <= alpha[0]:
                 return beta
     if maximize:
