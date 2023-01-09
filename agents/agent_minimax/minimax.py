@@ -73,6 +73,8 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
         Initial beta value (very big) for alpha beta pruning and initial PlayerAction to be overwritten.
     dictionary: {}
         Transposition table
+    use_mirror: bool
+        Determines if mirror functions will be used for dictionary
     Returns
     -------
     :(int, PlayerAction)
@@ -92,12 +94,12 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
                 evaluation: int = int(-1_000_000_000_000_000 * 10 ** (-current_depth))
             else:
                 evaluation: int = int(1_000_000_000_000_000 * 10 ** (-current_depth))
-            return [(evaluation, -1)]
+            return evaluation, -1
         if current_game_state == GameState.IS_DRAW:
-            return [(0, -1)]
+            return 0, -1
     if current_depth == desired_depth:  #desired depth reached - recursion anchor
         evaluation: int = evaluate_position(board_player_one, board_player_two)
-        return [(evaluation, -1)]  # -1 because we do not know the last played move - will be added when closing recursion
+        return evaluation, -1  # -1 because we do not know the last played move - will be added when closing recursion
 
     if maximize:
         for move in possible_moves:
@@ -108,12 +110,12 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
             except KeyError:
                 alpha = max([alpha, (
                 minimax_rec(current_depth + 1, desired_depth, new_board_player_one, new_board_player_two,
-                            BoardPiece(3 - player), not maximize, alpha, beta, dictionary)[0], move)], key=lambda x: x[0])
-                dictionary[create_dictionary_key(new_board_player_one, new_board_player_two)] = alpha
+                            BoardPiece(3 - player), not maximize, alpha, beta, dictionary, use_mirror)[0], move)], key=lambda x: x[0])
+                dictionary[new_board_player_one][new_board_player_two] = alpha
                 if use_mirror:
                     add_mirror_to_dictionary(board_player_one, board_player_two, dictionary, alpha)
             if beta[0] <= alpha[0]:
-                return [(alpha[0], move)]+alpha
+                return alpha
     else:
         for move in possible_moves:
             new_board_player_one, new_board_player_two = apply_player_action(board_player_one, board_player_two, move,
@@ -122,13 +124,13 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
                 beta = dictionary[new_board_player_one][new_board_player_two]
             except KeyError:
                 beta = min([beta, (minimax_rec(current_depth + 1, desired_depth, new_board_player_one, new_board_player_two,
-                                           BoardPiece(3 - player), not maximize, alpha, beta, dictionary)[
+                                           BoardPiece(3 - player), not maximize, alpha, beta, dictionary, use_mirror)[
                                    0], move)], key=lambda x: x[0])
-                dictionary[create_dictionary_key(new_board_player_one, new_board_player_two)] = beta
+                dictionary[new_board_player_one][new_board_player_two] = beta
                 if use_mirror:
                     add_mirror_to_dictionary(board_player_one, board_player_two, dictionary, beta)
             if beta[0] <= alpha[0]:
-                return [(beta[0], move)]+beta
+                return beta
     if maximize:
         return alpha
     else:

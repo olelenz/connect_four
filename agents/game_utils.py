@@ -274,25 +274,6 @@ def get_possible_moves(board_player_one: int, board_player_two: int, player: Boa
     return out
 
 
-def create_dictionary_key(board_player_one: int, board_player_two: int) -> int:
-    """
-
-    Parameters
-    ----------
-    board_player_one: int
-        Board PLAYER1.
-
-    board_player_two: int
-        Board PLAYER2.
-
-    Returns
-    -------
-    :int
-        Key for the dictionary
-    """
-    return (board_player_one << 49) | board_player_two
-
-
 def mirror_board(board_player1: int, board_player2: int) -> tuple[int, int]:
     """
     Mirrors the board by mirroring both player's board string
@@ -355,8 +336,7 @@ def add_mirror_to_dictionary(board_player1: int, board_player2: int, dictionary:
 
     """
     mirror_board_player1, mirror_board_player2 = mirror_board(board_player1, board_player2)
-    mirror_key = create_dictionary_key(mirror_board_player1, mirror_board_player2)
-    dictionary[mirror_key] = alpha_beta
+    dictionary[mirror_board_player1][mirror_board_player2] = alpha_beta
 
 
 def is_mirror_possible(board_player1: int, board_player2: int) -> bool:
