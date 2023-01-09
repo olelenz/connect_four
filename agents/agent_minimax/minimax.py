@@ -9,7 +9,7 @@ from collections import defaultdict
 
 
 def generate_move_minimax(board_player_one: int, board_player_two: int, player: BoardPiece,
-                          saved_state: Optional[SavedState], depth: int = 8) -> Tuple[
+                          saved_state: Optional[SavedState], depth: int = 10) -> Tuple[
     PlayerAction, Optional[SavedState]]:
     """
     Generates the next move using the minimax algorithm.
@@ -30,24 +30,27 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
     :Tuple[PlayerAction, Optional[SavedState]]
         Tuple containing the move to play and the saved state.
     """
-    alpha: (int, PlayerAction) = (-1_000_000_000_000_000, PlayerAction(-1))
-    beta: (int, PlayerAction) = (1_000_000_000_000_000, PlayerAction(-1))
+    alpha: [int, [PlayerAction]] = [-1_000_000_000_000_000, [PlayerAction(-1)]]
+    beta: [int, [PlayerAction]] = [1_000_000_000_000_000, [PlayerAction(-1)]]
     dictio_test_one = defaultdict(dict)
     dictio_test_two = defaultdict(dict)
     if player == PLAYER1:
-        evaluation = minimax_rec(0, depth, board_player_one, board_player_two, player, True, alpha,
-                                 beta, dictio_test_one)  # start maximizing if PLAYER1 is to play
+        evaluation: list[int, [PlayerAction]] = \
+            minimax_rec(0, depth, board_player_one, board_player_two, player, True, alpha,
+                                 beta, dictio_test_one, [])  # start maximizing if PLAYER1 is to play
         #for key in dictio_test_one.keys():
         #    print(dictio_test_one[key], "---", bin(key))
     else:
-        evaluation = minimax_rec(0, depth, board_player_one, board_player_two, player, False, alpha,
-                                 beta, dictio_test_two)  # start minimizing if PLAYER2 is to play
-    return PlayerAction(evaluation[1]), None
+        evaluation: list[int, [PlayerAction]] = \
+            minimax_rec(0, depth, board_player_one, board_player_two, player, False, alpha,
+                                 beta, dictio_test_two, [])  # start minimizing if PLAYER2 is to play
+    print(evaluation[0], " end: ", evaluation[1])
+    return PlayerAction(evaluation[1][-1]), None
 
 
 def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, board_player_two: int,
                 player: BoardPiece,
-                maximize: bool, alpha: (int, PlayerAction), beta: (int, PlayerAction), dictionary: {}) -> (int, PlayerAction):
+                maximize: bool, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {}, moves_line: list[int]) -> list[int, [PlayerAction]]:
     """
     Recursive helper function for generate_move_minimax. Implements the minimax algorithm.
 
@@ -76,27 +79,22 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
     :(int, PlayerAction)
         Tuple of the evaluation after playing the move, which is also returned in this Tuple.
     """
-    # TODO: also return recent moves
     possible_moves: [int] = get_possible_moves(board_player_one, board_player_two, player)
     if not possible_moves:
         current_game_state: GameState = check_end_state(board_player_one, board_player_two, 3-player)  # check for the last player
         if current_game_state == GameState.IS_WIN:
             #switch_negative = int(3-player == 2)  # last player was 2 and won, enable switch for negative value
             #evaluation: int = (-2*switch_negative+1) * int(1_000_000_000_000_000 * 10 ** (-current_depth))
-            #key = create_dictionary_key(board_player_one, board_player_two)
-            #dictionary[key] = evaluation, -1
-            #print("hellooo")
             if player == PLAYER1:
                 evaluation: int = int(-1_000_000_000_000_000 * 10 ** (-current_depth))
             else:
                 evaluation: int = int(1_000_000_000_000_000 * 10 ** (-current_depth))
-            return evaluation, -1
+            return [evaluation, moves_line]
         if current_game_state == GameState.IS_DRAW:
-            return 0, -1
+            return [0, moves_line]
     if current_depth == desired_depth:  #desired depth reached - recursion anchor
         evaluation: int = evaluate_position(board_player_one, board_player_two)
-        return evaluation, -1  # -1 because we do not know the last played move - will be added when closing recursion
-
+        return [evaluation, moves_line]
     if maximize:
         for move in possible_moves:
             new_board_player_one, new_board_player_two = apply_player_action(board_player_one, board_player_two, move,
@@ -104,9 +102,12 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
             try:
                 alpha = dictionary[new_board_player_one][new_board_player_two]
             except KeyError:
-                alpha = max([alpha, (
-                minimax_rec(current_depth + 1, desired_depth, new_board_player_one, new_board_player_two,
-                            BoardPiece(3 - player), not maximize, alpha, beta, dictionary)[0], move)], key=lambda x: x[0])
+                moves_line_new = moves_line.copy()
+                moves_line_new.append(move)
+                recursion_eval = minimax_rec(current_depth + 1, desired_depth, new_board_player_one, new_board_player_two,
+                                             BoardPiece(3 - player), not maximize,
+                                             alpha, beta, dictionary, moves_line_new)
+                alpha = max([alpha, recursion_eval], key=lambda x: x[0])
                 dictionary[new_board_player_one][new_board_player_two] = alpha
             if beta[0] <= alpha[0]:
                 return alpha
@@ -117,9 +118,12 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
             try:
                 beta = dictionary[new_board_player_one][new_board_player_two]
             except KeyError:
-                beta = min([beta, (minimax_rec(current_depth + 1, desired_depth, new_board_player_one, new_board_player_two,
-                                           BoardPiece(3 - player), not maximize, alpha, beta, dictionary)[
-                                   0], move)], key=lambda x: x[0])
+                moves_line_new = moves_line.copy()
+                moves_line_new.append(move)
+                recursion_eval = minimax_rec(current_depth + 1, desired_depth, new_board_player_one, new_board_player_two,
+                                             BoardPiece(3 - player), not maximize,
+                                             alpha, beta, dictionary, moves_line_new)
+                beta = min([beta, recursion_eval], key=lambda x: x[0])
                 dictionary[new_board_player_one][new_board_player_two] = beta
             if beta[0] <= alpha[0]:
                 return beta
