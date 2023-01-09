@@ -1,7 +1,7 @@
 import pytest
 
 from agents.agent_minimax import generate_move_minimax, evaluate_position
-from agents.agent_minimax.minimax import number_of_connected_n
+from agents.agent_minimax.minimax import number_of_connected_n, empty_board_positions
 from agents.game_utils import initialize_game_state, PLAYER1, apply_player_action, PlayerAction, PLAYER2, \
     string_to_board
 
@@ -126,3 +126,13 @@ def test_number_of_connected_n():
     assert ret == 4
 
 
+def test_empty_board_positions():
+    board_1 = 0b0100000_0000000_0000000_0110000_0000000_0100000_0000000
+    board_2 = 0b0000000_0100000_0100000_0000000_0110000_0000000_0100000
+    expected_result = 0b0011111_0011111_0011111_0001111_0001111_0011111_0011111
+
+    assert empty_board_positions(board_1, board_2) == expected_result
+
+
+def test_number_of_possible_4_connected_left():
+    return False

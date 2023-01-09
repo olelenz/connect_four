@@ -106,16 +106,16 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
             new_board_player_one, new_board_player_two = apply_player_action(board_player_one, board_player_two, move,
                                                                              player)
             try:
-                alpha = dictionary[new_board_player_one][new_board_player_two]
+                alpha_new = dictionary[new_board_player_one][new_board_player_two]
             except KeyError:
-                alpha = max([alpha, (
+                alpha_new = max([alpha, (
                 minimax_rec(current_depth + 1, desired_depth, new_board_player_one, new_board_player_two,
                             BoardPiece(3 - player), not maximize, alpha, beta, dictionary, use_mirror)[0], move)], key=lambda x: x[0])
-                dictionary[new_board_player_one][new_board_player_two] = alpha
+                dictionary[new_board_player_one][new_board_player_two] = alpha_new
                 if use_mirror:
-                    add_mirror_to_dictionary(board_player_one, board_player_two, dictionary, alpha)
-            if beta[0] <= alpha[0]:
-                return alpha
+                    add_mirror_to_dictionary(board_player_one, board_player_two, dictionary, alpha_new)
+            if beta[0] <= alpha_new[0]:
+                return alpha_new
     else:
         for move in possible_moves:
             new_board_player_one, new_board_player_two = apply_player_action(board_player_one, board_player_two, move,
@@ -194,3 +194,14 @@ def number_of_connected_n(board: int, connected: int) -> int:
             temp_board = temp_board & (temp_board >> i)
         out += bin(temp_board).count('1')
     return out
+
+
+def number_of_possible_4_connected_left(board_player1: int, board_player2: int) -> int:
+    empty_positions = empty_board_positions(board_player1, board_player2)
+    player1_possible_4connected = number_of_connected_n(empty_positions & board_player1, 4)
+    player2_possible_4connected = number_of_connected_n(empty_positions & board_player2, 4)
+    return player1_possible_4connected - player2_possible_4connected
+
+
+def empty_board_positions(board_player1: int, board_player2: int) -> int:
+    return 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111 - board_player1 - board_player2
