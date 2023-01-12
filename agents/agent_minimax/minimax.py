@@ -205,3 +205,95 @@ def number_of_possible_4_connected_left(board_player1: int, board_player2: int) 
 
 def empty_board_positions(board_player1: int, board_player2: int) -> int:
     return 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111 - board_player1 - board_player2
+
+
+def evaluate_window(positions: [int], board_player1: int, board_player2: int) -> int:
+    """
+
+    Parameters
+    ----------
+    positions: [int]
+        List of positions, represented as a board with a single piece on it.
+    board_player1: int
+        Board of player 1.
+    board_player2: int
+        Board of player 2.
+
+    Returns
+    -------
+
+    """
+    counter_player1: int = 0
+    counter_player2: int = 0
+    for position in positions:  # count player pieces in the window
+        if (position & board_player1) > 0:
+            counter_player1 += 1
+        elif (position & board_player2) > 0:
+            counter_player2 += 1
+    # return 0 if both player have pieces in the window, or both have none
+    if (counter_player1 > 0 and counter_player2 > 0) or counter_player1 == counter_player2:
+        return 0
+    # putting more weight on 3 pieces in a window
+    if counter_player1 == 3:
+        return 10
+    elif counter_player2 == 3:
+        return -10
+    return counter_player1 - counter_player2
+
+
+def list_windows() -> [(int, int, int, int)]:
+    """
+
+    Returns
+    -------
+    [int]:
+        List of 69 possible 4-in-a-row windows as tuples.
+        24 horizontal, 21 vertical, 12 diagonal-up, 12 diagonal-down
+    """
+    # 0b0000000_0000000_0000000_0000000_0000000_0000000_0000001 for reference
+    result: [(int, int, int, int)] = []
+
+    # horizontal windows
+    for column_offset in range(4):
+        for row_offset in range(6):
+            result += [(1 << (47+column_offset+row_offset), 1 << (40+column_offset+row_offset),
+                       1 << (33+column_offset+row_offset), 1 << (26+column_offset+row_offset))]
+
+    # vertical windows
+    for column_offset in range(7):
+        for row_offset in range(3):
+            result += [(1 << (47+column_offset+row_offset), 1 << (46+column_offset+row_offset),
+                       1 << (45+column_offset+row_offset), 1 << (44+column_offset+row_offset))]
+
+    # diagonal-up windows
+    for position in [47, 46, 45, 40, 39, 38, 33, 32, 31, 26, 25, 24]:
+        result += [(1 << position, 1 << (position-8), 1 << (position-16), 1 << (position-24))]
+
+    # diagonal-down window
+    for position in [42, 43, 44, 35, 36, 37, 28, 29, 30, 21, 22, 23]:
+        result += [(1 << position, 1 << (position - 6), 1 << (position - 12), 1 << (position - 18))]
+
+    return result
+
+
+def evaluate_board_using_windows(board_player1: int, board_player2: int) -> int:
+    """
+
+    Parameters
+    ----------
+    board_player1: int
+        Board of player 1.
+    board_player2: int
+        Board of player 2.
+
+    Returns
+    -------
+    :int
+        Evaluation of the board.
+
+    """
+    board_score = 0
+    for window in list_windows():
+        board_score += evaluate_window(window, board_player1, board_player2)
+    return board_score
+
