@@ -207,7 +207,7 @@ def empty_board_positions(board_player1: int, board_player2: int) -> int:
     return 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111 - board_player1 - board_player2
 
 
-def evaluate_window(positions: [int], board_player1: int, board_player2: int) -> int:
+def evaluate_window(positions: [(int, int, int, int)], board_player1: int, board_player2: int) -> int:
     """
 
     Parameters
