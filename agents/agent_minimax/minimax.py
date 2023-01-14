@@ -209,6 +209,8 @@ def empty_board_positions(board_player1: int, board_player2: int) -> int:
 
 def evaluate_window(positions: [(int, int, int, int)], board_player1: int, board_player2: int) -> int:
     """
+    Evaluates a single window, with emphasis on having 3 in a window and/or not sharing a window with pieces of the
+    other player. Does not check for 4-connect as its checked elsewhere.
 
     Parameters
     ----------
@@ -221,7 +223,8 @@ def evaluate_window(positions: [(int, int, int, int)], board_player1: int, board
 
     Returns
     -------
-
+    :int
+        Score of the window
     """
     counter_player1: int = 0
     counter_player2: int = 0
@@ -243,6 +246,7 @@ def evaluate_window(positions: [(int, int, int, int)], board_player1: int, board
 
 def list_windows() -> [(int, int, int, int)]:
     """
+    Builds windows that are represented as board with a single piece (1) by shifting the number 1 in different amounts.
 
     Returns
     -------
@@ -256,14 +260,14 @@ def list_windows() -> [(int, int, int, int)]:
     # horizontal windows
     for column_offset in range(4):
         for row_offset in range(6):
-            result += [(1 << (47+column_offset+row_offset), 1 << (40+column_offset+row_offset),
-                       1 << (33+column_offset+row_offset), 1 << (26+column_offset+row_offset))]
+            result += [(1 << (47-7*column_offset-row_offset), 1 << (40-7*column_offset-row_offset),
+                       1 << (33-7*column_offset-row_offset), 1 << (26-7*column_offset-row_offset))]
 
     # vertical windows
     for column_offset in range(7):
         for row_offset in range(3):
-            result += [(1 << (47+column_offset+row_offset), 1 << (46+column_offset+row_offset),
-                       1 << (45+column_offset+row_offset), 1 << (44+column_offset+row_offset))]
+            result += [(1 << (47-7*column_offset-row_offset), 1 << (46-7*column_offset-row_offset),
+                       1 << (45-7*column_offset-row_offset), 1 << (44-7*column_offset-row_offset))]
 
     # diagonal-up windows
     for position in [47, 46, 45, 40, 39, 38, 33, 32, 31, 26, 25, 24]:
@@ -278,6 +282,7 @@ def list_windows() -> [(int, int, int, int)]:
 
 def evaluate_board_using_windows(board_player1: int, board_player2: int) -> int:
     """
+    Evaluates the board and returns a score.
 
     Parameters
     ----------

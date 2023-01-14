@@ -1,7 +1,7 @@
 import pytest
 
 from agents.agent_minimax import generate_move_minimax, evaluate_position
-from agents.agent_minimax.minimax import number_of_connected_n, empty_board_positions
+from agents.agent_minimax.minimax import number_of_connected_n, empty_board_positions, evaluate_board_using_windows, list_windows, evaluate_window
 from agents.game_utils import initialize_game_state, PLAYER1, apply_player_action, PlayerAction, PLAYER2, \
     string_to_board
 
@@ -134,5 +134,49 @@ def test_empty_board_positions():
     assert empty_board_positions(board_1, board_2) == expected_result
 
 
-def test_number_of_possible_4_connected_left():
-    return False
+def test_evaluate_board_using_windows1():
+    board_1 = 0b0100000_0000000_0000000_0000000_0000000_0000000_0000000
+    board_2 = 0b0000000_0000000_0000000_0000000_0000000_0000000_0100000
+    res = evaluate_board_using_windows(board_1, board_2)
+    assert res == 0
+
+
+def test_evaluate_board_using_windows2():
+    board_1 = 0b0100000_0000000_0000000_0000000_0000000_0000000_0000000
+    board_2 = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
+    res = evaluate_board_using_windows(board_1, board_2)
+    assert res == 3
+
+
+def test_evaluate_board_using_windows3():
+    board_1 = 0b0111000_0000000_0000000_0000000_0000000_0000000_0000000  # 10 2 1 1 1 1 1 1 1 = 19 points
+    board_2 = 0b0000000_0000000_0000000_0000000_0000000_0000000_0100000  # 3 points (negative)
+    res = evaluate_board_using_windows(board_1, board_2)
+    assert res == 16
+
+
+def test_list_windows():
+    res = list_windows()
+    assert len(res) == 69
+
+
+def test_evaluate_window():
+    window_position1 = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000001
+    window_position2 = 0b0000000_0000000_0000000_0000000_0000000_0000001_0000000
+    window_position3 = 0b0000000_0000000_0000000_0000000_0000001_0000000_0000000
+    window_position4 = 0b0000000_0000000_0000000_0000001_0000000_0000000_0000000
+    board_player1 = 0b0100000_0000000_0000000_0000000_0000000_0000000_0000000
+    board_player2 = 0b0000000_0100000_0000000_0000000_0000000_0000000_0000000
+    res = evaluate_window((window_position1, window_position2, window_position3, window_position4), board_player1, board_player2)
+    assert res == 0
+
+    board_player2 = 0b0000000_0100000_0000000_0000000_0000000_0000001_0000001
+    res = evaluate_window((window_position1, window_position2, window_position3, window_position4), board_player1, board_player2)
+    assert res == -2
+
+    board_player2 = 0b0000000_0100000_0000000_0000000_0000001_0000001_0000001
+    res = evaluate_window((window_position1, window_position2, window_position3, window_position4), board_player1, board_player2)
+    assert res == -10
+
+
+
