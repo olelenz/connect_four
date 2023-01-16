@@ -32,6 +32,7 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
     :Tuple[PlayerAction, Optional[SavedState]]
         Tuple containing the move to play and the saved state.
     """
+
     alpha: [int, [PlayerAction]] = [-1_000_000_000_000_000, [PlayerAction(-1)]]
     beta: [int, [PlayerAction]] = [1_000_000_000_000_000, [PlayerAction(-1)]]
     #dictio_test_one = defaultdict(dict)
@@ -53,10 +54,12 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
         #        print(pretty_print_board(key, key_two),dictio_test_two[key][key_two])
     print(evaluation[0], " end: ", evaluation[1])
     return PlayerAction(evaluation[1][0]), None
+  
 
 
 def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, board_player_two: int,
                 player: BoardPiece,
+
                 maximize: bool, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {}, moves_line: list[int]) -> list[int, [PlayerAction]]:
     """
     Recursive helper function for generate_move_minimax. Implements the minimax algorithm.
@@ -81,6 +84,8 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
         Initial beta value (very big) for alpha beta pruning and initial PlayerAction to be overwritten.
     dictionary: {}
         Transposition table
+    use_mirror: bool
+        Determines if mirror functions will be used for dictionary
     Returns
     -------
     :(int, PlayerAction)
@@ -215,3 +220,111 @@ def number_of_connected_n(board: int, connected: int) -> int:
             temp_board = temp_board & (temp_board >> i)
         out += bin(temp_board).count('1')
     return out
+
+
+def number_of_possible_4_connected_left(board_player1: int, board_player2: int) -> int:
+    empty_positions = empty_board_positions(board_player1, board_player2)
+    player1_possible_4connected = number_of_connected_n(empty_positions & board_player1, 4)
+    player2_possible_4connected = number_of_connected_n(empty_positions & board_player2, 4)
+    return player1_possible_4connected - player2_possible_4connected
+
+
+def empty_board_positions(board_player1: int, board_player2: int) -> int:
+    return 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111 - board_player1 - board_player2
+
+
+def evaluate_window(positions: [(int, int, int, int)], board_player1: int, board_player2: int) -> int:
+    """
+    Evaluates a single window, with emphasis on having 3 in a window and/or not sharing a window with pieces of the
+    other player. Does not check for 4-connect as its checked elsewhere.
+
+    Parameters
+    ----------
+    positions: [int]
+        List of positions, represented as a board with a single piece on it.
+    board_player1: int
+        Board of player 1.
+    board_player2: int
+        Board of player 2.
+
+    Returns
+    -------
+    :int
+        Score of the window
+    """
+    counter_player1: int = 0
+    counter_player2: int = 0
+    for position in positions:  # count player pieces in the window
+        if (position & board_player1) > 0:
+            counter_player1 += 1
+        elif (position & board_player2) > 0:
+            counter_player2 += 1
+    # return 0 if both player have pieces in the window, or both have none
+    if (counter_player1 > 0 and counter_player2 > 0) or counter_player1 == counter_player2:
+        return 0
+    # putting more weight on 3 pieces in a window
+    if counter_player1 == 3:
+        return 10
+    elif counter_player2 == 3:
+        return -10
+    return counter_player1 - counter_player2
+
+
+def list_windows() -> [(int, int, int, int)]:
+    """
+    Builds windows that are represented as board with a single piece (1) by shifting the number 1 in different amounts.
+
+    Returns
+    -------
+    [int]:
+        List of 69 possible 4-in-a-row windows as tuples.
+        24 horizontal, 21 vertical, 12 diagonal-up, 12 diagonal-down
+    """
+    # 0b0000000_0000000_0000000_0000000_0000000_0000000_0000001 for reference
+    result: [(int, int, int, int)] = []
+
+    # horizontal windows
+    for column_offset in range(4):
+        for row_offset in range(6):
+            result += [(1 << (47-7*column_offset-row_offset), 1 << (40-7*column_offset-row_offset),
+                       1 << (33-7*column_offset-row_offset), 1 << (26-7*column_offset-row_offset))]
+
+    # vertical windows
+    for column_offset in range(7):
+        for row_offset in range(3):
+            result += [(1 << (47-7*column_offset-row_offset), 1 << (46-7*column_offset-row_offset),
+                       1 << (45-7*column_offset-row_offset), 1 << (44-7*column_offset-row_offset))]
+
+    # diagonal-up windows
+    for position in [47, 46, 45, 40, 39, 38, 33, 32, 31, 26, 25, 24]:
+        result += [(1 << position, 1 << (position-8), 1 << (position-16), 1 << (position-24))]
+
+    # diagonal-down window
+    for position in [42, 43, 44, 35, 36, 37, 28, 29, 30, 21, 22, 23]:
+        result += [(1 << position, 1 << (position - 6), 1 << (position - 12), 1 << (position - 18))]
+
+    return result
+
+
+def evaluate_board_using_windows(board_player1: int, board_player2: int) -> int:
+    """
+    Evaluates the board and returns a score.
+
+    Parameters
+    ----------
+    board_player1: int
+        Board of player 1.
+    board_player2: int
+        Board of player 2.
+
+    Returns
+    -------
+    :int
+        Evaluation of the board.
+
+    """
+    board_score = 0
+    for window in list_windows():
+        board_score += evaluate_window(window, board_player1, board_player2)
+    return board_score
+

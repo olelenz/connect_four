@@ -274,25 +274,6 @@ def get_possible_moves(board_player_one: int, board_player_two: int, player: Boa
     return out
 
 
-def create_dictionary_key(board_player_one: int, board_player_two: int) -> int:
-    """
-
-    Parameters
-    ----------
-    board_player_one: int
-        Board PLAYER1.
-
-    board_player_two: int
-        Board PLAYER2.
-
-    Returns
-    -------
-    :int
-        Key for the dictionary
-    """
-    return (board_player_one << 49) | board_player_two
-
-
 def mirror_board(board_player1: int, board_player2: int) -> tuple[int, int]:
     """
     Mirrors the board by mirroring both player's board string
@@ -327,13 +308,14 @@ def mirror_player_board(player_board) -> int:
     int:
         The mirrored board
     """
-    new_board = 0b1111111_0000000_0000000_0000000_0000000_0000000_0000000 & (player_board << 42)
-    + 0b0000000_1111111_0000000_0000000_0000000_0000000_0000000 & (player_board << 28)
-    + 0b0000000_0000000_1111111_0000000_0000000_0000000_0000000 & (player_board << 14)
-    + 0b0000000_0000000_0000000_1111111_0000000_0000000_0000000 & player_board
-    + 0b0000000_0000000_0000000_0000000_1111111_0000000_0000000 & (player_board >> 14)
-    + 0b0000000_0000000_0000000_0000000_0000000_1111111_0000000 & (player_board >> 28)
-    + 0b0000000_0000000_0000000_0000000_0000000_0000000_1111111 & (player_board >> 42)
+    row1 = 0b0111111_0000000_0000000_0000000_0000000_0000000_0000000 & (player_board << 42)
+    row2 = 0b0000000_0111111_0000000_0000000_0000000_0000000_0000000 & (player_board << 28)
+    row3 = 0b0000000_0000000_0111111_0000000_0000000_0000000_0000000 & (player_board << 14)
+    row4 = 0b0000000_0000000_0000000_0111111_0000000_0000000_0000000 & player_board
+    row5 = 0b0000000_0000000_0000000_0000000_0111111_0000000_0000000 & (player_board >> 14)
+    row6 = 0b0000000_0000000_0000000_0000000_0000000_0111111_0000000 & (player_board >> 28)
+    row7 = 0b0000000_0000000_0000000_0000000_0000000_0000000_0111111 & (player_board >> 42)
+    new_board = row1 | row2 | row3 | row4 | row5 | row6 | row7
     return new_board
 
 
@@ -354,8 +336,7 @@ def add_mirror_to_dictionary(board_player1: int, board_player2: int, dictionary:
 
     """
     mirror_board_player1, mirror_board_player2 = mirror_board(board_player1, board_player2)
-    mirror_key = create_dictionary_key(mirror_board_player1, mirror_board_player2)
-    dictionary[mirror_key] = alpha_beta
+    dictionary[mirror_board_player1][mirror_board_player2] = alpha_beta
 
 
 def is_mirror_possible(board_player1: int, board_player2: int) -> bool:
