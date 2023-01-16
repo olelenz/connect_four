@@ -136,6 +136,7 @@ def test_number_of_connected_n():
     ret = number_of_connected_n(board, 1)
     assert ret == 4
 
+
 def test_evaluate_position():
     board_player_one = 0b0000000_0000000_0100000_0000000_0000000_0000000_0000000
     board_player_two = 0b0011111_0011111_0011111_0011111_0011111_0011111_0011111
