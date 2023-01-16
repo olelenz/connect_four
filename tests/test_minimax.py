@@ -3,7 +3,7 @@ import pytest
 from agents.agent_minimax import generate_move_minimax, evaluate_position
 from agents.agent_minimax.minimax import number_of_connected_n, empty_board_positions, evaluate_board_using_windows, list_windows, evaluate_window
 from agents.game_utils import initialize_game_state, PLAYER1, apply_player_action, PlayerAction, PLAYER2, \
-    string_to_board
+    string_to_board, pretty_print_board
 
 
 def test_run_all():
@@ -44,19 +44,30 @@ def test_evaluate_position():
     assert ret == 0
 
 
-def test_player2_start():  # TODO: change to binary
-    board = initialize_game_state()
-    ret = generate_move_minimax(board, PLAYER2, None, 4)
+def test_minimax_player_two_start():
+    board_player_one = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
+    board_player_two = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
 
+    ret = generate_move_minimax(board_player_one, board_player_two, PLAYER2, None, 10)
     assert isinstance(ret[0], PlayerAction)
     assert ret[0] in [0, 1, 2, 3, 4, 5, 6]
+
+
+def test_avoid_loss_transposition_table():
+    board_player_one = 0b0000000_0000000_0011100_0010001_0001011_0001011_0000000
+    board_player_two = 0b0000000_0000001_0000011_0001110_0010100_0000100_0000001
+    print(pretty_print_board(board_player_one, board_player_two))
+
+    ret = generate_move_minimax(board_player_one, board_player_two, PLAYER2, None, 21)
+    assert isinstance(ret[0], PlayerAction)
+    assert ret[0] == 4
 
 
 def test_win_in_one_move():
     board_player_one = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
     board_player_two = 0b0000000_0000000_0000000_0000000_0000111_0000000_0000000
 
-    ret = generate_move_minimax(board_player_one, board_player_two, PLAYER2, None, 1)
+    ret = generate_move_minimax(board_player_one, board_player_two, PLAYER2, None, 2)
     assert isinstance(ret[0], PlayerAction)
     assert ret[0] == 2
 
@@ -125,6 +136,13 @@ def test_number_of_connected_n():
     ret = number_of_connected_n(board, 1)
     assert ret == 4
 
+def test_evaluate_position():
+    board_player_one = 0b0000000_0000000_0100000_0000000_0000000_0000000_0000000
+    board_player_two = 0b0011111_0011111_0011111_0011111_0011111_0011111_0011111
+    ret = evaluate_position(board_player_one, board_player_two)
+    assert isinstance(ret, int)
+    assert ret == 4
+
 
 def test_empty_board_positions():
     board_1 = 0b0100000_0000000_0000000_0110000_0000000_0100000_0000000
@@ -177,6 +195,3 @@ def test_evaluate_window():
     board_player2 = 0b0000000_0100000_0000000_0000000_0000001_0000001_0000001
     res = evaluate_window((window_position1, window_position2, window_position3, window_position4), board_player1, board_player2)
     assert res == -10
-
-
-
