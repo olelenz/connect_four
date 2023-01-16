@@ -11,7 +11,7 @@ FULL_BOARD: int = 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111
 
 
 def generate_move_minimax(board_player_one: int, board_player_two: int, player: BoardPiece,
-                          saved_state: Optional[SavedState], depth: int = 6) -> Tuple[
+                          saved_state: Optional[SavedState], depth: int = 7) -> Tuple[
     PlayerAction, Optional[SavedState]]:
     """
     Generates the next move using the minimax algorithm.
@@ -93,9 +93,9 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
             #switch_negative = int(3-player == 2)  # last player was 2 and won, enable switch for negative value
             #evaluation: int = (-2*switch_negative+1) * int(1_000_000_000_000_000 * 10 ** (-current_depth))
             if player == PLAYER1:
-                evaluation: int = int(-1_000_000_000_000_000 * 10 ** (-current_depth))
+                evaluation: int = int(-1_000_000_000_000_000_000 * 2 ** (-current_depth))
             else:
-                evaluation: int = int(1_000_000_000_000_000 * 10 ** (-current_depth))
+                evaluation: int = int(1_000_000_000_000_000_000 * 2 ** (-current_depth))
             #print(pretty_print_board(board_player_one, board_player_two), evaluation, player, moves_line)
             return [evaluation, moves_line]
         if current_game_state == GameState.IS_DRAW:
