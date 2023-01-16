@@ -56,7 +56,6 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
     return PlayerAction(evaluation[1][0]), None
   
 
-
 def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, board_player_two: int,
                 player: BoardPiece,
 
@@ -106,7 +105,8 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
         if current_game_state == GameState.IS_DRAW:
             return [0, moves_line]
     if current_depth == desired_depth:  #desired depth reached - recursion anchor
-        evaluation: int = evaluate_position(board_player_one, board_player_two)
+        # evaluation: int = evaluate_position(board_player_one, board_player_two)
+        evaluation: int = evaluate_board_using_windows(board_player_one, board_player_two)
         return [evaluation, moves_line]
     if maximize:
         for move in possible_moves:
