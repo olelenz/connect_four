@@ -1,7 +1,8 @@
 import pytest
 
 from agents.agent_minimax import generate_move_minimax, evaluate_position
-from agents.agent_minimax.minimax import number_of_connected_n, empty_board_positions, evaluate_board_using_windows, list_windows, evaluate_window
+from agents.agent_minimax.minimax import number_of_connected_n, empty_board_positions, evaluate_board_using_windows, \
+    list_windows, evaluate_window
 from agents.game_utils import initialize_game_state, PLAYER1, apply_player_action, PlayerAction, PLAYER2, \
     string_to_board, pretty_print_board
 
@@ -31,14 +32,17 @@ def test_evaluate_position():
     assert isinstance(ret, int)
     assert ret == 0
 
-    board_player_one, board_player_two = apply_player_action(board_player_one, board_player_two, PlayerAction(0), PLAYER1)
+    board_player_one, board_player_two = apply_player_action(board_player_one, board_player_two, PlayerAction(0),
+                                                             PLAYER1)
     ret = evaluate_position(board_player_one, board_player_two)
 
     assert ret == 0
 
     board_player_one, board_player_two = initialize_game_state()
-    board_player_one, board_player_two = apply_player_action(board_player_one, board_player_two, PlayerAction(3), PLAYER1)
-    board_player_one, board_player_two = apply_player_action(board_player_one, board_player_two, PlayerAction(4), PLAYER2)
+    board_player_one, board_player_two = apply_player_action(board_player_one, board_player_two, PlayerAction(3),
+                                                             PLAYER1)
+    board_player_one, board_player_two = apply_player_action(board_player_one, board_player_two, PlayerAction(4),
+                                                             PLAYER2)
     ret = evaluate_position(board_player_one, board_player_two)
 
     assert ret == 0
@@ -61,6 +65,15 @@ def test_avoid_loss_transposition_table():
     ret = generate_move_minimax(board_player_one, board_player_two, PLAYER2, None, 21)
     assert isinstance(ret[0], PlayerAction)
     assert ret[0] == 4
+
+
+def test_play_valid_move():
+    board_player_one = 0b101010101101101100010101000000100010000000110
+    board_player_two = 0b11010001010000010010101010000000001101110001001
+
+    ret = generate_move_minimax(board_player_one, board_player_two, PLAYER2, None, 21)
+    assert isinstance(ret[0], PlayerAction)
+    assert ret[0] in [0, 1, 2, 3, 4, 5, 6]
 
 
 def test_win_in_one_move():
@@ -186,13 +199,16 @@ def test_evaluate_window():
     window_position4 = 0b0000000_0000000_0000000_0000001_0000000_0000000_0000000
     board_player1 = 0b0100000_0000000_0000000_0000000_0000000_0000000_0000000
     board_player2 = 0b0000000_0100000_0000000_0000000_0000000_0000000_0000000
-    res = evaluate_window((window_position1, window_position2, window_position3, window_position4), board_player1, board_player2)
+    res = evaluate_window((window_position1, window_position2, window_position3, window_position4), board_player1,
+                          board_player2)
     assert res == 0
 
     board_player2 = 0b0000000_0100000_0000000_0000000_0000000_0000001_0000001
-    res = evaluate_window((window_position1, window_position2, window_position3, window_position4), board_player1, board_player2)
+    res = evaluate_window((window_position1, window_position2, window_position3, window_position4), board_player1,
+                          board_player2)
     assert res == -2
 
     board_player2 = 0b0000000_0100000_0000000_0000000_0000001_0000001_0000001
-    res = evaluate_window((window_position1, window_position2, window_position3, window_position4), board_player1, board_player2)
+    res = evaluate_window((window_position1, window_position2, window_position3, window_position4), board_player1,
+                          board_player2)
     assert res == -10

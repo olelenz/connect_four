@@ -239,7 +239,7 @@ def check_end_state(board_player_one: int, board_player_two: int, player: BoardP
     return GameState.STILL_PLAYING
 
 
-def get_possible_moves(board_player_one: int, board_player_two: int, player: BoardPiece) -> [PlayerAction]:
+def get_possible_moves(board_player_one: int, board_player_two: int, player: BoardPiece, next_move: int = 3) -> [PlayerAction]:
     """
     Calculates all possible moves from a give board-position.
 
@@ -267,7 +267,9 @@ def get_possible_moves(board_player_one: int, board_player_two: int, player: Boa
         if connected_four(board_player_two):
             return []
     board_full = board_player_one | board_player_two
+    #out: [PlayerAction] = [*set([next_move] + [3, 2, 4, 1, 5, 0, 6])]
     out: [PlayerAction] = [3, 2, 4, 1, 5, 0, 6]
+    out.insert(0, out.pop(out.index(next_move)))
     for i in [3, 2, 4, 1, 5, 0, 6]:
         if board_full & (1 << (i * 7 + 5)):
             out.remove(i)
