@@ -103,22 +103,40 @@ def test_check_end_state():
     board_p1 = 0b0000000_0000000_0000000_0000000_0000001_0000000_0000000
     board_p2 = 0b0000000_0000000_0000000_0000000_0000000_0000001_0000000
 
-    ret = check_end_state(board_p1, board_p1 | board_p2)
+    ret = check_end_state(board_p1, board_p2, PLAYER1)
 
     assert isinstance(ret, GameState)
     assert ret == GameState.STILL_PLAYING
 
     board_p1 = 0b0000000_0000000_0000000_0000000_0001111_0000000_0000000
 
-    ret = check_end_state(board_p1, board_p1 | board_p2)
+    ret = check_end_state(board_p1, board_p2, PLAYER1)
 
     assert isinstance(ret, GameState)
     assert ret == GameState.IS_WIN
 
-    board_p1 = 0b0100000_0000000_0100000_0000000_0100000_0000000_0100000
-    board_p2 = 0b0000000_0100000_0000000_0100000_0000000_0100000_0000000
+    board_p1 = 0b0101011_0101011_0111000_0010101_0010100_0100010_0101001
+    board_p2 = 0b0010100_0010100_0000111_0101010_0101011_0011101_0010110
 
-    ret = check_end_state(board_p1, board_p1 | board_p2)
+    ret = check_end_state(board_p1, board_p2, PLAYER1)
+
+    assert isinstance(ret, GameState)
+    assert ret == GameState.IS_DRAW
+
+
+def test_check_end_state_still_playing():
+    board_p1 = 0b0000000_0000000_0000000_0011101_0000011_0000000_0000000
+    board_p2 = 0b0000001_0000000_0000011_0100010_0000100_0000000_0000000
+    ret = check_end_state(board_p1, board_p2, PLAYER1)
+
+    assert isinstance(ret, GameState)
+    assert ret == GameState.STILL_PLAYING
+
+
+def test_check_end_state_draw():
+    board_p1 = 0b0001010_0010101_0111011_0101110_0000100_0010100_0100011
+    board_p2 = 0b0110101_0101010_0000100_0010001_0111011_0101011_0011100
+    ret = check_end_state(board_p1, board_p2, PLAYER1)
 
     assert isinstance(ret, GameState)
     assert ret == GameState.IS_DRAW
@@ -127,25 +145,25 @@ def test_check_end_state():
 def test_get_possible_moves():
     board_p1 = 0b0100000_0000000_0100000_0000000_0100000_0000000_0100000
     board_p2 = 0b0000000_0100000_0000000_0100000_0000000_0100000_0000000
-    ret = get_possible_moves(board_p1, board_p2)
+    ret = get_possible_moves(board_p1, board_p2, PLAYER1)
 
     assert ret == []
 
     board_p1 = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
     board_p2 = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
 
-    ret = get_possible_moves(board_p1, board_p2)
+    ret = get_possible_moves(board_p1, board_p2, PLAYER1)
     assert ret == [3, 2, 4, 1, 5, 0, 6]
 
     board_p1 = 0b0000000_0000000_0000000_0000111_0000000_0000000_0000000
     board_p2 = 0b0000000_0000000_0000000_0111000_0000000_0000000_0000000
 
-    ret = get_possible_moves(board_p1, board_p2)
+    ret = get_possible_moves(board_p1, board_p2, PLAYER1)
 
     assert ret == [2, 4, 1, 5, 0, 6]
 
     board_p1 = 0b0000000_0000000_0000000_0000111_0001111_0000000_0000000
 
-    ret = get_possible_moves(board_p1, board_p2)
+    ret = get_possible_moves(board_p1, board_p2, PLAYER2)
     assert ret == []
 

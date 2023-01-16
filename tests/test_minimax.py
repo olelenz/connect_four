@@ -10,8 +10,6 @@ def test_run_all():
     test_generate_move()
     test_evaluate_position()
     test_player2_start()
-    test_evaluate_winning_position_1()
-    test_evaluate_winning_position_2()
     test_win_in_one_move()
     test_prevent_opponent_win()
     test_win_in_two_moves()
@@ -54,49 +52,42 @@ def test_player2_start():  # TODO: change to binary
     assert ret[0] in [0, 1, 2, 3, 4, 5, 6]
 
 
-def test_evaluate_winning_position_1():  # TODO: change to binary
-    board = initialize_game_state()
-    board[0, 0:4] = PLAYER1
-    ret = evaluate_position(board)
+def test_win_in_one_move():
+    board_player_one = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
+    board_player_two = 0b0000000_0000000_0000000_0000000_0000111_0000000_0000000
 
-    assert isinstance(ret, int)
-    assert ret == 1_000_000_000_000
-
-
-def test_evaluate_winning_position_2():  # TODO: change to binary
-    board = initialize_game_state()
-    board[0, 0:4] = PLAYER2
-    ret = evaluate_position(board)
-
-    assert isinstance(ret, int)
-    assert ret == -1_000_000_000_000
-
-
-def test_win_in_one_move():  # TODO: change to binary
-    board = initialize_game_state()
-    board[0, 0:3] = PLAYER2
-
-    ret = generate_move_minimax(board, PLAYER2, None, 1)
+    ret = generate_move_minimax(board_player_one, board_player_two, PLAYER2, None, 1)
     assert isinstance(ret[0], PlayerAction)
-    assert ret[0] == 3
+    assert ret[0] == 2
 
 
-def test_prevent_opponent_win():  # TODO: change to binary
-    board = initialize_game_state()
-    board[0, 1:4] = PLAYER1
-    board[0, 0] = PLAYER2
+def test_prevent_opponent_win():
+    board_player_one = 0b0000000_0000000_0000000_0000001_0000001_0000001_0000000
+    board_player_two = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000001
+    #1000000_0000000_0000000_0000000_0000000_0000000_0000001
 
-    ret = generate_move_minimax(board, PLAYER2, None, 2)
+    ret = generate_move_minimax(board_player_one, board_player_two, PLAYER2, None, 2)
     assert isinstance(ret[0], PlayerAction)
     assert ret[0] == 4
 
 
-def test_win_in_two_moves():  # TODO: change to binary
-    board = initialize_game_state()
-    board[0, 1] = PLAYER2
-    board[0, 3] = PLAYER2
+def test_prevent_opponent_win_two():
+    board_player_one = 0b0000000_0000000_0000000_0110101_0000001_0000000_0000000
+    board_player_one = 0b110101_0000001_0000000_0000000
 
-    ret = generate_move_minimax(board, PLAYER2, None, 3)
+    board_player_two = 0b0000000_0000111_0000000_0001010_0000000_0000000_0000000
+    board_player_two = 0b11100000000001010000000000000000000000
+
+    ret = generate_move_minimax(board_player_one, board_player_two, PLAYER1, None, 7)
+    assert isinstance(ret[0], PlayerAction)
+    assert ret[0] == 5
+
+
+def test_win_in_two_moves():
+    board_player_one = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
+    board_player_two = 0b0000000_0000000_0000000_0000001_0000000_0000001_0000000
+
+    ret = generate_move_minimax(board_player_one, board_player_two, PLAYER2, None, 3)
     assert isinstance(ret[0], PlayerAction)
     assert ret[0] == 2
 

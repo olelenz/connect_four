@@ -25,7 +25,7 @@ class GameState(Enum):
 
 
 GenMove = Callable[
-    [np.ndarray, BoardPiece, Optional[SavedState]],  # Arguments for the generate_move function
+    [int, int, BoardPiece, Optional[SavedState]],  # Arguments for the generate_move function
     tuple[PlayerAction, Optional[SavedState]]  # Return type of the generate_move function
 ]
 
@@ -206,7 +206,7 @@ def connected_four(board: int) -> bool:
     return False
 
 
-def check_end_state(board: int, board_all_pieces: int) -> GameState:
+def check_end_state(board_player_one: int, board_player_two: int, player: BoardPiece) -> GameState:
     """
     Returns the current game state for the current `player`, i.e. has their last
     action won (GameState.IS_WIN) or drawn (GameState.IS_DRAW) the game,
@@ -214,26 +214,32 @@ def check_end_state(board: int, board_all_pieces: int) -> GameState:
 
     Parameters
     ----------
-    board: int
-        The board to check the end state on.
+    board_player_one: int
+        Board PLAYER1.
 
-    board_all_pieces: int
-        The board containing all pieces to check the draw on.
+    board_player_two: int
+        Board PLAYER2.
+
+    player: BoardPiece
+        The player to check the state.
 
     Returns
     ----------
     :GameState
         The current game-state - either IS_WIN, IS_DRAW or STILL_PLAYING.
     """
-
-    if connected_four(board):
-        return GameState.IS_WIN
-    if board_all_pieces & 0b0100000_0100000_0100000_0100000_0100000_0100000_0100000:
+    if player == PLAYER1:
+        if connected_four(board_player_one):
+            return GameState.IS_WIN
+    else:
+        if connected_four(board_player_two):
+            return GameState.IS_WIN
+    if board_player_one | board_player_two == 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111:
         return GameState.IS_DRAW
     return GameState.STILL_PLAYING
 
 
-def get_possible_moves(board_player_one: int, board_player_two: int) -> [PlayerAction]:
+def get_possible_moves(board_player_one: int, board_player_two: int, player: BoardPiece) -> [PlayerAction]:
     """
     Calculates all possible moves from a give board-position.
 
@@ -245,15 +251,21 @@ def get_possible_moves(board_player_one: int, board_player_two: int) -> [PlayerA
     board_player_two: int
         Board PLAYER2.
 
+    player : BoardPiece
+        The player which wants to make a move.
+
     Returns
     -------
     :[PlayerAction]
         A list containing all possible moves.
 
     """
-    if connected_four(board_player_one) or connected_four(board_player_two):  # no moves are possible if either player
-        # has already won
-        return []
+    if player == PLAYER2:  # no moves are possible if either player has already won
+        if connected_four(board_player_one):
+            return []
+    else:
+        if connected_four(board_player_two):
+            return []
     board_full = board_player_one | board_player_two
     out: [PlayerAction] = [3, 2, 4, 1, 5, 0, 6]
     for i in [3, 2, 4, 1, 5, 0, 6]:
@@ -278,7 +290,7 @@ def create_dictionary_key(board_player_one: int, board_player_two: int) -> int:
     :int
         Key for the dictionary
     """
-    return (board_player_one << 49) + board_player_two
+    return (board_player_one << 49) | board_player_two
 
 
 def mirror_board(board_player1: int, board_player2: int) -> tuple[int, int]:

@@ -43,9 +43,10 @@ def human_vs_agent(
                 action, saved_state[player] = gen_move(
                     board_player_one, board_player_two, player, saved_state[player], *args
                 )
+                print(bin(board_player_one), " --- ", bin(board_player_two), " --- ", player, " --- ", action)
                 print(f"Move time: {time.time() - t0:.3f}s for move {action}")
                 board_player_one, board_player_two = apply_player_action(board_player_one, board_player_two, action, player)
-                end_state = check_end_state(board_player_one, board_player_two)
+                end_state = check_end_state(board_player_one, board_player_two, player)
                 if end_state != GameState.STILL_PLAYING:
                     print(pretty_print_board(board_player_one, board_player_two))
                     if end_state == GameState.IS_DRAW:
