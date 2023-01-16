@@ -2,6 +2,7 @@ import pytest
 
 from agents.game_utils import *
 import numpy as np
+from collections import defaultdict
 
 
 def test_run_all():
@@ -167,3 +168,40 @@ def test_get_possible_moves():
     ret = get_possible_moves(board_p1, board_p2, PLAYER2)
     assert ret == []
 
+
+def test_mirror_board():
+    board1 = 0b0000000_0111111_0001000_0000000_0000000_0000000_0111111
+    board2 = 0b0111111_0000000_0000000_0000000_0001000_0111111_0000000
+    assert mirror_board(board1, board2) == (board2, board1)
+
+
+def test_mirror_player_board():
+    board1 = 0b0000000_0111111_0000000_0100000_0111111_0000000_0111111
+    board2 = 0b0111111_0000000_0111111_0100000_0000000_0111111_0000000
+    assert mirror_player_board(board1) == board2
+
+
+def test_add_mirror_to_dictionary():
+    test_dict = defaultdict(dict)
+    board1 = 0b_0100000_0000000_0000000_0000000_0000000_0000000_0000000
+    board2 = 0b_0000000_0100000_0000000_0000000_0000000_0000000_0000000
+
+    assert not test_dict.keys()  # empty and no keys
+
+    add_mirror_to_dictionary(board1, board2, test_dict, (1, -1))
+    assert test_dict.keys()  # not empty and key exists
+
+    mirror1, mirror2 = mirror_board(board1, board2)
+    assert test_dict[mirror1][mirror2] == (1, -1)
+
+
+def test_is_mirror_possible1():
+    board1 = 0b_0100000_0000000_0000000_0000000_0000000_0000000_0000000
+    board2 = 0b_0000000_0100000_0000000_0000000_0000000_0000000_0000000
+    assert is_mirror_possible(board1, board2)
+
+
+def test_is_mirror_possible2():
+    board1 = 0b_0100000_0000000_0000000_0000000_0000000_0000000_0000000
+    board2 = 0b_0000000_0100000_0000000_0000000_0000000_0000000_0100000
+    assert not is_mirror_possible(board1, board2)
