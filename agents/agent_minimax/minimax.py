@@ -1,11 +1,8 @@
-import numpy as np
 from typing import Tuple, Optional
-import time
+from interruptingcow import timeout
 
-import agents.game_utils
 from agents.game_utils import *
 from agents.saved_state import SavedState
-from collections import defaultdict
 
 FULL_BOARD: int = 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111
 
@@ -34,39 +31,41 @@ def generate_move_minimax_id(board_player_one: int, board_player_two: int, playe
 
     alpha: [int, [PlayerAction]] = [-1_000_000_000_000_000_000, [PlayerAction(-1)]]
     beta: [int, [PlayerAction]] = [1_000_000_000_000_000_000, [PlayerAction(-1)]]
-    #dictio_test_one = defaultdict(dict)
-    #dictio_test_two = defaultdict(dict)
-    dictio_test_one = {-1: {}}
-    dictio_test_two = {-1: {}}
+    dictio_one = {-1: {}}
+    dictio_two = {-1: {}}
     if player == PLAYER1:
         evaluation: list[int, [PlayerAction]] = \
             minimax_rec(0, depth, board_player_one, board_player_two, player, True, alpha,
-                                 beta, dictio_test_one, [], [])  # start maximizing if PLAYER1 is to play
-        #for key in dictio_test_one.keys():
-        #    print(dictio_test_one[key], "---", bin(key))
+                                 beta, dictio_one, [], [])  # start maximizing if PLAYER1 is to play
+        #for key in dictio_one.keys():
+        #    print(dictio_one[key], "---", bin(key))
     else:
         evaluation: list[int, [PlayerAction]] = \
             minimax_rec(0, depth, board_player_one, board_player_two, player, False, alpha,
-                                 beta, dictio_test_two, [], [])  # start minimizing if PLAYER2 is to play
-        #for key in dictio_test_two.keys():
-        #    for key_two in dictio_test_two[key].keys():
-        #        print(pretty_print_board(key, key_two),dictio_test_two[key][key_two])
+                                 beta, dictio_two, [], [])  # start minimizing if PLAYER2 is to play
+        #for key in dictio_two.keys():
+        #    for key_two in dictio_two[key].keys():
+        #        print(pretty_print_board(key, key_two),dictio_two[key][key_two])
     #print(evaluation[0], " end: ", evaluation[1])
     #return PlayerAction(evaluation[1][0]), None
     return evaluation
 
 def generate_move_minimax(board_player_one: int, board_player_two: int, player: BoardPiece,
-                          saved_state: Optional[SavedState], seconds: int = 5) -> Tuple[
+                          saved_state: Optional[SavedState], seconds: int = 1) -> Tuple[
     PlayerAction, Optional[SavedState]]:
     depth: int = 0
     evaluation: list[int, [PlayerAction]] = [0, []]
-    start_time = time.time()
-    while True:
-        evaluation: list[int, [PlayerAction]] = generate_move_minimax_id(board_player_one, board_player_two, player, None, evaluation[1], depth)
-        print(depth, " moves: ", evaluation[1], " eval: ", evaluation[0])
-        depth += 1
-        if time.time() - start_time > seconds:
-            break
+    try:
+        with timeout(seconds, exception=RuntimeError):
+            while True:
+                evaluation: list[int, [PlayerAction]] = generate_move_minimax_id(board_player_one, board_player_two, player, None, evaluation[1], depth)
+                print(depth, " moves: ", evaluation[1], " eval: ", evaluation[0])
+                if depth >= len(evaluation[1]) + 4:
+                    break
+                depth += 1
+
+    except RuntimeError:
+        pass
     return PlayerAction(evaluation[1][0]), None
   
 
