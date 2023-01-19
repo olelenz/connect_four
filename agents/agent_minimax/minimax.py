@@ -33,16 +33,18 @@ def generate_move_minimax_id(board_player_one: int, board_player_two: int, playe
     beta: [int, [PlayerAction]] = [1_000_000_000_000_000_000, [PlayerAction(-1)]]
     dictio_one = {-1: {}}
     dictio_two = {-1: {}}
+    use_mirror = is_mirror_possible(board_player_one, board_player_two)
+    # use_mirror = False
     if player == PLAYER1:
         evaluation: list[int, [PlayerAction]] = \
             minimax_rec(0, depth, board_player_one, board_player_two, player, True, alpha,
-                                 beta, dictio_one, [], [])  # start maximizing if PLAYER1 is to play
+                                 beta, dictio_one, [], [], use_mirror)  # start maximizing if PLAYER1 is to play
         #for key in dictio_one.keys():
         #    print(dictio_one[key], "---", bin(key))
     else:
         evaluation: list[int, [PlayerAction]] = \
             minimax_rec(0, depth, board_player_one, board_player_two, player, False, alpha,
-                                 beta, dictio_two, [], [])  # start minimizing if PLAYER2 is to play
+                                 beta, dictio_two, [], [], use_mirror)  # start minimizing if PLAYER2 is to play
         #for key in dictio_two.keys():
         #    for key_two in dictio_two[key].keys():
         #        print(pretty_print_board(key, key_two),dictio_two[key][key_two])
@@ -72,7 +74,7 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
 def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, board_player_two: int,
                 player: BoardPiece,
                 maximize: bool, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {},
-                moves_line: list[int], next_moves: list[int]) -> list[int, [PlayerAction]]:
+                moves_line: list[int], next_moves: list[int], use_mirror: bool) -> list[int, [PlayerAction]]:
     """
     Recursive helper function for generate_move_minimax. Implements the minimax algorithm.
 
@@ -139,9 +141,11 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
                 moves_line_new.append(move)
                 recursion_eval = minimax_rec(current_depth + 1, desired_depth, new_board_player_one, new_board_player_two,
                                              BoardPiece(3 - player), not maximize,
-                                             alpha, beta, dictionary, moves_line_new, next_moves)
+                                             alpha, beta, dictionary, moves_line_new, next_moves, use_mirror)
                 alpha = max([alpha, recursion_eval], key=lambda x: x[0])
                 dictionary[new_board_player_one] = {new_board_player_two: [alpha[0], alpha[1][current_depth+1:]]}
+                if use_mirror:
+                    add_mirror_to_dictionary(board_player_one, board_player_two, dictionary, alpha, current_depth)
             if beta[0] <= alpha[0]:
                 return alpha
     else:
@@ -159,9 +163,11 @@ def minimax_rec(current_depth: int, desired_depth: int, board_player_one: int, b
                 moves_line_new.append(move)
                 recursion_eval = minimax_rec(current_depth + 1, desired_depth, new_board_player_one, new_board_player_two,
                                              BoardPiece(3 - player), not maximize,
-                                             alpha, beta, dictionary, moves_line_new, next_moves)
+                                             alpha, beta, dictionary, moves_line_new, next_moves, use_mirror)
                 beta = min([beta, recursion_eval], key=lambda x: x[0])
                 dictionary[new_board_player_one] = {new_board_player_two: [beta[0], beta[1][current_depth+1:]]}
+                if use_mirror:
+                    add_mirror_to_dictionary(board_player_one, board_player_two, dictionary, beta, current_depth)
             if beta[0] <= alpha[0]:
                 return beta
     if maximize:
