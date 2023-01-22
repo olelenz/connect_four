@@ -182,17 +182,15 @@ def test_mirror_player_board():
 
 
 def test_add_mirror_to_dictionary():
-    test_dict = defaultdict(dict)
+    test_dict = {-1: {}}
     board1 = 0b_0100000_0000000_0000000_0000000_0000000_0000000_0000000
     board2 = 0b_0000000_0100000_0000000_0000000_0000000_0000000_0000000
 
-    assert not test_dict.keys()  # empty and no keys
-
-    add_mirror_to_dictionary(board1, board2, test_dict, (1, -1))
-    assert test_dict.keys()  # not empty and key exists
+    add_mirror_to_dictionary(board1, board2, test_dict, (1, [-1]), 0)
 
     mirror1, mirror2 = mirror_board(board1, board2)
-    assert test_dict[mirror1][mirror2] == (1, -1)
+    res = test_dict[mirror1][mirror2]
+    assert res[0] == 1
 
 
 def test_is_mirror_possible1():

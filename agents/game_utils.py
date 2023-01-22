@@ -1,5 +1,5 @@
 from enum import Enum
-from scipy import signal
+# from scipy import signal
 import numpy as np
 from typing import Callable, Optional, Tuple
 
@@ -321,7 +321,7 @@ def mirror_player_board(player_board) -> int:
     return new_board
 
 
-def add_mirror_to_dictionary(board_player1: int, board_player2: int, dictionary: {}, alpha_beta: tuple[int, int], current_depth: int):
+def add_mirror_to_dictionary(board_player1: int, board_player2: int, dictionary, alpha_beta: list[int, [PlayerAction]], current_depth: int):
     """
     Uses the mirror functions to add a mirrored board, its evaluation and playeraction to the dictionary.
 
@@ -340,7 +340,6 @@ def add_mirror_to_dictionary(board_player1: int, board_player2: int, dictionary:
 
     """
     mirror_board_player1, mirror_board_player2 = mirror_board(board_player1, board_player2)
-    dictionary[mirror_board_player1][mirror_board_player2] = alpha_beta
     dictionary[mirror_board_player1] = {mirror_board_player2: [alpha_beta[0], alpha_beta[1][current_depth + 1:]]}
 
 
