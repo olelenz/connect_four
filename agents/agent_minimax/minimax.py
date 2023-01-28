@@ -70,12 +70,8 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
     time.sleep(5)
     minimax_process.terminate()
     minimax_process.join()
-    print(evaluation)
-    print(results.qsize())
-    size = results.qsize()
-    for i in range(size):
+    for i in range(results.qsize()):
         evaluation = results.get()
-        print(evaluation)
     #try:
     #    with timeout(seconds, exception=RuntimeError):
     #        while True:
@@ -97,7 +93,7 @@ def generate_move_helper(board_player_one: int, board_player_two: int, player: B
         evaluation: list[int, [PlayerAction]] = generate_move_minimax_id(board_player_one, board_player_two, player, None, evaluation[1], depth)
         results.put(evaluation, block=True)
         print(depth, " moves: ", evaluation[1], " eval: ", evaluation[0])
-        depth += 2
+        depth += 1
         if depth >= len(evaluation[1]) + 4:
             time.sleep(5)
 
