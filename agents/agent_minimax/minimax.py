@@ -53,7 +53,7 @@ def generate_move_minimax_id(board_player_one: int, board_player_two: int, playe
     return evaluation
 
 def generate_move_minimax(board_player_one: int, board_player_two: int, player: BoardPiece,
-                          saved_state: Optional[SavedState], seconds: int = 1) -> Tuple[
+                          saved_state: Optional[SavedState], seconds: int = 10) -> Tuple[
     PlayerAction, Optional[SavedState]]:
     depth: int = 0
     evaluation: list[int, [PlayerAction]] = [0, []]
