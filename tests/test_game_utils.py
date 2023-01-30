@@ -186,11 +186,12 @@ def test_add_mirror_to_dictionary():
     board1 = 0b_0100000_0000000_0000000_0000000_0000000_0000000_0000000
     board2 = 0b_0000000_0100000_0000000_0000000_0000000_0000000_0000000
 
-    add_mirror_to_dictionary(board1, board2, test_dict, (1, [-1]), 0)
+    add_mirror_to_dictionary(board1, board2, test_dict, (12, [0, 1]), 0)
 
     mirror1, mirror2 = mirror_board(board1, board2)
     res = test_dict[mirror1][mirror2]
-    assert res[0] == 1
+    assert res[0] == 12  # evaluation 1
+    assert res[1] == 5  # action 1 -> 5
 
 
 def test_is_mirror_possible1():
