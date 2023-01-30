@@ -339,8 +339,9 @@ def add_mirror_to_dictionary(board_player1: int, board_player2: int, dictionary,
         Depth in the minimax algorithm
 
     """
+    mirrored_player_action = PlayerAction(6)-alpha_beta[1][current_depth + 1:]
     mirror_board_player1, mirror_board_player2 = mirror_board(board_player1, board_player2)
-    dictionary[mirror_board_player1] = {mirror_board_player2: [alpha_beta[0], alpha_beta[1][current_depth + 1:]]}
+    dictionary[mirror_board_player1] = {mirror_board_player2: [alpha_beta[0], mirrored_player_action]}
 
 
 def is_mirror_possible(board_player1: int, board_player2: int) -> bool:
