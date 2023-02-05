@@ -1,4 +1,4 @@
-from tests import test_game_utils, test_random, test_minimax
+from tests import test_game_utils_old, test_random, test_minimax
 
 
 def test_all():

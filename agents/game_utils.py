@@ -5,6 +5,15 @@ from typing import Callable, Optional, Tuple
 
 from agents.saved_state import SavedState
 
+# static variables
+EMPTY_BOARD: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
+BOARD_SHAPE_BINARY = (7, 7)
+BINARY_SIZE: int = 49
+PRINT_SUBSTITUTION_TABLE = {0: ' ', 1: 'X', 2: 'O'}
+TOP_PRETTY_PRINT_BOARD: str = "|==============|\n"
+BOTTOM_PRETTY_PRINT_BOARD: str = "|==============|\n|0 1 2 3 4 5 6 |"
+SIDE_PRETTY_PRINT_BOARD: str = "|"
+
 BoardPiece = np.int8  # The data type (dtype) of the board
 NO_PLAYER = BoardPiece(0)  # board[i, j] == NO_PLAYER where the position is empty
 PLAYER1 = BoardPiece(1)  # board[i, j] == PLAYER1 where player 1 (player to move first) has a piece
@@ -39,11 +48,13 @@ def initialize_game_state() -> tuple[int, int]:
     tuple[int, int]
         Initial game state.
     """
-    return 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000, 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
+    return EMPTY_BOARD, EMPTY_BOARD
 
 
 def to_array(bitboard: int) -> np.ndarray:
     """
+    Function to convert a bitboard to a numpy nd-array for visualisation.
+
     Parameters
     ----------
     bitboard: int
@@ -54,10 +65,9 @@ def to_array(bitboard: int) -> np.ndarray:
     :np.ndarray
         Bitboard as an array.
     """
-
-    lst = str(bin(bitboard))[2:].rjust(49, '0')
-    lst = np.reshape(list(lst), (7, 7))[::-1].T
-    return np.array(lst, dtype=int)
+    bitboard_string = str(bin(bitboard))[2:].rjust(BINARY_SIZE, '0')  # to String, remove 0b and pad 0 to the left
+    assert len(bitboard_string) == BINARY_SIZE  # catch too long Strings
+    return np.flip(np.fromiter(bitboard_string, dtype=int).reshape(BOARD_SHAPE_BINARY), 1)  # read to numpy array and reshape to fit board
 
 
 def pretty_print_board(board_player_one: int, board_player_two: int) -> str:
@@ -89,21 +99,16 @@ def pretty_print_board(board_player_one: int, board_player_two: int) -> str:
     str
         String representation of the board.
     """
-    board = (np.add(to_array(board_player_one), to_array(board_player_two) * 2))[1::][::-1]
-    output: str = "|==============|\n"
-    for line in board[::-1]:
-        output += "|"
-        for entry in line:
-            if entry == NO_PLAYER:
-                output += NO_PLAYER_PRINT
-            elif entry == PLAYER1:
-                output += PLAYER1_PRINT
-            else:
-                output += PLAYER2_PRINT
-            output += " "
-        output += "|\n"
-    output += "|==============|\n|0 1 2 3 4 5 6 |"
-    return output
+    board = np.add(to_array(board_player_one), to_array(board_player_two) * 2)
+
+    replace_board = np.vectorize(lambda dict, key: dict.get(key))
+    board_modified = replace_board(PRINT_SUBSTITUTION_TABLE, board)
+
+    body: str = ""
+    for index in range(1, 7):
+        body += SIDE_PRETTY_PRINT_BOARD+''.join(map('{} '.format, board_modified[index]))+SIDE_PRETTY_PRINT_BOARD+"\n"
+
+    return TOP_PRETTY_PRINT_BOARD + body + BOTTOM_PRETTY_PRINT_BOARD
 
 
 def string_to_board(pp_board: str) -> tuple[int, int]:  # TODO: change to binary
@@ -360,6 +365,6 @@ def is_mirror_possible(board_player1: int, board_player2: int) -> bool:
     Returns
     -------
     bool:
-        if board can be mirrored of not
+        if board can be mirrored or not
     """
     return (board_player1 & mirror_player_board(board_player2)) == 0
