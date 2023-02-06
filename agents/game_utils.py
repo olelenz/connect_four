@@ -19,6 +19,7 @@ EMPTY_ROW_CHAR = [' ', ' ', ' ', ' ', ' ', ' ', ' ']
 HEIGHT_PRINT_BOARD: int = 9
 HEIGHT_TOP_PRINT_BOARD: int = 1
 HEIGHT_BOTTOM_PRINT_BOARD: int = 2
+HEIGHT_BOARD: int = HEIGHT_PRINT_BOARD - HEIGHT_TOP_PRINT_BOARD - HEIGHT_BOTTOM_PRINT_BOARD
 
 BoardPiece = np.int8  # The data type (dtype) of the board
 NO_PLAYER = BoardPiece(0)  # board[i, j] == NO_PLAYER where the position is empty
@@ -111,7 +112,7 @@ def pretty_print_board(board_player_one: int, board_player_two: int) -> str:
     board_modified: np.ndarray = replace_board(PRINT_SUBSTITUTION_TABLE, board)
 
     body: str = ""
-    for index in range(1, HEIGHT_PRINT_BOARD - HEIGHT_TOP_PRINT_BOARD - HEIGHT_BOTTOM_PRINT_BOARD + 1):
+    for index in range(1, HEIGHT_BOARD + 1):
         body += SIDE_PRETTY_PRINT_BOARD+''.join(map('{} '.format, board_modified[index]))+SIDE_PRETTY_PRINT_BOARD+"\n"
 
     return TOP_PRETTY_PRINT_BOARD + body + BOTTOM_PRETTY_PRINT_BOARD
@@ -187,8 +188,8 @@ def apply_player_action(board_player_one: int, board_player_two: int, action: Pl
     :tuple[int, int]
         Modified board-positions if the move was legal.
     """
-    move_board = ((board_player_one | board_player_two) + (1 << action * 7))
-    if move_board & (1 << (action * 7 + 6)):
+    move_board = ((board_player_one | board_player_two) + (1 << action * (HEIGHT_BOARD + 1)))
+    if move_board & (1 << (action * (HEIGHT_BOARD + 1) + HEIGHT_BOARD)):
         raise ValueError
     if player == PLAYER1:
         return (move_board & ~board_player_two) | board_player_one, board_player_two
