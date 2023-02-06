@@ -33,8 +33,8 @@ def generate_move_minimax_id(board_player_one: int, board_player_two: int, playe
     beta: [int, [PlayerAction]] = [1_000_000_000_000_000_000, [PlayerAction(-1)]]
     dictio_one = {-1: {}}
     dictio_two = {-1: {}}
-    use_mirror = is_mirror_possible(board_player_one, board_player_two)
-    # use_mirror = False
+    # use_mirror = is_mirror_possible(board_player_one, board_player_two)
+    use_mirror = False
     if player == PLAYER1:
         evaluation: list[int, [PlayerAction]] = \
             minimax_rec(0, depth, board_player_one, board_player_two, player, True, alpha,
@@ -53,7 +53,7 @@ def generate_move_minimax_id(board_player_one: int, board_player_two: int, playe
     return evaluation
 
 def generate_move_minimax(board_player_one: int, board_player_two: int, player: BoardPiece,
-                          saved_state: Optional[SavedState], seconds: int = 10) -> Tuple[
+                          saved_state: Optional[SavedState], seconds: int = 4) -> Tuple[
     PlayerAction, Optional[SavedState]]:
     depth: int = 0
     evaluation: list[int, [PlayerAction]] = [0, []]

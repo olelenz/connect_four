@@ -61,5 +61,5 @@ def human_vs_agent(
 
 if __name__ == "__main__":
     # human_vs_agent(generate_move_minimax, generate_move_mcts)
-    # human_vs_agent(generate_move_minimax)
-    human_vs_agent(generate_move_minimax, generate_move_minimax)
+    human_vs_agent(generate_move_minimax)
+    # human_vs_agent(generate_move_minimax, generate_move_minimax)

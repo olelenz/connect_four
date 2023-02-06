@@ -67,7 +67,7 @@ def to_array(bitboard: int) -> np.ndarray:
     """
     bitboard_string = str(bin(bitboard))[2:].rjust(BINARY_SIZE, '0')  # to String, remove 0b and pad 0 to the left
     assert len(bitboard_string) == BINARY_SIZE  # catch too long Strings
-    return np.flip(np.fromiter(bitboard_string, dtype=int).reshape(BOARD_SHAPE_BINARY), 1)  # read to numpy array and reshape to fit board
+    return np.rot90(np.fromiter(bitboard_string, dtype=int).reshape(BOARD_SHAPE_BINARY), 3)  # read to numpy array and reshape to fit board
 
 
 def pretty_print_board(board_player_one: int, board_player_two: int) -> str:

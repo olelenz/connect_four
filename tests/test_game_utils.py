@@ -4,6 +4,8 @@ from agents.game_utils import *
 
 EMPTY_BOARD: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
 EMPTY_BOARD_STRING: str = "|==============|\n|              |\n|              |\n|              |\n|              |\n|              |\n|              |\n|==============|\n|0 1 2 3 4 5 6 |"
+FIRST_PIECE_BOARD: int = 0b0000000_0000000_0000000_0000001_0000000_0000000_0000000
+FIRST_PIECE_STRING: str = "|==============|\n|              |\n|              |\n|              |\n|              |\n|              |\n|      X       |\n|==============|\n|0 1 2 3 4 5 6 |"
 FULL_BOARD: int = 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111
 DIAGONAL_BOARD_RIGHT_TOP: int = 0b0000000_0000000_0000000_0001000_0000100_0000010_0000001
 DIAGONAL_BOARD_RIGHT_TOP_X: str = "|==============|\n|              |\n|              |\n|      X       |\n|    X         |\n|  X           |\n|X             |\n|==============|\n|0 1 2 3 4 5 6 |"
@@ -40,6 +42,13 @@ def test_pretty_print_board_diagonal_right_top():
     ret = pretty_print_board(DIAGONAL_BOARD_RIGHT_TOP, EMPTY_BOARD)
     assert isinstance(ret, str)
     assert ret == DIAGONAL_BOARD_RIGHT_TOP_X
+
+
+def test_pretty_print_board_middle_one():
+    ret = pretty_print_board(FIRST_PIECE_BOARD, EMPTY_BOARD)
+    assert isinstance(ret, str)
+    assert ret == FIRST_PIECE_STRING
+
 
 
 def test_new_idea():
