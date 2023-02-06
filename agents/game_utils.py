@@ -10,9 +10,15 @@ EMPTY_BOARD: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
 BOARD_SHAPE_BINARY = (7, 7)
 BINARY_SIZE: int = 49
 PRINT_SUBSTITUTION_TABLE = {0: ' ', 1: 'X', 2: 'O'}
+PRINT_BACK_SUBSTITUTION_TABLE_PLAYER_ONE = {' ': 0, 'X': 1, 'O': 0}
+PRINT_BACK_SUBSTITUTION_TABLE_PLAYER_TWO = {' ': 0, 'X': 0, 'O': 1}
 TOP_PRETTY_PRINT_BOARD: str = "|==============|\n"
 BOTTOM_PRETTY_PRINT_BOARD: str = "|==============|\n|0 1 2 3 4 5 6 |"
 SIDE_PRETTY_PRINT_BOARD: str = "|"
+EMPTY_ROW_CHAR = [' ', ' ', ' ', ' ', ' ', ' ', ' ']
+HEIGHT_PRINT_BOARD: int = 9
+HEIGHT_TOP_PRINT_BOARD: int = 1
+HEIGHT_BOTTOM_PRINT_BOARD: int = 2
 
 BoardPiece = np.int8  # The data type (dtype) of the board
 NO_PLAYER = BoardPiece(0)  # board[i, j] == NO_PLAYER where the position is empty
@@ -99,19 +105,19 @@ def pretty_print_board(board_player_one: int, board_player_two: int) -> str:
     str
         String representation of the board.
     """
-    board = np.add(to_array(board_player_one), to_array(board_player_two) * 2)
+    board: np.ndarray = np.add(to_array(board_player_one), to_array(board_player_two) * 2)
 
-    replace_board = np.vectorize(lambda dict, key: dict.get(key))
-    board_modified = replace_board(PRINT_SUBSTITUTION_TABLE, board)
+    replace_board: Callable = np.vectorize(lambda dictionary, key: dictionary.get(key))
+    board_modified: np.ndarray = replace_board(PRINT_SUBSTITUTION_TABLE, board)
 
     body: str = ""
-    for index in range(1, 7):
+    for index in range(1, HEIGHT_PRINT_BOARD - HEIGHT_TOP_PRINT_BOARD - HEIGHT_BOTTOM_PRINT_BOARD + 1):
         body += SIDE_PRETTY_PRINT_BOARD+''.join(map('{} '.format, board_modified[index]))+SIDE_PRETTY_PRINT_BOARD+"\n"
 
     return TOP_PRETTY_PRINT_BOARD + body + BOTTOM_PRETTY_PRINT_BOARD
 
 
-def string_to_board(pp_board: str) -> tuple[int, int]:  # TODO: change to binary
+def string_to_board(pp_board: str) -> tuple[int, int]:
     """
     Takes the output of pretty_print_board and turns it back into an ndarray.
     This is quite useful for debugging, when the agent crashed and you have the last
@@ -132,20 +138,21 @@ def string_to_board(pp_board: str) -> tuple[int, int]:  # TODO: change to binary
     :tuple[int, int]
         Board-positions as binary numbers.
     """
-
-    if len(pp_board.split("\n")) != 9:  # using regex would be way better
+    if len(pp_board.split("\n")) != HEIGHT_PRINT_BOARD:
         raise AttributeError
-    output_player1 = ["0" for _ in range(49)]  # list("0000000_0000000_0000000_0000000_0000000_0000000_0000000")
-    output_player2 = ["0" for _ in range(49)]  # list("0000000_0000000_0000000_0000000_0000000_0000000_0000000")
-    for row, line in enumerate(pp_board.split("\n")[1:-2]):
-        for column, entry in enumerate(line[1:-1:2]):
-            if entry == PLAYER1_PRINT:
-                output_player1[5 - row + 7 * column] = "1"  # 5 - row because string is bein looked at from the top
-            elif entry == PLAYER2_PRINT:
-                output_player2[5 - row + 7 * column] = "1"  # 7 * colum to jump columns
-    output1 = "".join(output_player1[::-1])  # flip because binary is indexed from the first bit on the right
-    output2 = "".join(output_player2[::-1])
-    return int(output1, 2), int(output2, 2)
+    string_input: str = pp_board.replace(SIDE_PRETTY_PRINT_BOARD, '')
+    string_input: list[str] = string_input.split("\n")[HEIGHT_TOP_PRINT_BOARD:-HEIGHT_BOTTOM_PRINT_BOARD]
+    get_entries: Callable = np.vectorize(lambda arr: list(arr[::2]))
+    entry_array = list(map(get_entries, string_input))
+    entry_array = np.vstack((EMPTY_ROW_CHAR, entry_array))  # add buffer
+    entry_array = np.rot90(entry_array, 1)
+    replace_board: Callable = np.vectorize(lambda dictionary, key: dictionary.get(key))
+    entry_array_numbers_player_one: np.ndarray = replace_board(PRINT_BACK_SUBSTITUTION_TABLE_PLAYER_ONE, entry_array).flatten()
+    output_player_one: int = int(np.array2string(entry_array_numbers_player_one, separator='')[1:-1], 2)
+    entry_array_numbers_player_two: np.ndarray = replace_board(PRINT_BACK_SUBSTITUTION_TABLE_PLAYER_TWO, entry_array).flatten()
+    output_player_two: int = int(np.array2string(entry_array_numbers_player_two, separator='')[1:-1], 2)
+
+    return output_player_one, output_player_two
 
 
 def apply_player_action(board_player_one: int, board_player_two: int, action: PlayerAction, player: BoardPiece) -> \

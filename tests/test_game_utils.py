@@ -6,11 +6,17 @@ EMPTY_BOARD: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
 EMPTY_BOARD_STRING: str = "|==============|\n|              |\n|              |\n|              |\n|              |\n|              |\n|              |\n|==============|\n|0 1 2 3 4 5 6 |"
 FIRST_PIECE_BOARD: int = 0b0000000_0000000_0000000_0000001_0000000_0000000_0000000
 FIRST_PIECE_STRING: str = "|==============|\n|              |\n|              |\n|              |\n|              |\n|              |\n|      X       |\n|==============|\n|0 1 2 3 4 5 6 |"
+LEFT_BOTTOM_CORNER_PIECE_BOARD: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000001
+LEFT_BOTTOM_CORNER_PIECE_STRING: str = "|==============|\n|              |\n|              |\n|              |\n|              |\n|              |\n|X             |\n|==============|\n|0 1 2 3 4 5 6 |"
 FULL_BOARD: int = 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111
 DIAGONAL_BOARD_RIGHT_TOP: int = 0b0000000_0000000_0000000_0001000_0000100_0000010_0000001
-DIAGONAL_BOARD_RIGHT_TOP_X: str = "|==============|\n|              |\n|              |\n|      X       |\n|    X         |\n|  X           |\n|X             |\n|==============|\n|0 1 2 3 4 5 6 |"
+DIAGONAL_BOARD_RIGHT_TOP_PLAYER_ONE_STRING: str = "|==============|\n|              |\n|              |\n|      X       |\n|    X         |\n|  X           |\n|X             |\n|==============|\n|0 1 2 3 4 5 6 |"
+DIAGONAL_BOARD_RIGHT_TOP_PLAYER_TWO_STRING: str = "|==============|\n|              |\n|              |\n|      O       |\n|    O         |\n|  O           |\n|O             |\n|==============|\n|0 1 2 3 4 5 6 |"
 BOARD_SHAPE_BINARY = (7, 7)
 PRINT_SUBSTITUTION_TABLE = {0: ' ', 1: 'X', 2: 'O'}
+PRINT_BACK_SUBSTITUTION_TABLE_PLAYER_ONE = {' ': 0, 'X': 1, 'O': 0}
+PRINT_BACK_SUBSTITUTION_TABLE_PLAYER_TWO = {' ': 0, 'X': 0, 'O': 1}
+EMPTY_ROW_CHAR = [' ', ' ', ' ', ' ', ' ', ' ', ' ']
 def test_initialize_game_state():
     board_player_one, board_player_two = initialize_game_state()
     assert board_player_one == EMPTY_BOARD
@@ -41,7 +47,7 @@ def test_pretty_print_board_empty():
 def test_pretty_print_board_diagonal_right_top():
     ret = pretty_print_board(DIAGONAL_BOARD_RIGHT_TOP, EMPTY_BOARD)
     assert isinstance(ret, str)
-    assert ret == DIAGONAL_BOARD_RIGHT_TOP_X
+    assert ret == DIAGONAL_BOARD_RIGHT_TOP_PLAYER_ONE_STRING
 
 
 def test_pretty_print_board_middle_one():
@@ -50,26 +56,33 @@ def test_pretty_print_board_middle_one():
     assert ret == FIRST_PIECE_STRING
 
 
+def test_string_to_board_empty():
+    ret = string_to_board(EMPTY_BOARD_STRING)
+    assert type(ret[0]) == int
+    assert type(ret[1]) == int
+    assert ret[0] == EMPTY_BOARD
+    assert ret[1] == EMPTY_BOARD
+
+
+def test_string_to_board_left_bottom_corner():
+    ret = string_to_board(LEFT_BOTTOM_CORNER_PIECE_STRING)
+    assert ret[0] == LEFT_BOTTOM_CORNER_PIECE_BOARD
+    assert ret[1] == EMPTY_BOARD
+
+
+def test_string_to_board_diagonal_board_right_top_player_one():
+    ret = string_to_board(DIAGONAL_BOARD_RIGHT_TOP_PLAYER_ONE_STRING)
+    assert ret[0] == DIAGONAL_BOARD_RIGHT_TOP
+    assert ret[1] == EMPTY_BOARD
+
+
+def test_string_to_board_diagonal_board_right_top_player_two():
+    ret = string_to_board(DIAGONAL_BOARD_RIGHT_TOP_PLAYER_TWO_STRING)
+    assert ret[0] == EMPTY_BOARD
+    assert ret[1] == DIAGONAL_BOARD_RIGHT_TOP
+
 
 def test_new_idea():
     pass
-    to_replace = np.zeros(BOARD_SHAPE_BINARY)
-    to_replace[6][0] = 1
-    to_replace[5][1] = 1
-    to_replace[4][2] = 1
-    to_replace[3][3] = 1
-    to_replace[6][4] = 2
-    to_replace = np.array(to_replace)
-
-    get_from_dict_vect = np.vectorize(lambda dict, key: dict.get(key))
-    arry_mod = get_from_dict_vect(PRINT_SUBSTITUTION_TABLE, to_replace)
-    print(arry_mod)
-    #print(str(arry_mod[0]))
-    #print(np.array2string(arry_mod))
-    print("|"+''.join(map('{} '.format, arry_mod[5]))+"|")
-    #for i in map('{} '.format, arry_mod[5]):
-        #print(i)
-
-
 
 
