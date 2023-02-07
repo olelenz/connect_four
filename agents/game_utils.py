@@ -1,25 +1,7 @@
 from enum import Enum
-# from scipy import signal
 import numpy as np
-from typing import Callable, Optional, Tuple
-
+from typing import Callable, Optional
 from agents.saved_state import SavedState
-
-# static variables
-EMPTY_BOARD: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
-BOARD_SHAPE_BINARY = (7, 7)
-BINARY_SIZE: int = 49
-PRINT_SUBSTITUTION_TABLE = {0: ' ', 1: 'X', 2: 'O'}
-PRINT_BACK_SUBSTITUTION_TABLE_PLAYER_ONE = {' ': 0, 'X': 1, 'O': 0}
-PRINT_BACK_SUBSTITUTION_TABLE_PLAYER_TWO = {' ': 0, 'X': 0, 'O': 1}
-TOP_PRETTY_PRINT_BOARD: str = "|==============|\n"
-BOTTOM_PRETTY_PRINT_BOARD: str = "|==============|\n|0 1 2 3 4 5 6 |"
-SIDE_PRETTY_PRINT_BOARD: str = "|"
-EMPTY_ROW_CHAR = [' ', ' ', ' ', ' ', ' ', ' ', ' ']
-HEIGHT_PRINT_BOARD: int = 9
-HEIGHT_TOP_PRINT_BOARD: int = 1
-HEIGHT_BOTTOM_PRINT_BOARD: int = 2
-HEIGHT_BOARD: int = HEIGHT_PRINT_BOARD - HEIGHT_TOP_PRINT_BOARD - HEIGHT_BOTTOM_PRINT_BOARD
 
 BoardPiece = np.int8  # The data type (dtype) of the board
 NO_PLAYER = BoardPiece(0)  # board[i, j] == NO_PLAYER where the position is empty
@@ -32,6 +14,24 @@ PLAYER1_PRINT = BoardPiecePrint('X')
 PLAYER2_PRINT = BoardPiecePrint('O')
 
 PlayerAction = np.int8  # The column to be played
+
+# static variables
+EMPTY_BOARD: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
+FULL_BOARD: int = 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111
+BOARD_SHAPE_BINARY: (int, int) = (7, 7)
+BINARY_SIZE: int = 49
+PRINT_SUBSTITUTION_TABLE: {int: str} = {0: ' ', 1: 'X', 2: 'O'}
+PRINT_BACK_SUBSTITUTION_TABLE_PLAYER_ONE: {str: int} = {' ': 0, 'X': 1, 'O': 0}
+PRINT_BACK_SUBSTITUTION_TABLE_PLAYER_TWO: {str: int} = {' ': 0, 'X': 0, 'O': 1}
+TOP_PRETTY_PRINT_BOARD: str = "|==============|\n"
+BOTTOM_PRETTY_PRINT_BOARD: str = "|==============|\n|0 1 2 3 4 5  6 |"
+SIDE_PRETTY_PRINT_BOARD: str = "|"
+EMPTY_ROW_CHAR: [str] = [' ', ' ', ' ', ' ', ' ', ' ', ' ']
+HEIGHT_PRINT_BOARD: int = 9
+HEIGHT_TOP_PRINT_BOARD: int = 1
+HEIGHT_BOTTOM_PRINT_BOARD: int = 2
+HEIGHT_BOARD: int = HEIGHT_PRINT_BOARD - HEIGHT_TOP_PRINT_BOARD - HEIGHT_BOTTOM_PRINT_BOARD
+MOVE_ORDER: [PlayerAction] = [3, 2, 4, 1, 5, 0, 6]
 
 
 class GameState(Enum):
@@ -212,7 +212,7 @@ def connected_four(board: int) -> bool:
         Returns True if there are four adjacent pieces equal to `player` arranged
         in either a horizontal, vertical, or diagonal line. Returns False otherwise.
     """
-    for i in [1, 6, 7, 8]:
+    for i in [1, HEIGHT_BOARD, HEIGHT_BOARD+1, HEIGHT_BOARD+2]:
         temp_bitboard = board & (board >> i)
         if temp_bitboard & (temp_bitboard >> 2 * i):
             return True
@@ -241,13 +241,11 @@ def check_end_state(board_player_one: int, board_player_two: int, player: BoardP
     :GameState
         The current game-state - either IS_WIN, IS_DRAW or STILL_PLAYING.
     """
-    if player == PLAYER1:
-        if connected_four(board_player_one):
-            return GameState.IS_WIN
-    else:
-        if connected_four(board_player_two):
-            return GameState.IS_WIN
-    if board_player_one | board_player_two == 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111:
+    if player == PLAYER1 and connected_four(board_player_one):
+        return GameState.IS_WIN
+    elif connected_four(board_player_two):
+        return GameState.IS_WIN
+    if board_player_one | board_player_two == FULL_BOARD:
         return GameState.IS_DRAW
     return GameState.STILL_PLAYING
 
@@ -264,32 +262,31 @@ def get_possible_moves(board_player_one: int, board_player_two: int, player: Boa
     board_player_two: int
         Board PLAYER2.
 
-    player : BoardPiece
+    player: BoardPiece
         The player which wants to make a move.
+
+    next_move:
+        The move which should be first in returned list if it is allowed. Used for better pruning in iterative deepening.
 
     Returns
     -------
     :[PlayerAction]
         A list containing all possible moves.
-
     """
-    if player == PLAYER2:  # no moves are possible if either player has already won
-        if connected_four(board_player_one):
-            return []
-    else:
-        if connected_four(board_player_two):
-            return []
-    board_full = board_player_one | board_player_two
-    #out: [PlayerAction] = [*set([next_move] + [3, 2, 4, 1, 5, 0, 6])]
-    out: [PlayerAction] = [3, 2, 4, 1, 5, 0, 6]
-    out.insert(0, out.pop(out.index(next_move)))
-    for i in [3, 2, 4, 1, 5, 0, 6]:
-        if board_full & (1 << (i * 7 + 5)):
+    if player == PLAYER2 and connected_four(board_player_one):  # no moves are possible if either player has already won
+        return []
+    elif connected_four(board_player_two):
+        return []
+    board_both_players = board_player_one | board_player_two
+    out: [PlayerAction] = MOVE_ORDER.copy()
+    out.insert(0, out.pop(out.index(next_move)))  # move preferred move to front
+    for i in MOVE_ORDER:
+        if board_both_players & (1 << (i * (HEIGHT_BOARD+1) + (HEIGHT_BOARD-1))):  # check for top piece in column
             out.remove(i)
     return out
 
 
-def mirror_board(board_player1: int, board_player2: int) -> tuple[int, int]:
+def mirror_board(board_player1: int, board_player2: int) -> tuple[int, int]:  # TODO: refactor and test
     """
     Mirrors the board by mirroring both player's board string
 
@@ -309,7 +306,7 @@ def mirror_board(board_player1: int, board_player2: int) -> tuple[int, int]:
     return mirror_player_board(board_player1), mirror_player_board(board_player2)
 
 
-def mirror_player_board(player_board) -> int:
+def mirror_player_board(player_board) -> int:  # TODO: refactor and test
     """
     Mirrors a single board string by bit shifting
 
@@ -334,7 +331,7 @@ def mirror_player_board(player_board) -> int:
     return new_board
 
 
-def add_mirror_to_dictionary(board_player1: int, board_player2: int, dictionary, alpha_beta: list[int, [PlayerAction]], current_depth: int):
+def add_mirror_to_dictionary(board_player1: int, board_player2: int, dictionary, alpha_beta: list[int, [PlayerAction]], current_depth: int):  # TODO: refactor and test
     """
     Uses the mirror functions to add a mirrored board, its evaluation and playeraction to the dictionary.
 
@@ -356,7 +353,7 @@ def add_mirror_to_dictionary(board_player1: int, board_player2: int, dictionary,
     dictionary[mirror_board_player1] = {mirror_board_player2: [alpha_beta[0], PlayerAction(6)-alpha_beta[1][current_depth + 1:]]}
 
 
-def is_mirror_possible(board_player1: int, board_player2: int) -> bool:
+def is_mirror_possible(board_player1: int, board_player2: int) -> bool:  # TODO: refactor and test
     """
     Checks if the board could still have mirrored states in the future. E.g. if player1 has a piece in the bottom
     left corner and player2 in the bottom right corner, the board is asymmetric and mirrored board states
