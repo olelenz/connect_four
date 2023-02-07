@@ -22,12 +22,14 @@ LEFT_TOWER_FIVE_BOARD: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0
 LEFT_TOWER_SIX_BOARD: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0101010
 
 DIAGONAL_BOARD_LEFT_TOP: int = 0b0000000_0000000_0000001_0000010_0000100_0001000_0000000
-VERTICAL_BOARD: int = 0b0000000_0000000_0000000_0001000_0001000_0001000_0001000
-HORIZONTAL_BOARD: int = 0b0000000_0001111_0000000_0000000_0000000_0000000_0000000
+HORIZONTAL_BOARD: int = 0b0000000_0000000_0000000_0001000_0001000_0001000_0001000
+VERTICAL_BOARD: int = 0b0000000_0001111_0000000_0000000_0000000_0000000_0000000
 FULL_WIN_BOARD: int = 0b0000000_0001011_0000110_0000010_0000001_0000000_0000100
 FULL_NO_WIN_BOARD: int = 0b0000000_0001011_0000110_0000000_0000001_0000000_0000100
 DRAW_PLAYER_ONE: int = 0b0001010_0010101_0111011_0101110_0000100_0010100_0100011
 DRAW_PLAYER_TWO: int = 0b0110101_0101010_0000100_0010001_0111011_0101011_0011100
+
+
 def test_initialize_game_state():
     board_player_one, board_player_two = initialize_game_state()
     assert board_player_one == EMPTY_BOARD
@@ -94,61 +96,60 @@ def test_string_to_board_diagonal_board_right_top_player_two():
 
 
 def test_apply_player_action_empty_board_player_one():
-    ret = apply_player_action(EMPTY_BOARD, EMPTY_BOARD, PlayerAction(3), PLAYER1)
+    ret = apply_player_action((EMPTY_BOARD, EMPTY_BOARD, PLAYER1), PlayerAction(3))
     assert ret[0] == FIRST_PIECE_BOARD
     assert ret[1] == EMPTY_BOARD
 
 
 def test_apply_player_action_empty_board_player_two():
-    ret = apply_player_action(EMPTY_BOARD, EMPTY_BOARD, PlayerAction(3), PLAYER2)
+    ret = apply_player_action((EMPTY_BOARD, EMPTY_BOARD, PLAYER2), PlayerAction(3))
     assert ret[0] == EMPTY_BOARD
     assert ret[1] == FIRST_PIECE_BOARD
 
 
 def test_apply_player_action_left_bottom_corner_player_one():
-    ret = apply_player_action(EMPTY_BOARD, EMPTY_BOARD, PlayerAction(0), PLAYER1)
+    ret = apply_player_action((EMPTY_BOARD, EMPTY_BOARD, PLAYER1), PlayerAction(0))
     assert ret[0] == LEFT_BOTTOM_CORNER_PIECE_BOARD
     assert ret[1] == EMPTY_BOARD
 
 
 def test_apply_player_action_left_bottom_corner_player_two():
-    ret = apply_player_action(EMPTY_BOARD, EMPTY_BOARD, PlayerAction(0), PLAYER2)
+    ret = apply_player_action((EMPTY_BOARD, EMPTY_BOARD, PLAYER2), PlayerAction(0))
     assert ret[0] == EMPTY_BOARD
     assert ret[1] == LEFT_BOTTOM_CORNER_PIECE_BOARD
 
 
 def test_apply_player_action_column_two_full():
     with pytest.raises(ValueError):
-        apply_player_action(COLUMN_TWO_FILLED_BOARD_PLAYER_ONE, COLUMN_TWO_FILLED_BOARD_PLAYER_TWO, PlayerAction(2),
-                            PLAYER1)
+        apply_player_action((COLUMN_TWO_FILLED_BOARD_PLAYER_ONE, COLUMN_TWO_FILLED_BOARD_PLAYER_TWO, PLAYER1), PlayerAction(2))
 
 
 def test_apply_player_action_row_two():
-    ret = apply_player_action(LEFT_TOWER_ONE_BOARD, EMPTY_BOARD, PlayerAction(0), PLAYER2)
+    ret = apply_player_action((LEFT_TOWER_ONE_BOARD, EMPTY_BOARD, PLAYER2), PlayerAction(0))
     assert ret[0] == LEFT_TOWER_ONE_BOARD
     assert ret[1] == LEFT_TOWER_TWO_BOARD
 
 
 def test_apply_player_action_row_three():
-    ret = apply_player_action(LEFT_TOWER_ONE_BOARD, LEFT_TOWER_TWO_BOARD, PlayerAction(0), PLAYER1)
+    ret = apply_player_action((LEFT_TOWER_ONE_BOARD, LEFT_TOWER_TWO_BOARD, PLAYER1), PlayerAction(0))
     assert ret[0] == LEFT_TOWER_THREE_BOARD
     assert ret[1] == LEFT_TOWER_TWO_BOARD
 
 
 def test_apply_player_action_row_four():
-    ret = apply_player_action(LEFT_TOWER_THREE_BOARD, LEFT_TOWER_TWO_BOARD, PlayerAction(0), PLAYER2)
+    ret = apply_player_action((LEFT_TOWER_THREE_BOARD, LEFT_TOWER_TWO_BOARD, PLAYER2), PlayerAction(0))
     assert ret[0] == LEFT_TOWER_THREE_BOARD
     assert ret[1] == LEFT_TOWER_FOUR_BOARD
 
 
 def test_apply_player_action_row_five():
-    ret = apply_player_action(LEFT_TOWER_THREE_BOARD, LEFT_TOWER_FOUR_BOARD, PlayerAction(0), PLAYER1)
+    ret = apply_player_action((LEFT_TOWER_THREE_BOARD, LEFT_TOWER_FOUR_BOARD, PLAYER1), PlayerAction(0))
     assert ret[0] == LEFT_TOWER_FIVE_BOARD
     assert ret[1] == LEFT_TOWER_FOUR_BOARD
 
 
 def test_apply_player_action_row_six():
-    ret = apply_player_action(LEFT_TOWER_FIVE_BOARD, LEFT_TOWER_FOUR_BOARD, PlayerAction(0), PLAYER2)
+    ret = apply_player_action((LEFT_TOWER_FIVE_BOARD, LEFT_TOWER_FOUR_BOARD, PLAYER2), PlayerAction(0))
     assert ret[0] == LEFT_TOWER_FIVE_BOARD
     assert ret[1] == LEFT_TOWER_SIX_BOARD
 
@@ -214,36 +215,46 @@ def test_check_end_state_is_win_player_two():
 
 def test_get_possible_moves_all_player_one():
     ret = get_possible_moves(EMPTY_BOARD, EMPTY_BOARD, PLAYER1)
-    assert ret == MOVE_ORDER
+    assert ret == (MOVE_ORDER, GameState.STILL_PLAYING)
 
 
 def test_get_possible_moves_all_player_two():
     ret = get_possible_moves(EMPTY_BOARD, EMPTY_BOARD, PLAYER2)
-    assert ret == MOVE_ORDER
+    assert ret == (MOVE_ORDER, GameState.STILL_PLAYING)
 
 
 def test_get_possible_moves_none_player_one():
     ret = get_possible_moves(DRAW_PLAYER_ONE, DRAW_PLAYER_TWO, PLAYER1)
-    assert ret == []
+    assert ret == ([], GameState.IS_DRAW)
 
 
 def test_get_possible_moves_none_player_two():
     ret = get_possible_moves(DRAW_PLAYER_ONE, DRAW_PLAYER_TWO, PLAYER2)
-    assert ret == []
+    assert ret == ([], GameState.IS_DRAW)
 
 
 def test_get_possible_moves_column_two_full_player_one():
     ret = get_possible_moves(COLUMN_TWO_FILLED_BOARD_PLAYER_ONE, COLUMN_TWO_FILLED_BOARD_PLAYER_TWO, PLAYER1)
     moves: list[PlayerAction] = MOVE_ORDER.copy()
     moves.remove(PlayerAction(2))
-    assert ret == moves
+    assert ret == (moves, GameState.STILL_PLAYING)
 
 
 def test_get_possible_moves_column_two_full_player_two():
     ret = get_possible_moves(COLUMN_TWO_FILLED_BOARD_PLAYER_ONE, COLUMN_TWO_FILLED_BOARD_PLAYER_TWO, PLAYER2)
     moves: list[PlayerAction] = MOVE_ORDER.copy()
     moves.remove(PlayerAction(2))
-    assert ret == moves
+    assert ret == (moves, GameState.STILL_PLAYING)
+
+
+def test_get_possible_moves_player_one_won():
+    ret = get_possible_moves(HORIZONTAL_BOARD, EMPTY_BOARD, PLAYER2)
+    assert ret == ([], GameState.IS_WIN)
+
+
+def test_get_possible_moves_player_two_won():
+    ret = get_possible_moves(EMPTY_BOARD, DIAGONAL_BOARD_RIGHT_TOP, PLAYER1)
+    assert ret == ([], GameState.IS_WIN)
 
 
 def test_ideas():

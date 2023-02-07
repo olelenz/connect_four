@@ -24,7 +24,7 @@ PRINT_SUBSTITUTION_TABLE: {int: str} = {0: ' ', 1: 'X', 2: 'O'}
 PRINT_BACK_SUBSTITUTION_TABLE_PLAYER_ONE: {str: int} = {' ': 0, 'X': 1, 'O': 0}
 PRINT_BACK_SUBSTITUTION_TABLE_PLAYER_TWO: {str: int} = {' ': 0, 'X': 0, 'O': 1}
 TOP_PRETTY_PRINT_BOARD: str = "|==============|\n"
-BOTTOM_PRETTY_PRINT_BOARD: str = "|==============|\n|0 1 2 3 4 5  6 |"
+BOTTOM_PRETTY_PRINT_BOARD: str = "|==============|\n|0 1 2 3 4 5 6 |"
 SIDE_PRETTY_PRINT_BOARD: str = "|"
 EMPTY_ROW_CHAR: [str] = [' ', ' ', ' ', ' ', ' ', ' ', ' ']
 HEIGHT_PRINT_BOARD: int = 9
@@ -156,7 +156,7 @@ def string_to_board(pp_board: str) -> tuple[int, int]:
     return output_player_one, output_player_two
 
 
-def apply_player_action(board_player_one: int, board_player_two: int, action: PlayerAction, player: BoardPiece) -> \
+def apply_player_action(board_information: (int, int, BoardPiece), action: PlayerAction) -> \
         tuple[int, int]:
     """
     Sets board[i, action] = player, where i is the lowest open row. Raises a ValueError
@@ -166,6 +166,9 @@ def apply_player_action(board_player_one: int, board_player_two: int, action: Pl
 
     Parameters
     ----------
+    board_information: (int, int, BoardPiece)
+        Contains the board for PLAYER1, PLAYER2 and the next player to make a move.
+
     board_player_one: int
         Board PLAYER1.
 
@@ -188,6 +191,10 @@ def apply_player_action(board_player_one: int, board_player_two: int, action: Pl
     :tuple[int, int]
         Modified board-positions if the move was legal.
     """
+    board_player_one: int
+    board_player_two: int
+    player: BoardPiece
+    board_player_one, board_player_two, player = board_information
     move_board = ((board_player_one | board_player_two) + (1 << action * (HEIGHT_BOARD + 1)))
     if move_board & (1 << (action * (HEIGHT_BOARD + 1) + HEIGHT_BOARD)):
         raise ValueError
@@ -250,7 +257,7 @@ def check_end_state(board_player_one: int, board_player_two: int, player: BoardP
     return GameState.STILL_PLAYING
 
 
-def get_possible_moves(board_player_one: int, board_player_two: int, player: BoardPiece, next_move: int = 3) -> [PlayerAction]:
+def get_possible_moves(board_player_one: int, board_player_two: int, player: BoardPiece, next_move: int = 3) -> ([PlayerAction], GameState):
     """
     Calculates all possible moves from a give board-position.
 
@@ -270,20 +277,19 @@ def get_possible_moves(board_player_one: int, board_player_two: int, player: Boa
 
     Returns
     -------
-    :[PlayerAction]
-        A list containing all possible moves.
+    :([PlayerAction], GameState)
+        A list containing all possible moves and the current GameState.
     """
-    if player == PLAYER2 and connected_four(board_player_one):  # no moves are possible if either player has already won
-        return []
-    elif connected_four(board_player_two):
-        return []
+    game_state: GameState = check_end_state(board_player_one, board_player_two, 3-player)  # win needs to be checked on the other players board
+    if game_state == GameState.IS_WIN:  # no moves are possible if either player has already won
+        return [], game_state
     board_both_players = board_player_one | board_player_two
     out: [PlayerAction] = MOVE_ORDER.copy()
     out.insert(0, out.pop(out.index(next_move)))  # move preferred move to front
     for i in MOVE_ORDER:
         if board_both_players & (1 << (i * (HEIGHT_BOARD+1) + (HEIGHT_BOARD-1))):  # check for top piece in column
             out.remove(i)
-    return out
+    return out, game_state
 
 
 def mirror_board(board_player1: int, board_player2: int) -> tuple[int, int]:  # TODO: refactor and test
