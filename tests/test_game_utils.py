@@ -22,6 +22,13 @@ LEFT_TOWER_THREE_BOARD: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_
 LEFT_TOWER_FOUR_BOARD: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0001010
 LEFT_TOWER_FIVE_BOARD: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0010101
 LEFT_TOWER_SIX_BOARD: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0101010
+
+DIAGONAL_BOARD_LEFT_TOP: int = 0b0000000_0000000_0000001_0000010_0000100_0001000_0000000
+VERTICAL_BOARD: int = 0b0000000_0000000_0000000_0001000_0001000_0001000_0001000
+HORIZONTAL_BOARD: int = 0b0000000_0001111_0000000_0000000_0000000_0000000_0000000
+FULL_WIN_BOARD: int = 0b0000000_0001011_0000110_0000010_0000001_0000000_0000100
+FULL_NO_WIN_BOARD: int = 0b0000000_0001011_0000110_0000000_0000001_0000000_0000100
+
 def test_initialize_game_state():
     board_player_one, board_player_two = initialize_game_state()
     assert board_player_one == EMPTY_BOARD
@@ -113,7 +120,8 @@ def test_apply_player_action_left_bottom_corner_player_two():
 
 def test_apply_player_action_column_two_full():
     with pytest.raises(ValueError):
-        apply_player_action(COLUMN_TWO_FILLED_BOARD_PLAYER_ONE, COLUMN_TWO_FILLED_BOARD_PLAYER_TWO, PlayerAction(2), PLAYER1)
+        apply_player_action(COLUMN_TWO_FILLED_BOARD_PLAYER_ONE, COLUMN_TWO_FILLED_BOARD_PLAYER_TWO, PlayerAction(2),
+                            PLAYER1)
 
 
 def test_apply_player_action_row_two():
@@ -144,6 +152,42 @@ def test_apply_player_action_row_six():
     ret = apply_player_action(LEFT_TOWER_FIVE_BOARD, LEFT_TOWER_FOUR_BOARD, PlayerAction(0), PLAYER2)
     assert ret[0] == LEFT_TOWER_FIVE_BOARD
     assert ret[1] == LEFT_TOWER_SIX_BOARD
+
+
+def test_connected_four_empty_board():
+    ret = connected_four(EMPTY_BOARD)
+    assert not ret
+
+
+def test_connected_four_horizontal():
+    ret = connected_four(HORIZONTAL_BOARD)
+    assert ret
+
+
+def test_connected_four_vertical():
+    ret = connected_four(VERTICAL_BOARD)
+    assert ret
+
+
+def test_connected_four_diagonal_right_top():
+    ret = connected_four(DIAGONAL_BOARD_RIGHT_TOP)
+    assert ret
+
+
+def test_connected_four_diagonal_left_top():
+    ret = connected_four(DIAGONAL_BOARD_LEFT_TOP)
+    assert ret
+
+
+def test_connected_four_many_pieces_no_win():
+    ret = connected_four(FULL_NO_WIN_BOARD)
+    assert not ret
+
+
+def test_connected_four_many_pieces_win():
+    ret = connected_four(FULL_WIN_BOARD)
+    assert ret
+
 
 def test_ideas():
     pass
