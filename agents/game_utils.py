@@ -292,7 +292,7 @@ def get_possible_moves(board_player_one: int, board_player_two: int, player: Boa
     return out, game_state
 
 
-def mirror_board(board_player1: int, board_player2: int) -> tuple[int, int]:  # TODO: refactor and test
+def mirror_boards(board_player1: int, board_player2: int) -> tuple[int, int]:  # TODO: refactor and test
     """
     Mirrors the board by mirroring both player's board string
 
@@ -314,7 +314,7 @@ def mirror_board(board_player1: int, board_player2: int) -> tuple[int, int]:  # 
 
 def mirror_player_board(player_board) -> int:  # TODO: refactor and test
     """
-    Mirrors a single board string by bit shifting
+    Mirrors a single board string by bit shifting separate columns and putting them together.
 
     Parameters
     ----------
@@ -326,18 +326,17 @@ def mirror_player_board(player_board) -> int:  # TODO: refactor and test
     int:
         The mirrored board
     """
-    row1 = 0b0111111_0000000_0000000_0000000_0000000_0000000_0000000 & (player_board << 42)
-    row2 = 0b0000000_0111111_0000000_0000000_0000000_0000000_0000000 & (player_board << 28)
-    row3 = 0b0000000_0000000_0111111_0000000_0000000_0000000_0000000 & (player_board << 14)
-    row4 = 0b0000000_0000000_0000000_0111111_0000000_0000000_0000000 & player_board
-    row5 = 0b0000000_0000000_0000000_0000000_0111111_0000000_0000000 & (player_board >> 14)
-    row6 = 0b0000000_0000000_0000000_0000000_0000000_0111111_0000000 & (player_board >> 28)
-    row7 = 0b0000000_0000000_0000000_0000000_0000000_0000000_0111111 & (player_board >> 42)
-    new_board = row1 | row2 | row3 | row4 | row5 | row6 | row7
-    return new_board
+    column_0 = 0b0111111_0000000_0000000_0000000_0000000_0000000_0000000 & (player_board << 42)
+    column_1 = 0b0000000_0111111_0000000_0000000_0000000_0000000_0000000 & (player_board << 28)
+    column_2 = 0b0000000_0000000_0111111_0000000_0000000_0000000_0000000 & (player_board << 14)
+    column_3 = 0b0000000_0000000_0000000_0111111_0000000_0000000_0000000 & player_board
+    column_4 = 0b0000000_0000000_0000000_0000000_0111111_0000000_0000000 & (player_board >> 14)
+    column_5 = 0b0000000_0000000_0000000_0000000_0000000_0111111_0000000 & (player_board >> 28)
+    column_6 = 0b0000000_0000000_0000000_0000000_0000000_0000000_0111111 & (player_board >> 42)
+    return column_0 | column_1 | column_2 | column_3 | column_4 | column_5 | column_6
 
 
-def add_mirror_to_dictionary(board_player1: int, board_player2: int, dictionary, alpha_beta: list[int, [PlayerAction]], current_depth: int):  # TODO: refactor and test
+def add_mirrored_boards_to_dictionary(board_player1: int, board_player2: int, dictionary, alpha_beta: list[int, [PlayerAction]], current_depth: int):  # TODO: refactor and test
     """
     Uses the mirror functions to add a mirrored board, its evaluation and playeraction to the dictionary.
 
@@ -355,16 +354,17 @@ def add_mirror_to_dictionary(board_player1: int, board_player2: int, dictionary,
         Depth in the minimax algorithm
 
     """
-    mirror_board_player1, mirror_board_player2 = mirror_board(board_player1, board_player2)
-    dictionary[mirror_board_player1] = {mirror_board_player2: [alpha_beta[0], PlayerAction(6)-alpha_beta[1][current_depth + 1:]]}
+    mirrored_board_player1, mirrored_board_player2 = mirror_boards(board_player1, board_player2)
+    mirrored_player_action = PlayerAction(6)-alpha_beta[1][current_depth + 1:]
+    dictionary[mirrored_board_player1] = {mirrored_board_player2: [alpha_beta[0], mirrored_player_action]}
 
 
-def is_mirror_possible(board_player1: int, board_player2: int) -> bool:  # TODO: refactor and test
+def use_mirror_functions(board_player1: int, board_player2: int) -> bool:  # TODO: refactor and test
     """
-    Checks if the board could still have mirrored states in the future. E.g. if player1 has a piece in the bottom
-    left corner and player2 in the bottom right corner, the board is asymmetric and mirrored board states
-    will no longer occur.
-    The goal is to not call mirror functions after this function returns False
+    Checks if the board could still have mirrored states in the future by checking for overlap between a board and the
+    other players mirrored board  E.g. if player1 has a piece in the bottom left corner and player2 in the bottom right
+    corner, the board is asymmetric and mirrored board states will no longer occur.
+    The goal is to not call mirror functions after this function returns False.
 
     Parameters
     ----------
