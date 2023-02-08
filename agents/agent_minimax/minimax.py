@@ -40,11 +40,11 @@ def generate_move_minimax_id(board_player_one: int, board_player_two: int, playe
     use_mirror = False
     if player == PLAYER1:
         evaluation: list[int, [PlayerAction]] = \
-            rec_max(depth, board_player_one, board_player_two, player, alpha,
+            minimax_rec(depth, board_player_one, board_player_two, player, alpha,
                         beta, dictio_one, [], [], 1)  # start maximizing if PLAYER1 is to play
     else:
         evaluation: list[int, [PlayerAction]] = \
-            rec_min(depth, board_player_one, board_player_two, player, alpha,
+            minimax_rec(depth, board_player_one, board_player_two, player, alpha,
                         beta, dictio_two, [], [], 0)  # start minimizing if PLAYER2 is to play
     return evaluation
 
@@ -68,7 +68,7 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
         pass
     return PlayerAction(evaluation[1][0]), None
 
-def rec_max(current_depth: int, board_player_one: int, board_player_two: int,
+def minimax_rec(current_depth: int, board_player_one: int, board_player_two: int,
                 player: BoardPiece, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {},
                 moves_line: list[int], next_moves: list[int], minmax: int) -> list[int, [PlayerAction]]:
     possible_moves, game_state = get_possible_moves_iterative((board_player_one, board_player_two, player), next_moves)
@@ -77,31 +77,24 @@ def rec_max(current_depth: int, board_player_one: int, board_player_two: int,
     if current_depth == 0:  # desired depth reached - recursion anchor
         evaluation: int = evaluate_board_using_windows(board_player_one, board_player_two)
         return [evaluation, moves_line]
-    for move in possible_moves:
-        new_board_player_one, new_board_player_two = apply_player_action(
-            (board_player_one, board_player_two, player), move)
-        alpha = get_alpha(current_depth, new_board_player_one, new_board_player_two, player,
-                          alpha, beta, dictionary, moves_line, next_moves, move, minmax)
-        if beta[0] <= alpha[0]:
-            return alpha
-    return alpha
-
-
-def rec_min(current_depth: int, board_player_one: int, board_player_two: int,
-                player: BoardPiece, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {},
-                moves_line: list[int], next_moves: list[int], minmax: int) -> list[int, [PlayerAction]]:
-    possible_moves, game_state = get_possible_moves_iterative((board_player_one, board_player_two, player), next_moves)
-    if not possible_moves:
-        return [handle_empty_moves_eval(player, game_state, current_depth), moves_line]
-    if current_depth == 0:  # desired depth reached - recursion anchor
-        evaluation: int = evaluate_board_using_windows(board_player_one, board_player_two)
-        return [evaluation, moves_line]
-    for move in possible_moves:
-        new_board_player_one, new_board_player_two = apply_player_action((board_player_one, board_player_two, player), move)
-        beta = get_beta(current_depth, new_board_player_one, new_board_player_two, player, alpha, beta, dictionary, moves_line, next_moves, move, minmax)
-        if beta[0] <= alpha[0]:
-            return beta
-    return beta
+    if minmax == 1:  # max
+        for move in possible_moves:
+            new_board_player_one, new_board_player_two = apply_player_action(
+                (board_player_one, board_player_two, player), move)
+            alpha = get_alpha(current_depth, new_board_player_one, new_board_player_two, player,
+                              alpha, beta, dictionary, moves_line, next_moves, move, minmax)
+            if beta[0] <= alpha[0]:
+                return alpha
+        return alpha
+    else:  # min
+        for move in possible_moves:
+            new_board_player_one, new_board_player_two = apply_player_action(
+                (board_player_one, board_player_two, player), move)
+            beta = get_beta(current_depth, new_board_player_one, new_board_player_two, player, alpha, beta, dictionary,
+                            moves_line, next_moves, move, minmax)
+            if beta[0] <= alpha[0]:
+                return beta
+        return beta
 
 
 def get_alpha(current_depth: int, new_board_player_one: int, new_board_player_two: int, player: BoardPiece, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {}, moves_line: list[int], next_moves: list[int], move: PlayerAction, minmax: int):
@@ -111,8 +104,8 @@ def get_alpha(current_depth: int, new_board_player_one: int, new_board_player_tw
 
     moves_line_new = moves_line.copy()
     moves_line_new.append(move)
-    recursion_eval = rec_min(current_depth - 1, new_board_player_one, new_board_player_two, BoardPiece(3 - player),
-                             alpha, beta, dictionary, moves_line_new, next_moves, 1-minmax)
+    recursion_eval = minimax_rec(current_depth - 1, new_board_player_one, new_board_player_two, BoardPiece(3 - player),
+                                 alpha, beta, dictionary, moves_line_new, next_moves, 1 - minmax)
     alpha = MIN_MAX_FUNCTIONS[minmax]([alpha, recursion_eval], key=lambda x: x[0])
     dictionary[new_board_player_one] = {new_board_player_two: [alpha[0], alpha[1][current_depth + 1:]]}
     return alpha
@@ -125,8 +118,8 @@ def get_beta(current_depth: int, new_board_player_one: int, new_board_player_two
 
     moves_line_new = moves_line.copy()
     moves_line_new.append(move)
-    recursion_eval = rec_max(current_depth - 1, new_board_player_one, new_board_player_two, BoardPiece(3 - player),
-                             alpha, beta, dictionary, moves_line_new, next_moves, 1-minmax)
+    recursion_eval = minimax_rec(current_depth - 1, new_board_player_one, new_board_player_two, BoardPiece(3 - player),
+                                 alpha, beta, dictionary, moves_line_new, next_moves, 1 - minmax)
     beta = MIN_MAX_FUNCTIONS[minmax]([beta, recursion_eval], key=lambda x: x[0])
     dictionary[new_board_player_one] = {new_board_player_two: [beta[0], beta[1][current_depth + 1:]]}
     return beta
