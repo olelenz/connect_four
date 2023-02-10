@@ -1,6 +1,27 @@
 import pytest
 
-from agents.game_utils import PlayerAction
+from agents.agent_minimax.minimax import handle_empty_moves_eval, START_VALUE
+from agents.game_utils import *
+
+
+def test_handle_empty_moves_eval_draw():
+    ret = handle_empty_moves_eval(PLAYER1, GameState.IS_DRAW, 4)
+    assert ret == 0
+
+
+def test_handle_empty_moves_eval_still_playing():
+    with pytest.raises(AttributeError):
+        handle_empty_moves_eval(PLAYER1, GameState.STILL_PLAYING, 4)
+
+
+def test_handle_empty_moves_eval_player_one_won():
+    ret = handle_empty_moves_eval(PLAYER1, GameState.IS_WIN, 4)
+    assert ret == (-START_VALUE * 2 ** 4)
+
+
+def test_handle_empty_moves_eval_player_one_won():
+    ret = handle_empty_moves_eval(PLAYER2, GameState.IS_WIN, 5)
+    assert ret == (START_VALUE * 2 ** 5)
 
 
 def test_ideas():
@@ -24,8 +45,3 @@ def test_ideas():
     
     
     '''
-
-    test_data = MinimaxCalculation(0, 0, PlayerAction(1), [1], [2], [1, [2]], [3, [4]], {}, 0)
-    print(test_data.__repr__())
-    test_data.__setattr__("board_player_one", 30)
-    print(test_data.__repr__())
