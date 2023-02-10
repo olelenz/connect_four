@@ -1,5 +1,7 @@
 from typing import Tuple, Optional
 from interruptingcow import timeout
+import multiprocessing
+import time
 
 from agents.game_utils import *
 from agents.saved_state import SavedState
@@ -35,19 +37,16 @@ def generate_move_minimax_id(board_player_one: int, board_player_two: int, playe
 
     alpha: [int, [PlayerAction]] = [-MAX_VALUE, [PlayerAction(-1)]]
     beta: [int, [PlayerAction]] = [MAX_VALUE, [PlayerAction(-1)]]
-    dictio = {-1: {}}
     dictio_one = {-1: {}}
     dictio_two = {-1: {}}
     # use_mirror = is_mirror_possible(board_player_one, board_player_two)
     use_mirror = False
-    minimax_data: MinimaxCalculation = MinimaxCalculation(depth=depth, board_player_one=board_player_one, board_player_two=board_player_two, current_player=player, dictionary=dictio, alpha=alpha, beta=beta)
     #print(minimax_data.__repr__())
     if player == PLAYER1:
         evaluation: list[int, [PlayerAction]] = \
             minimax_rec(depth, board_player_one, board_player_two, player, alpha,
                         beta, dictio_one, [], next_moves, 1)  # start maximizing if PLAYER1 is to play
     else:
-        minimax_data.__setattr__("minmax", 1)
         evaluation: list[int, [PlayerAction]] = \
             minimax_rec(depth, board_player_one, board_player_two, player, alpha,
                         beta, dictio_two, [], next_moves, 0)  # start minimizing if PLAYER2 is to play
@@ -58,22 +57,27 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
                           saved_state: Optional[SavedState], seconds: int = 4) -> Tuple[
     PlayerAction, Optional[SavedState]]:
     depth: int = 1
-    evaluation: list[int, [PlayerAction]] = [0, []]
-    move_output: int = -1
-    try:
-        with timeout(seconds, exception=RuntimeError):
-            while True:
-                evaluation: list[int, [PlayerAction]] = generate_move_minimax_id(board_player_one, board_player_two,
-                                                                                 player, None, evaluation[1], depth)
-                move_output = evaluation[1][0]
-                print(depth, " moves: ", evaluation[1], " eval: ", evaluation[0])
-                if depth >= len(evaluation[1]) + 4:
-                    break
-                depth += 1
+    move_output: [int] = [-1]
 
-    except RuntimeError:
-        pass
-    return PlayerAction(move_output), None
+    process_minimax = multiprocessing.Process(target=generate_move_loop_to_stop, args=(move_output, board_player_one, board_player_two, player, depth))
+    process_minimax.start()
+    time.sleep(seconds)
+    process_minimax.terminate()
+    process_minimax.join()
+
+    return PlayerAction(move_output[0]), None
+
+
+def generate_move_loop_to_stop(move_output: [int], board_player_one: int, board_player_two: int, player: BoardPiece, depth: int):
+    evaluation: list[int, [PlayerAction]] = [0, []]
+    while True:
+        evaluation: list[int, [PlayerAction]] = generate_move_minimax_id(board_player_one, board_player_two,
+                                                                         player, None, evaluation[1], depth)
+        move_output[0] = evaluation[1][0]
+        print(depth, " moves: ", evaluation[1], " eval: ", evaluation[0])
+        if depth >= len(evaluation[1]) + 4:
+            break
+        depth += 1
 
 def minimax_rec(current_depth: int, board_player_one: int, board_player_two: int,
                 player: BoardPiece, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {},
