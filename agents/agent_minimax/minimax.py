@@ -93,7 +93,7 @@ def minimax_rec(current_depth: int, board_player_one: int, board_player_two: int
             new_board_player_one, new_board_player_two = apply_player_action(
                 (board_player_one, board_player_two, player), move)
             alpha = get_alpha(current_depth, new_board_player_one, new_board_player_two, player,
-                              alpha, beta, dictionary, moves_line, next_moves, move, minmax)
+                              alpha, beta, dictionary, moves_line, next_moves, move)
             if beta[0] <= alpha[0]:
                 return alpha
         return alpha
@@ -102,36 +102,36 @@ def minimax_rec(current_depth: int, board_player_one: int, board_player_two: int
             new_board_player_one, new_board_player_two = apply_player_action(
                 (board_player_one, board_player_two, player), move)
             beta = get_beta(current_depth, new_board_player_one, new_board_player_two, player, alpha, beta, dictionary,
-                            moves_line, next_moves, move, minmax)
+                            moves_line, next_moves, move)
             if beta[0] <= alpha[0]:
                 return beta
         return beta
 
 
-def get_alpha(current_depth: int, new_board_player_one: int, new_board_player_two: int, player: BoardPiece, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {}, moves_line: list[int], next_moves: list[int], move: PlayerAction, minmax: int):
+def get_alpha(current_depth: int, new_board_player_one: int, new_board_player_two: int, player: BoardPiece, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {}, moves_line: list[int], next_moves: list[int], move: PlayerAction):
     saved_eval = get_eval_from_dictionary(new_board_player_one, new_board_player_two, dictionary, moves_line)
     if saved_eval is not None:
-        return MIN_MAX_FUNCTIONS[minmax]([alpha, saved_eval], key=lambda x: x[0])
+        return max([alpha, saved_eval], key=lambda x: x[0])
 
     moves_line_new = moves_line.copy()
     moves_line_new.append(move)
     recursion_eval = minimax_rec(current_depth - 1, new_board_player_one, new_board_player_two, BoardPiece(3 - player),
-                                 alpha, beta, dictionary, moves_line_new, next_moves, 1 - minmax)
-    alpha = MIN_MAX_FUNCTIONS[minmax]([alpha, recursion_eval], key=lambda x: x[0])
+                                 alpha, beta, dictionary, moves_line_new, next_moves, 0)
+    alpha = max([alpha, recursion_eval], key=lambda x: x[0])
     dictionary[new_board_player_one] = {new_board_player_two: [alpha[0], alpha[1][current_depth + 1:]]}  # possible mistake here
     return alpha
 
 
-def get_beta(current_depth: int, new_board_player_one: int, new_board_player_two: int, player: BoardPiece, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {}, moves_line: list[int], next_moves: list[int], move: PlayerAction, minmax: int):
+def get_beta(current_depth: int, new_board_player_one: int, new_board_player_two: int, player: BoardPiece, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {}, moves_line: list[int], next_moves: list[int], move: PlayerAction):
     saved_eval = get_eval_from_dictionary(new_board_player_one, new_board_player_two, dictionary, moves_line)
     if saved_eval is not None:
-        return MIN_MAX_FUNCTIONS[minmax]([beta, saved_eval], key=lambda x: x[0])
+        return min([beta, saved_eval], key=lambda x: x[0])
 
     moves_line_new = moves_line.copy()
     moves_line_new.append(move)
     recursion_eval = minimax_rec(current_depth - 1, new_board_player_one, new_board_player_two, BoardPiece(3 - player),
-                                 alpha, beta, dictionary, moves_line_new, next_moves, 1 - minmax)
-    beta = MIN_MAX_FUNCTIONS[minmax]([beta, recursion_eval], key=lambda x: x[0])
+                                 alpha, beta, dictionary, moves_line_new, next_moves, 1)
+    beta = min([beta, recursion_eval], key=lambda x: x[0])
     dictionary[new_board_player_one] = {new_board_player_two: [beta[0], beta[1][current_depth + 1:]]}  # possible mistake here
     return beta
 
