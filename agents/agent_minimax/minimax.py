@@ -1,6 +1,7 @@
 from typing import Tuple, Optional
 from interruptingcow import timeout
 
+from agents.agent_minimax.minimax_data import MinimaxCalculation
 from agents.game_utils import *
 from agents.saved_state import SavedState
 
@@ -35,31 +36,37 @@ def generate_move_minimax_id(board_player_one: int, board_player_two: int, playe
 
     alpha: [int, [PlayerAction]] = [-MAX_VALUE, [PlayerAction(-1)]]
     beta: [int, [PlayerAction]] = [MAX_VALUE, [PlayerAction(-1)]]
+    dictio = {-1: {}}
     dictio_one = {-1: {}}
     dictio_two = {-1: {}}
     # use_mirror = is_mirror_possible(board_player_one, board_player_two)
     use_mirror = False
+    minimax_data: MinimaxCalculation = MinimaxCalculation(depth=depth, board_player_one=board_player_one, board_player_two=board_player_two, current_player=player, dictionary=dictio, alpha=alpha, beta=beta)
+    #print(minimax_data.__repr__())
     if player == PLAYER1:
         evaluation: list[int, [PlayerAction]] = \
             minimax_rec(depth, board_player_one, board_player_two, player, alpha,
-                        beta, dictio_one, [], [], 1)  # start maximizing if PLAYER1 is to play
+                        beta, dictio_one, [], next_moves, 1, minimax_data)  # start maximizing if PLAYER1 is to play
     else:
+        minimax_data.__setattr__("minmax", 1)
         evaluation: list[int, [PlayerAction]] = \
             minimax_rec(depth, board_player_one, board_player_two, player, alpha,
-                        beta, dictio_two, [], [], 0)  # start minimizing if PLAYER2 is to play
+                        beta, dictio_two, [], next_moves, 0, minimax_data)  # start minimizing if PLAYER2 is to play
     return evaluation
 
 
 def generate_move_minimax(board_player_one: int, board_player_two: int, player: BoardPiece,
-                          saved_state: Optional[SavedState], seconds: int = 100) -> Tuple[
+                          saved_state: Optional[SavedState], seconds: int = 4) -> Tuple[
     PlayerAction, Optional[SavedState]]:
-    depth: int = 0
+    depth: int = 1
     evaluation: list[int, [PlayerAction]] = [0, []]
+    move_output: int = -1
     try:
         with timeout(seconds, exception=RuntimeError):
             while True:
                 evaluation: list[int, [PlayerAction]] = generate_move_minimax_id(board_player_one, board_player_two,
                                                                                  player, None, evaluation[1], depth)
+                move_output = evaluation[1][0]
                 print(depth, " moves: ", evaluation[1], " eval: ", evaluation[0])
                 if depth >= len(evaluation[1]) + 4:
                     break
@@ -67,7 +74,7 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
 
     except RuntimeError:
         pass
-    return PlayerAction(evaluation[1][0]), None
+    return PlayerAction(move_output), None
 
 def minimax_rec(current_depth: int, board_player_one: int, board_player_two: int,
                 player: BoardPiece, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {},
@@ -108,7 +115,7 @@ def get_alpha(current_depth: int, new_board_player_one: int, new_board_player_tw
     recursion_eval = minimax_rec(current_depth - 1, new_board_player_one, new_board_player_two, BoardPiece(3 - player),
                                  alpha, beta, dictionary, moves_line_new, next_moves, 1 - minmax)
     alpha = MIN_MAX_FUNCTIONS[minmax]([alpha, recursion_eval], key=lambda x: x[0])
-    dictionary[new_board_player_one] = {new_board_player_two: [alpha[0], alpha[1][current_depth + 1:]]}
+    dictionary[new_board_player_one] = {new_board_player_two: [alpha[0], alpha[1][current_depth + 1:]]}  # possible mistake here
     return alpha
 
 
@@ -122,7 +129,7 @@ def get_beta(current_depth: int, new_board_player_one: int, new_board_player_two
     recursion_eval = minimax_rec(current_depth - 1, new_board_player_one, new_board_player_two, BoardPiece(3 - player),
                                  alpha, beta, dictionary, moves_line_new, next_moves, 1 - minmax)
     beta = MIN_MAX_FUNCTIONS[minmax]([beta, recursion_eval], key=lambda x: x[0])
-    dictionary[new_board_player_one] = {new_board_player_two: [beta[0], beta[1][current_depth + 1:]]}
+    dictionary[new_board_player_one] = {new_board_player_two: [beta[0], beta[1][current_depth + 1:]]}  # possible mistake here
     return beta
 
 
