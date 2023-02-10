@@ -1,3 +1,4 @@
+import copy
 from typing import Tuple, Optional
 from interruptingcow import timeout
 
@@ -41,12 +42,11 @@ def generate_move_minimax_id(board_player_one: int, board_player_two: int, playe
     dictio_two = {-1: {}}
     # use_mirror = is_mirror_possible(board_player_one, board_player_two)
     use_mirror = False
-    minimax_data: MinimaxCalculation = MinimaxCalculation(depth=depth, board_player_one=board_player_one, board_player_two=board_player_two, current_player=player, dictionary=dictio, alpha=alpha, beta=beta)
+    minimax_data: MinimaxCalculation = MinimaxCalculation(depth=depth, board_player_one=board_player_one, board_player_two=board_player_two, current_player=player, dictionary=dictio)
     #print(minimax_data.__repr__())
     if player == PLAYER1:
         evaluation: list[int, [PlayerAction]] = \
-            minimax_rec(depth, board_player_one, board_player_two, player, alpha,
-                        beta, dictio_one, [], next_moves, 1, minimax_data)  # start maximizing if PLAYER1 is to play
+            minimax_rec(minimax_data, alpha, beta, [], next_moves)  # start maximizing if PLAYER1 is to play
     else:
         minimax_data.__setattr__("minmax", 1)
         evaluation: list[int, [PlayerAction]] = \
@@ -76,60 +76,66 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
         pass
     return PlayerAction(move_output), None
 
-def minimax_rec(current_depth: int, board_player_one: int, board_player_two: int,
-                player: BoardPiece, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {},
-                moves_line: list[int], next_moves: list[int], minmax: int) -> list[int, [PlayerAction]]:
-    possible_moves, game_state = get_possible_moves_iterative((board_player_one, board_player_two, player), next_moves)
+
+def minimax_rec(minimax_data: MinimaxCalculation, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], next_moves: list[int], moves_line: list[int]) -> list[int, [PlayerAction]]:
+    possible_moves, game_state = get_possible_moves_iterative(copy.deepcopy(minimax_data), next_moves=next_moves)
     if not possible_moves:
-        return [handle_empty_moves_eval(player, game_state, current_depth), moves_line]
-    if current_depth == 0:  # desired depth reached - recursion anchor
-        evaluation: int = evaluate_board_using_windows(board_player_one, board_player_two)
+        return [handle_empty_moves_eval(copy.deepcopy(minimax_data), game_state), moves_line]
+    if minimax_data.depth == 0:  # desired depth reached - recursion anchor
+        evaluation: int = evaluate_board_using_windows(minimax_data.board_player_one, minimax_data.board_player_two)
         return [evaluation, moves_line]
-    if minmax == 1:  # max
+    if minimax_data.minmax == 1:  # max
         for move in possible_moves:
             new_board_player_one, new_board_player_two = apply_player_action(
-                (board_player_one, board_player_two, player), move)
-            alpha = get_alpha(current_depth, new_board_player_one, new_board_player_two, player,
-                              alpha, beta, dictionary, moves_line, next_moves, move, minmax)
+                (minimax_data.board_player_one, minimax_data.board_player_two, minimax_data.current_player), move)
+            minimax_data.__setattr__("board_player_one", new_board_player_one)
+            minimax_data.__setattr__("board_player_two", new_board_player_two)
+            alpha = get_alpha(copy.deepcopy(minimax_data), move, alpha=alpha, beta=beta, moves_line=moves_line, next_moves=next_moves)
             if beta[0] <= alpha[0]:
                 return alpha
         return alpha
     else:  # min
         for move in possible_moves:
             new_board_player_one, new_board_player_two = apply_player_action(
-                (board_player_one, board_player_two, player), move)
-            beta = get_beta(current_depth, new_board_player_one, new_board_player_two, player, alpha, beta, dictionary,
-                            moves_line, next_moves, move, minmax)
+                (minimax_data.board_player_one, minimax_data.board_player_two, minimax_data.current_player), move)
+            minimax_data.__setattr__("board_player_one", new_board_player_one)
+            minimax_data.__setattr__("board_player_two", new_board_player_two)
+            beta = get_beta(copy.deepcopy(minimax_data), move,alpha=alpha, beta=beta, moves_line=moves_line, next_moves=next_moves)
             if beta[0] <= alpha[0]:
                 return beta
         return beta
 
 
-def get_alpha(current_depth: int, new_board_player_one: int, new_board_player_two: int, player: BoardPiece, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {}, moves_line: list[int], next_moves: list[int], move: PlayerAction, minmax: int):
-    saved_eval = get_eval_from_dictionary(new_board_player_one, new_board_player_two, dictionary, moves_line)
+def get_alpha(minimax_data: MinimaxCalculation, move: PlayerAction, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], moves_line: list[int], next_moves: []):
+    saved_eval = get_eval_from_dictionary(minimax_data.board_player_one, minimax_data.board_player_two, minimax_data.dictionary, moves_line)
     if saved_eval is not None:
-        return MIN_MAX_FUNCTIONS[minmax]([alpha, saved_eval], key=lambda x: x[0])
+        return MIN_MAX_FUNCTIONS[minimax_data.minmax]([alpha, saved_eval], key=lambda x: x[0])
 
     moves_line_new = moves_line.copy()
     moves_line_new.append(move)
-    recursion_eval = minimax_rec(current_depth - 1, new_board_player_one, new_board_player_two, BoardPiece(3 - player),
-                                 alpha, beta, dictionary, moves_line_new, next_moves, 1 - minmax)
-    alpha = MIN_MAX_FUNCTIONS[minmax]([alpha, recursion_eval], key=lambda x: x[0])
-    dictionary[new_board_player_one] = {new_board_player_two: [alpha[0], alpha[1][current_depth + 1:]]}  # possible mistake here
+
+    minimax_data.__setattr__("depth", minimax_data.depth-1)
+    minimax_data.__setattr__("current_player", 3-minimax_data.current_player)
+    minimax_data.__setattr__("minmax", 1 - minimax_data.minmax)
+    recursion_eval = minimax_rec(copy.deepcopy(minimax_data), alpha=alpha, beta=beta, moves_line=moves_line, next_moves=next_moves)
+    alpha = MIN_MAX_FUNCTIONS[minimax_data.minmax]([alpha, recursion_eval], key=lambda x: x[0])
+    minimax_data.dictionary[minimax_data.board_player_one] = {minimax_data.board_player_two: [alpha[0], alpha[1][minimax_data.depth + 1:]]}  # possible mistake here
     return alpha
 
 
-def get_beta(current_depth: int, new_board_player_one: int, new_board_player_two: int, player: BoardPiece, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {}, moves_line: list[int], next_moves: list[int], move: PlayerAction, minmax: int):
-    saved_eval = get_eval_from_dictionary(new_board_player_one, new_board_player_two, dictionary, moves_line)
+def get_beta(minimax_data: MinimaxCalculation, move: PlayerAction, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], moves_line: [], next_moves: []):
+    saved_eval = get_eval_from_dictionary(minimax_data.board_player_one, minimax_data.board_player_two, minimax_data.dictionary, moves_line)
     if saved_eval is not None:
-        return MIN_MAX_FUNCTIONS[minmax]([beta, saved_eval], key=lambda x: x[0])
+        return MIN_MAX_FUNCTIONS[minimax_data.minmax]([beta, saved_eval], key=lambda x: x[0])
 
     moves_line_new = moves_line.copy()
     moves_line_new.append(move)
-    recursion_eval = minimax_rec(current_depth - 1, new_board_player_one, new_board_player_two, BoardPiece(3 - player),
-                                 alpha, beta, dictionary, moves_line_new, next_moves, 1 - minmax)
-    beta = MIN_MAX_FUNCTIONS[minmax]([beta, recursion_eval], key=lambda x: x[0])
-    dictionary[new_board_player_one] = {new_board_player_two: [beta[0], beta[1][current_depth + 1:]]}  # possible mistake here
+    minimax_data.__setattr__("depth", minimax_data.depth - 1)
+    minimax_data.__setattr__("current_player", 3 - minimax_data.current_player)
+    minimax_data.__setattr__("minmax", 1 - minimax_data.minmax)
+    recursion_eval = minimax_rec(copy.deepcopy(minimax_data), alpha=alpha, beta=beta, moves_line=moves_line, next_moves=next_moves)
+    beta = MIN_MAX_FUNCTIONS[minimax_data.minmax]([beta, recursion_eval], key=lambda x: x[0])
+    minimax_data.dictionary[minimax_data.board_player_one] = {minimax_data.board_player_two: [beta[0], beta[1][minimax_data.depth + 1:]]}  # possible mistake here
     return beta
 
 
@@ -142,19 +148,19 @@ def get_eval_from_dictionary(new_board_player_one: int, new_board_player_two: in
         return None
 
 
-def get_possible_moves_iterative(board_information: (int, int, BoardPiece), next_moves: list[int]) -> ([PlayerAction], GameState):
+def get_possible_moves_iterative(minimax_data: MinimaxCalculation, next_moves: []) -> ([PlayerAction], GameState):
     try:
-        return get_possible_moves(board_information[0], board_information[1], board_information[2], next_moves.pop(0))
+        return get_possible_moves(minimax_data.board_player_one, minimax_data.board_player_two, minimax_data.current_player, next_moves.pop(0))
     except IndexError:
-        return get_possible_moves(board_information[0], board_information[1], board_information[2])
+        return get_possible_moves(minimax_data.board_player_one, minimax_data.board_player_two, minimax_data.current_player)
 
 
-def handle_empty_moves_eval(player: BoardPiece, game_state: GameState, current_depth: int) -> int:
+def handle_empty_moves_eval(minimax_data: MinimaxCalculation, game_state: GameState) -> int:
     if game_state == GameState.IS_WIN:
-        if player == PLAYER1:
-            return int(-START_VALUE * 2 ** (current_depth))
+        if minimax_data.current_player == PLAYER1:
+            return int(-START_VALUE * 2 ** (minimax_data.depth))
         else:
-            return int(START_VALUE * 2 ** (current_depth))
+            return int(START_VALUE * 2 ** (minimax_data.depth))
     elif game_state == GameState.IS_DRAW:
         return 0
     else:

@@ -16,9 +16,9 @@ class MinimaxCalculation:
     board_player_two: int
     current_player: BoardPiece
     dictionary: {}
-    alpha: list[int, [PlayerAction]]
-    beta: list[int, [PlayerAction]]
+    #alpha: list[int, [PlayerAction]]
+    #beta: list[int, [PlayerAction]]
     minmax: int = 0  # initialised to maximise
-    next_moves: list[int] = field(default_factory=list)
-    moves_line: list[int] = field(default_factory=list)
+    #next_moves: list[int] = field(default_factory=list)
+    #moves_line: list[int] = field(default_factory=list)
 
