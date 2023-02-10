@@ -1,10 +1,13 @@
 import pytest
 
+from agents.agent_minimax.minimax_data import MinimaxCalculation
+from agents.game_utils import PlayerAction
+
 
 def test_ideas():
     print("hello")
     '''
-    - current depth und desired depth zu einem parameter -> auf null testesn und immer um eins verringern
+    DONE - current depth und desired depth zu einem parameter -> auf null testesn und immer um eins verringern
     - two boards into one tuple with boards and current player
     - alpha and beta into one tuple
     - remove flags maximize and use_mirror
@@ -22,3 +25,8 @@ def test_ideas():
     
     
     '''
+
+    test_data = MinimaxCalculation(0, 0, PlayerAction(1), [1], [2], [1, [2]], [3, [4]], {}, 0)
+    print(test_data.__repr__())
+    test_data.__setattr__("board_player_one", 30)
+    print(test_data.__repr__())

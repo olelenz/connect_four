@@ -6,6 +6,7 @@ from agents.saved_state import SavedState
 
 FULL_BOARD: int = 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111
 START_VALUE: int = 100
+MAX_VALUE: int = 1_000_000_000_000_000_000
 MIN_MAX_FUNCTIONS = (min, max)
 
 
@@ -32,8 +33,8 @@ def generate_move_minimax_id(board_player_one: int, board_player_two: int, playe
         Tuple containing the move to play and the saved state.
     """
 
-    alpha: [int, [PlayerAction]] = [-1_000_000_000_000_000_000, [PlayerAction(-1)]]
-    beta: [int, [PlayerAction]] = [1_000_000_000_000_000_000, [PlayerAction(-1)]]
+    alpha: [int, [PlayerAction]] = [-MAX_VALUE, [PlayerAction(-1)]]
+    beta: [int, [PlayerAction]] = [MAX_VALUE, [PlayerAction(-1)]]
     dictio_one = {-1: {}}
     dictio_two = {-1: {}}
     # use_mirror = is_mirror_possible(board_player_one, board_player_two)
@@ -50,7 +51,7 @@ def generate_move_minimax_id(board_player_one: int, board_player_two: int, playe
 
 
 def generate_move_minimax(board_player_one: int, board_player_two: int, player: BoardPiece,
-                          saved_state: Optional[SavedState], seconds: int = 4) -> Tuple[
+                          saved_state: Optional[SavedState], seconds: int = 100) -> Tuple[
     PlayerAction, Optional[SavedState]]:
     depth: int = 0
     evaluation: list[int, [PlayerAction]] = [0, []]
