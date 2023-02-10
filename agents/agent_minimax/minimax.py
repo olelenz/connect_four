@@ -1,3 +1,4 @@
+import os
 from typing import Tuple, Optional
 from interruptingcow import timeout
 import multiprocessing
@@ -57,26 +58,25 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
                           saved_state: Optional[SavedState], seconds: int = 4) -> Tuple[
     PlayerAction, Optional[SavedState]]:
     depth: int = 1
-    move_output: [int] = [-1]
-
+    move_output = multiprocessing.Value('i', -1)
     process_minimax = multiprocessing.Process(target=generate_move_loop_to_stop, args=(move_output, board_player_one, board_player_two, player, depth))
     process_minimax.start()
     time.sleep(seconds)
     process_minimax.terminate()
     process_minimax.join()
 
-    return PlayerAction(move_output[0]), None
+    return PlayerAction(move_output.value), None
 
 
-def generate_move_loop_to_stop(move_output: [int], board_player_one: int, board_player_two: int, player: BoardPiece, depth: int):
+def generate_move_loop_to_stop(move_output, board_player_one: int, board_player_two: int, player: BoardPiece, depth: int):
     evaluation: list[int, [PlayerAction]] = [0, []]
     while True:
         evaluation: list[int, [PlayerAction]] = generate_move_minimax_id(board_player_one, board_player_two,
                                                                          player, None, evaluation[1], depth)
-        move_output[0] = evaluation[1][0]
+        move_output.value = evaluation[1][0]
         print(depth, " moves: ", evaluation[1], " eval: ", evaluation[0])
         if depth >= len(evaluation[1]) + 4:
-            break
+            return
         depth += 1
 
 def minimax_rec(current_depth: int, board_player_one: int, board_player_two: int,
