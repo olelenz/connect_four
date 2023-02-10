@@ -1,7 +1,6 @@
 from typing import Tuple, Optional
 from interruptingcow import timeout
 
-from agents.agent_minimax.minimax_data import MinimaxCalculation
 from agents.game_utils import *
 from agents.saved_state import SavedState
 
@@ -46,12 +45,12 @@ def generate_move_minimax_id(board_player_one: int, board_player_two: int, playe
     if player == PLAYER1:
         evaluation: list[int, [PlayerAction]] = \
             minimax_rec(depth, board_player_one, board_player_two, player, alpha,
-                        beta, dictio_one, [], next_moves, 1, minimax_data)  # start maximizing if PLAYER1 is to play
+                        beta, dictio_one, [], next_moves, 1)  # start maximizing if PLAYER1 is to play
     else:
         minimax_data.__setattr__("minmax", 1)
         evaluation: list[int, [PlayerAction]] = \
             minimax_rec(depth, board_player_one, board_player_two, player, alpha,
-                        beta, dictio_two, [], next_moves, 0, minimax_data)  # start minimizing if PLAYER2 is to play
+                        beta, dictio_two, [], next_moves, 0)  # start minimizing if PLAYER2 is to play
     return evaluation
 
 

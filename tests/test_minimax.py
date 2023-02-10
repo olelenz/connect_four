@@ -1,6 +1,5 @@
 import pytest
 
-from agents.agent_minimax.minimax_data import MinimaxCalculation
 from agents.game_utils import PlayerAction
 
 
