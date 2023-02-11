@@ -118,7 +118,7 @@ def get_alpha(current_depth: int, new_board_player_one: int, new_board_player_tw
     recursion_eval = minimax_rec(current_depth - 1, new_board_player_one, new_board_player_two, BoardPiece(3 - player),
                                  alpha, beta, dictionary, moves_line_new, next_moves, 0)
     alpha = max([alpha, recursion_eval], key=lambda x: x[0])
-    dictionary[new_board_player_one] = {new_board_player_two: [alpha[0], alpha[1][current_depth + 1:]]}  # possible mistake here
+    dictionary[new_board_player_one] = {new_board_player_two: [alpha[0], alpha[1][-current_depth:]]}  # possible mistake here
     return alpha
 
 
@@ -132,7 +132,7 @@ def get_beta(current_depth: int, new_board_player_one: int, new_board_player_two
     recursion_eval = minimax_rec(current_depth - 1, new_board_player_one, new_board_player_two, BoardPiece(3 - player),
                                  alpha, beta, dictionary, moves_line_new, next_moves, 1)
     beta = min([beta, recursion_eval], key=lambda x: x[0])
-    dictionary[new_board_player_one] = {new_board_player_two: [beta[0], beta[1][current_depth + 1:]]}  # possible mistake here
+    dictionary[new_board_player_one] = {new_board_player_two: [beta[0], beta[1][-current_depth:]]}  # possible mistake here
     return beta
 
 
