@@ -7,7 +7,9 @@ import time
 
 from agents.game_utils import *
 from agents.saved_state import SavedState
-from minimax_window_list import MINIMAX_EVALUATION_WINDOWS_LIST
+from agents.agent_minimax.minimax_window_list import MINIMAX_EVALUATION_WINDOWS_LIST
+
+
 
 FULL_BOARD: int = 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111
 START_VALUE: int = 100
@@ -63,13 +65,17 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
     move_output = multiprocessing.Value('i', -1)
 
     if platform.system() == 'Windows':
-        process_minimax = multiprocessing.Process(target=generate_move_loop_to_stop, args=(move_output, board_player_one, board_player_two, player, depth))
-        process_minimax.start()
-        time.sleep(seconds)
-        process_minimax.terminate()
-        process_minimax.join()
-
-        return PlayerAction(move_output.value), None
+        start_time = time.time()
+        evaluation: list[int, [PlayerAction]] = [0, []]
+        while True:
+            evaluation: list[int, [PlayerAction]] = generate_move_minimax_id(board_player_one, board_player_two,
+                                                                             player, None, evaluation[1], depth)
+            print(depth, " moves: ", evaluation[1], " eval: ", evaluation[0])
+            result_action = evaluation[1][0]
+            depth += 1
+            if (time.time() - start_time) > seconds or depth >= len(evaluation[1]) + 4:
+                break
+        return PlayerAction(result_action), None
     else:
         try:
             with timeout(seconds, exception=RuntimeError):
@@ -78,24 +84,6 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
         except RuntimeError:
             pass
         return PlayerAction(move_output.value), None
-
-
-def generate_move_minimax2(board_player_one: int, board_player_two: int, player: BoardPiece,
-                          saved_state: Optional[SavedState], seconds: int = 2.5) -> Tuple[
-    PlayerAction, Optional[SavedState]]:
-    result_action = PlayerAction(-1)
-    evaluation: list[int, [PlayerAction]] = [0, []]
-    start_time = time.time()
-    depth: int = 1
-    while True:
-        evaluation: list[int, [PlayerAction]] = generate_move_minimax_id(board_player_one, board_player_two,
-                                                                         player, None, evaluation[1], depth)
-        print(depth, " moves: ", evaluation[1], " eval: ", evaluation[0])
-        result_action = evaluation[1][0]
-        depth += 1
-        if (time.time() - start_time) > seconds or depth >= len(evaluation[1]) + 4:
-            break
-    return result_action, None
 
 
 def generate_move_loop_to_stop(move_output, board_player_one: int, board_player_two: int, player: BoardPiece, depth: int):
