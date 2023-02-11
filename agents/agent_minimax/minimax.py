@@ -63,19 +63,17 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
     PlayerAction, Optional[SavedState]]:
     depth: int = 1
     move_output = multiprocessing.Value('i', -1)
+    print(platform.system())
+    if platform.system() == "Windows":
+        process_minimax = multiprocessing.Process(target=generate_move_loop_to_stop,
+                                                  args=(move_output, board_player_one, board_player_two, player, depth))
+        process_minimax.start()
+        time.sleep(seconds)
+        process_minimax.terminate()
+        process_minimax.join()
 
-    if platform.system() == 'Windows':
-        start_time = time.time()
-        evaluation: list[int, [PlayerAction]] = [0, []]
-        while True:
-            evaluation: list[int, [PlayerAction]] = generate_move_minimax_id(board_player_one, board_player_two,
-                                                                             player, None, evaluation[1], depth)
-            print(depth, " moves: ", evaluation[1], " eval: ", evaluation[0])
-            result_action = evaluation[1][0]
-            depth += 1
-            if (time.time() - start_time) > seconds or depth >= len(evaluation[1]) + 4:
-                break
-        return PlayerAction(result_action), None
+        return move_output.value, None
+
     else:
         try:
             with timeout(seconds, exception=RuntimeError):
