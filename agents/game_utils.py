@@ -372,7 +372,8 @@ def add_mirrored_boards_to_dictionary(board_player1: int, board_player2: int, di
 
     """
     mirrored_board_player1, mirrored_board_player2 = mirror_boards(board_player1, board_player2)
-    mirrored_player_action = PlayerAction(6)-alpha_beta[1][-current_depth:]
+    mirror_player_actions: Callable = np.vectorize(lambda arr: 6 - arr)
+    mirrored_player_action = list(map(mirror_player_actions, alpha_beta[1][-current_depth:]))
     dictionary[mirrored_board_player1] = {mirrored_board_player2: [alpha_beta[0], mirrored_player_action]}
 
 
