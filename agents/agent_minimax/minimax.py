@@ -1,4 +1,5 @@
 import os
+import platform
 from typing import Tuple, Optional
 from interruptingcow import timeout
 import multiprocessing
@@ -60,13 +61,23 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
     PlayerAction, Optional[SavedState]]:
     depth: int = 1
     move_output = multiprocessing.Value('i', -1)
-    process_minimax = multiprocessing.Process(target=generate_move_loop_to_stop, args=(move_output, board_player_one, board_player_two, player, depth))
-    process_minimax.start()
-    time.sleep(seconds)
-    process_minimax.terminate()
-    process_minimax.join()
 
-    return PlayerAction(move_output.value), None
+    if platform.system() == 'Windows':
+        process_minimax = multiprocessing.Process(target=generate_move_loop_to_stop, args=(move_output, board_player_one, board_player_two, player, depth))
+        process_minimax.start()
+        time.sleep(seconds)
+        process_minimax.terminate()
+        process_minimax.join()
+
+        return PlayerAction(move_output.value), None
+    else:
+        try:
+            with timeout(seconds, exception=RuntimeError):
+                while True:
+                    generate_move_loop_to_stop(move_output, board_player_one, board_player_two, player, depth)
+        except RuntimeError:
+            pass
+        return PlayerAction(move_output.value), None
 
 
 def generate_move_minimax2(board_player_one: int, board_player_two: int, player: BoardPiece,
