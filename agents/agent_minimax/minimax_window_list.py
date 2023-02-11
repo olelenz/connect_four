@@ -31,7 +31,6 @@ MINIMAX_EVALUATION_WINDOWS_LIST = [(140737488355328, 1099511627776, 8589934592, 
         (268435456, 4194304, 65536, 1024), (536870912, 8388608, 131072, 2048), (1073741824, 16777216, 262144, 4096),
         (2097152, 32768, 512, 8), (4194304, 65536, 1024, 16), (8388608, 131072, 2048, 32)]
 
-
 def list_windows() -> [(int, int, int, int)]:
     """
     Builds windows that are represented as board with a single piece (1) by shifting the number 1 in different amounts.
