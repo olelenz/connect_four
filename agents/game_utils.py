@@ -328,7 +328,8 @@ def mirror_boards(board_player1: int, board_player2: int) -> tuple[int, int]:  #
 
 def mirror_player_board(player_board) -> int:  # TODO: refactor and test
     """
-    Mirrors a single board string by bit shifting separate columns and putting them together.
+    Mirrors a single board around the middle column by bit shifting separate
+    columns and putting them together.
 
     Parameters
     ----------
