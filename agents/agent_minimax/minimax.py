@@ -76,8 +76,7 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
     else:
         try:
             with timeout(seconds, exception=RuntimeError):
-                while True:
-                    generate_move_loop_to_stop(move_output, board_player_one, board_player_two, player, depth)
+                generate_move_loop_to_stop(move_output, board_player_one, board_player_two, player, depth)
         except RuntimeError:
             pass
         return PlayerAction(move_output.value), None
