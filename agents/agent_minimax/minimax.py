@@ -15,7 +15,7 @@ FULL_BOARD: int = 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111
 START_VALUE: int = 100
 MAX_VALUE: int = 1_000_000_000_000_000_000
 MIN_MAX_FUNCTIONS = (min, max)
-THREE_PIECES_IN_A_WINDOW_EVAL = 10
+THREE_PIECES_IN_A_WINDOW_EVAL = 6
 
 def generate_move_minimax_id(board_player_one: int, board_player_two: int, player: BoardPiece,
                              saved_state: Optional[SavedState], next_moves: list[int], depth: int = 8) -> list[
@@ -59,7 +59,7 @@ def generate_move_minimax_id(board_player_one: int, board_player_two: int, playe
 
 
 def generate_move_minimax(board_player_one: int, board_player_two: int, player: BoardPiece,
-                          saved_state: Optional[SavedState], seconds: int = 1) -> Tuple[
+                          saved_state: Optional[SavedState], seconds: int = 5) -> Tuple[
     PlayerAction, Optional[SavedState]]:
     depth: int = 1
     move_output = multiprocessing.Value('i', -1)
@@ -132,7 +132,8 @@ def get_alpha(current_depth: int, new_board_player_one: int, new_board_player_tw
     recursion_eval = minimax_rec(current_depth - 1, new_board_player_one, new_board_player_two, BoardPiece(3 - player),
                                  alpha, beta, dictionary, moves_line_new, next_moves, 0, use_mirror)
     alpha = max([alpha, recursion_eval], key=lambda x: x[0])
-    dictionary[new_board_player_one] = {new_board_player_two: [alpha[0], alpha[1][-current_depth:]]}  # possible mistake here
+    #dictionary[new_board_player_one] = {new_board_player_two: [alpha[0], alpha[1][-current_depth:]]}  # possible mistake here
+    dictionary[new_board_player_one] = {new_board_player_two: [alpha[0], alpha[1]]}
     if use_mirror:
         add_mirrored_boards_to_dictionary(new_board_player_one, new_board_player_two, dictionary, alpha, current_depth)
     return alpha
@@ -148,7 +149,8 @@ def get_beta(current_depth: int, new_board_player_one: int, new_board_player_two
     recursion_eval = minimax_rec(current_depth - 1, new_board_player_one, new_board_player_two, BoardPiece(3 - player),
                                  alpha, beta, dictionary, moves_line_new, next_moves, 1, use_mirror)
     beta = min([beta, recursion_eval], key=lambda x: x[0])
-    dictionary[new_board_player_one] = {new_board_player_two: [beta[0], beta[1][-current_depth:]]}  # possible mistake here
+    #dictionary[new_board_player_one] = {new_board_player_two: [beta[0], beta[1][-current_depth:]]}  # possible mistake here
+    dictionary[new_board_player_one] = {new_board_player_two: [beta[0], beta[1]]}
     if use_mirror:
         add_mirrored_boards_to_dictionary(new_board_player_one, new_board_player_two, dictionary, beta, current_depth)
     return beta
@@ -157,7 +159,7 @@ def get_beta(current_depth: int, new_board_player_one: int, new_board_player_two
 def get_eval_from_dictionary(new_board_player_one: int, new_board_player_two: int, dictionary: {}, moves_line: [PlayerAction]) -> int | None:
     try:
         saved_eval = dictionary[new_board_player_one][new_board_player_two]
-        saved_eval[1] = moves_line + saved_eval[1]
+        #saved_eval[1] = moves_line + saved_eval[1]
         return saved_eval
     except KeyError:
         return None
@@ -283,7 +285,7 @@ def evaluate_window(positions: [(int, int, int, int)], board_player1: int, board
         return THREE_PIECES_IN_A_WINDOW_EVAL
     elif counter_player2 == 3:
         return -1 * THREE_PIECES_IN_A_WINDOW_EVAL
-    return counter_player1 - counter_player2
+    return counter_player1**2 - counter_player2**2
 
 
 def evaluate_board_using_windows(board_player1: int, board_player2: int) -> int:
