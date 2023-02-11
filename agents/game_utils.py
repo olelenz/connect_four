@@ -376,10 +376,7 @@ def add_mirrored_boards_to_dictionary(board_player1: int, board_player2: int, di
 
 def use_mirror_functions(board_player1: int, board_player2: int) -> bool:  # TODO: refactor and test
     """
-    Checks if the board could still have mirrored states in the future by checking for overlap between a board and the
-    other players mirrored board  E.g. if player1 has a piece in the bottom left corner and player2 in the bottom right
-    corner, the board is asymmetric and mirrored board states will no longer occur.
-    The goal is to not call mirror functions after this function returns False.
+    Checks if the board is symmetrical around the middle column.
 
     Parameters
     ----------
@@ -393,5 +390,10 @@ def use_mirror_functions(board_player1: int, board_player2: int) -> bool:  # TOD
     bool:
         if board can be mirrored or not
     """
-    # neu machen, rein symmetrische boards
-    return (board_player1 & mirror_player_board(board_player2)) == 0
+    return (board_player1 & COLUMN_0_FILLED == (board_player1 << SHIFT_6_COLUMNS) & COLUMN_0_FILLED) and \
+           (board_player1 & COLUMN_1_FILLED == (board_player1 << SHIFT_4_COLUMNS) & COLUMN_1_FILLED) and \
+           (board_player1 & COLUMN_2_FILLED == (board_player1 << SHIFT_2_COLUMNS) & COLUMN_2_FILLED) and \
+           (board_player2 & COLUMN_0_FILLED == (board_player2 << SHIFT_6_COLUMNS) & COLUMN_0_FILLED) and \
+           (board_player2 & COLUMN_1_FILLED == (board_player2 << SHIFT_4_COLUMNS) & COLUMN_1_FILLED) and \
+           (board_player2 & COLUMN_2_FILLED == (board_player2 << SHIFT_2_COLUMNS) & COLUMN_2_FILLED)
+

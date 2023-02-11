@@ -6,12 +6,13 @@ import time
 
 from agents.game_utils import *
 from agents.saved_state import SavedState
+from minimax_window_list import MINIMAX_EVALUATION_WINDOWS_LIST
 
 FULL_BOARD: int = 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111
 START_VALUE: int = 100
 MAX_VALUE: int = 1_000_000_000_000_000_000
 MIN_MAX_FUNCTIONS = (min, max)
-
+THREE_PIECES_IN_A_WINDOW_EVAL = 10
 
 def generate_move_minimax_id(board_player_one: int, board_player_two: int, player: BoardPiece,
                              saved_state: Optional[SavedState], next_moves: list[int], depth: int = 8) -> list[
@@ -68,6 +69,24 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
     return PlayerAction(move_output.value), None
 
 
+def generate_move_minimax2(board_player_one: int, board_player_two: int, player: BoardPiece,
+                          saved_state: Optional[SavedState], seconds: int = 2.5) -> Tuple[
+    PlayerAction, Optional[SavedState]]:
+    result_action = PlayerAction(-1)
+    evaluation: list[int, [PlayerAction]] = [0, []]
+    start_time = time.time()
+    depth: int = 1
+    while True:
+        evaluation: list[int, [PlayerAction]] = generate_move_minimax_id(board_player_one, board_player_two,
+                                                                         player, None, evaluation[1], depth)
+        print(depth, " moves: ", evaluation[1], " eval: ", evaluation[0])
+        result_action = evaluation[1][0]
+        depth += 1
+        if (time.time() - start_time) > seconds or depth >= len(evaluation[1]) + 4:
+            break
+    return result_action, None
+
+
 def generate_move_loop_to_stop(move_output, board_player_one: int, board_player_two: int, player: BoardPiece, depth: int):
     evaluation: list[int, [PlayerAction]] = [0, []]
     while True:
@@ -118,7 +137,7 @@ def get_alpha(current_depth: int, new_board_player_one: int, new_board_player_tw
     recursion_eval = minimax_rec(current_depth - 1, new_board_player_one, new_board_player_two, BoardPiece(3 - player),
                                  alpha, beta, dictionary, moves_line_new, next_moves, 0)
     alpha = max([alpha, recursion_eval], key=lambda x: x[0])
-    dictionary[new_board_player_one] = {new_board_player_two: [alpha[0], alpha[1][current_depth + 1:]]}  # possible mistake here
+    dictionary[new_board_player_one] = {new_board_player_two: [alpha[0], alpha[1][-current_depth:]]}  # possible mistake here
     return alpha
 
 
@@ -132,7 +151,7 @@ def get_beta(current_depth: int, new_board_player_one: int, new_board_player_two
     recursion_eval = minimax_rec(current_depth - 1, new_board_player_one, new_board_player_two, BoardPiece(3 - player),
                                  alpha, beta, dictionary, moves_line_new, next_moves, 1)
     beta = min([beta, recursion_eval], key=lambda x: x[0])
-    dictionary[new_board_player_one] = {new_board_player_two: [beta[0], beta[1][current_depth + 1:]]}  # possible mistake here
+    dictionary[new_board_player_one] = {new_board_player_two: [beta[0], beta[1][-current_depth:]]}  # possible mistake here
     return beta
 
 
@@ -162,8 +181,6 @@ def handle_empty_moves_eval(player: BoardPiece, game_state: GameState, current_d
         return 0
     else:
         raise AttributeError
-
-
 
 
 def evaluate_position(board_player_one: int, board_player_two: int) -> int:
@@ -232,17 +249,6 @@ def number_of_connected_n(board: int, connected: int) -> int:
     return out
 
 
-def number_of_possible_4_connected_left(board_player1: int, board_player2: int) -> int:
-    empty_positions = empty_board_positions(board_player1, board_player2)
-    player1_possible_4connected = number_of_connected_n(empty_positions & board_player1, 4)
-    player2_possible_4connected = number_of_connected_n(empty_positions & board_player2, 4)
-    return player1_possible_4connected - player2_possible_4connected
-
-
-def empty_board_positions(board_player1: int, board_player2: int) -> int:
-    return 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111 - board_player1 - board_player2
-
-
 def evaluate_window(positions: [(int, int, int, int)], board_player1: int, board_player2: int) -> int:
     """
     Evaluates a single window, with emphasis on having 3 in a window and/or not sharing a window with pieces of the
@@ -272,48 +278,13 @@ def evaluate_window(positions: [(int, int, int, int)], board_player1: int, board
     # return 0 if both player have pieces in the window, or both have none
     if (counter_player1 > 0 and counter_player2 > 0) or counter_player1 == counter_player2:
         return 0
+
     # putting more weight on 3 pieces in a window
     if counter_player1 == 3:
-        return 10
+        return THREE_PIECES_IN_A_WINDOW_EVAL
     elif counter_player2 == 3:
-        return -10
+        return -1 * THREE_PIECES_IN_A_WINDOW_EVAL
     return counter_player1 - counter_player2
-
-
-def list_windows() -> [(int, int, int, int)]:
-    """
-    Builds windows that are represented as board with a single piece (1) by shifting the number 1 in different amounts.
-
-    Returns
-    -------
-    [int]:
-        List of 69 possible 4-in-a-row windows as tuples.
-        24 horizontal, 21 vertical, 12 diagonal-up, 12 diagonal-down
-    """
-    # 0b0000000_0000000_0000000_0000000_0000000_0000000_0000001 for reference
-    result: [(int, int, int, int)] = []
-
-    # horizontal windows
-    for column_offset in range(4):
-        for row_offset in range(6):
-            result += [(1 << (47 - 7 * column_offset - row_offset), 1 << (40 - 7 * column_offset - row_offset),
-                        1 << (33 - 7 * column_offset - row_offset), 1 << (26 - 7 * column_offset - row_offset))]
-
-    # vertical windows
-    for column_offset in range(7):
-        for row_offset in range(3):
-            result += [(1 << (47 - 7 * column_offset - row_offset), 1 << (46 - 7 * column_offset - row_offset),
-                        1 << (45 - 7 * column_offset - row_offset), 1 << (44 - 7 * column_offset - row_offset))]
-
-    # diagonal-up windows
-    for position in [47, 46, 45, 40, 39, 38, 33, 32, 31, 26, 25, 24]:
-        result += [(1 << position, 1 << (position - 8), 1 << (position - 16), 1 << (position - 24))]
-
-    # diagonal-down window
-    for position in [42, 43, 44, 35, 36, 37, 28, 29, 30, 21, 22, 23]:
-        result += [(1 << position, 1 << (position - 6), 1 << (position - 12), 1 << (position - 18))]
-
-    return result
 
 
 def evaluate_board_using_windows(board_player1: int, board_player2: int) -> int:
@@ -334,7 +305,7 @@ def evaluate_board_using_windows(board_player1: int, board_player2: int) -> int:
 
     """
     board_score = 0
-    for window in list_windows():
+    for window in MINIMAX_EVALUATION_WINDOWS_LIST:
         board_score += evaluate_window(window, board_player1, board_player2)
     return board_score
 
