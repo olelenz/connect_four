@@ -34,17 +34,17 @@ HEIGHT_BOARD: int = HEIGHT_PRINT_BOARD - HEIGHT_TOP_PRINT_BOARD - HEIGHT_BOTTOM_
 MOVE_ORDER: [PlayerAction] = [3, 2, 4, 1, 5, 0, 6]
 DICT_EMPTY_BOARDS: {int: {int: [int, [int]]}} = {EMPTY_BOARD: {EMPTY_BOARD: [0, [3, 3, 3, 3, 3]]}}
 
-COLUMN_0_FILLED = 0b0111111_0000000_0000000_0000000_0000000_0000000_0000000
-COLUMN_1_FILLED = 0b0000000_0111111_0000000_0000000_0000000_0000000_0000000
-COLUMN_2_FILLED = 0b0000000_0000000_0111111_0000000_0000000_0000000_0000000
-COLUMN_3_FILLED = 0b0000000_0000000_0000000_0111111_0000000_0000000_0000000
-COLUMN_4_FILLED = 0b0000000_0000000_0000000_0000000_0111111_0000000_0000000
-COLUMN_5_FILLED = 0b0000000_0000000_0000000_0000000_0000000_0111111_0000000
-COLUMN_6_FILLED = 0b0000000_0000000_0000000_0000000_0000000_0000000_0111111
+COLUMN_0_FILLED: int = 0b0111111_0000000_0000000_0000000_0000000_0000000_0000000
+COLUMN_1_FILLED: int = 0b0000000_0111111_0000000_0000000_0000000_0000000_0000000
+COLUMN_2_FILLED: int = 0b0000000_0000000_0111111_0000000_0000000_0000000_0000000
+COLUMN_3_FILLED: int = 0b0000000_0000000_0000000_0111111_0000000_0000000_0000000
+COLUMN_4_FILLED: int = 0b0000000_0000000_0000000_0000000_0111111_0000000_0000000
+COLUMN_5_FILLED: int = 0b0000000_0000000_0000000_0000000_0000000_0111111_0000000
+COLUMN_6_FILLED: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0111111
 
-SHIFT_6_COLUMNS = 42
-SHIFT_4_COLUMNS = 28
-SHIFT_2_COLUMNS = 14
+SHIFT_6_COLUMNS: int = 42
+SHIFT_4_COLUMNS: int = 28
+SHIFT_2_COLUMNS: int = 14
 
 
 
@@ -340,15 +340,15 @@ def mirror_player_board(player_board) -> int:  # TODO: refactor and test
     int:
         The mirrored board
     """
-    new_column_0 = COLUMN_0_FILLED & (player_board << SHIFT_6_COLUMNS)
+    new_column_0: int = COLUMN_0_FILLED & (player_board << SHIFT_6_COLUMNS)
     # shifts the board to the left so that column 6 is in place
     # of column 0, then removes the other columns
-    new_column_1 = COLUMN_1_FILLED & (player_board << SHIFT_4_COLUMNS)
-    new_column_2 = COLUMN_2_FILLED & (player_board << SHIFT_2_COLUMNS)
-    new_column_3 = COLUMN_3_FILLED & player_board  # not shifted because in the middle
-    new_column_4 = COLUMN_4_FILLED & (player_board >> SHIFT_2_COLUMNS)
-    new_column_5 = COLUMN_5_FILLED & (player_board >> SHIFT_4_COLUMNS)
-    new_column_6 = COLUMN_6_FILLED & (player_board >> SHIFT_6_COLUMNS)
+    new_column_1: int = COLUMN_1_FILLED & (player_board << SHIFT_4_COLUMNS)
+    new_column_2: int = COLUMN_2_FILLED & (player_board << SHIFT_2_COLUMNS)
+    new_column_3: int = COLUMN_3_FILLED & player_board  # not shifted because in the middle
+    new_column_4: int = COLUMN_4_FILLED & (player_board >> SHIFT_2_COLUMNS)
+    new_column_5: int = COLUMN_5_FILLED & (player_board >> SHIFT_4_COLUMNS)
+    new_column_6: int = COLUMN_6_FILLED & (player_board >> SHIFT_6_COLUMNS)
     return new_column_0 | new_column_1 | new_column_2 | new_column_3 | new_column_4 | new_column_5 | new_column_6  # puts all the columns together
 
 
