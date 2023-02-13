@@ -16,6 +16,9 @@ MIRRORED_EXAMPLE_BOARD: int = 0b000100_0000000_0000001_0000010_0000110_0001011_0
 LEFT_TOWER_ONE_BOARD: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000001
 LEFT_TOWER_TWO_BOARD: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000010
 
+MIDDLE_TOWER_ONE_BOARD: int = 0b0000000_0000000_0000000_0000001_0000000_0000000_0000000
+MIDDLE_TOWER_TWO_BOARD: int = 0b0000000_0000000_0000000_0000010_0000000_0000000_0000000
+
 RIGHT_TOWER_ONE_BOARD: int = 0b0000001_0000000_0000000_0000000_0000000_0000000_0000000
 RIGHT_TOWER_TWO_BOARD: int = 0b0000010_0000000_0000000_0000000_0000000_0000000_0000000
 
@@ -91,13 +94,22 @@ def test_mirror_boards():
 def test_add_mirrored_boards_to_dictionary():
     dictionary = {-1: {}}
     add_mirrored_boards_to_dictionary(LEFT_TOWER_ONE_BOARD, LEFT_TOWER_TWO_BOARD, dictionary, [10, [1, 1, 2]], 1)
+    # mirrored boards should be in the dictionary
     ret = dictionary[RIGHT_TOWER_ONE_BOARD][RIGHT_TOWER_TWO_BOARD]
     # current depth 1 means that the action in the list at depth 2 (index 2) will be mirrored, so 2 turns into 4
     assert ret == [10, 4]
 
 
-def test_use_mirror_functions():
-    assert use_mirror_functions(LEFT_TOWER_ONE_BOARD, LEFT_TOWER_TWO_BOARD) and not use_mirror_functions(LEFT_TOWER_ONE_BOARD, RIGHT_TOWER_ONE_BOARD)
+def test_use_mirror_functions_one():
+    assert use_mirror_functions(EMPTY_BOARD, EMPTY_BOARD)
+
+
+def test_use_mirror_functions_two():
+    assert use_mirror_functions(MIDDLE_TOWER_ONE_BOARD, MIDDLE_TOWER_TWO_BOARD)
+
+
+def test_use_mirror_functions_three():
+    assert not use_mirror_functions(LEFT_TOWER_ONE_BOARD, RIGHT_TOWER_ONE_BOARD)
 
 
 def test_ideas():

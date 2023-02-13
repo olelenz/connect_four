@@ -373,7 +373,7 @@ def mirror_player_board(player_board) -> int:
 
 def add_mirrored_boards_to_dictionary(board_player1: int, board_player2: int, dictionary, alpha_beta: list[int, [PlayerAction]], current_depth: int):  # TODO: refactor and test
     """
-    Uses the mirror functions to add a mirrored board, its evaluation and playeraction to the dictionary.
+    Uses the mirror functions to add a mirrored board, its evaluation and mirrored playeractions to the dictionary.
 
     Parameters
     ----------
@@ -384,20 +384,20 @@ def add_mirrored_boards_to_dictionary(board_player1: int, board_player2: int, di
     dictionary: {}
         Dictionary  # should be reference of dictionary
     alpha_beta: tuple[int, int]
-        Tuple that contains evaluation and playeraction
+        Tuple that contains evaluation and playeractions
     current_depth: int
         Depth in the minimax algorithm
 
     """
     mirrored_board_player1, mirrored_board_player2 = mirror_boards(board_player1, board_player2)
-    mirror_player_actions: Callable = np.vectorize(lambda arr: 6 - arr)
+    mirror_player_actions: Callable = np.vectorize(lambda arr: 6 - arr)  # mirrors each action in the move list
     mirrored_player_action = list(map(mirror_player_actions, alpha_beta[1]))
     dictionary[mirrored_board_player1] = {mirrored_board_player2: [alpha_beta[0], mirrored_player_action]}
 
 
 def use_mirror_functions(board_player1: int, board_player2: int) -> bool:  # TODO: refactor and test
     """
-    Checks if the board is symmetrical around the middle column. This is accomplished by selecting 2 column,
+    Checks if the board is symmetrical around the middle column. This is accomplished by selecting 2 columns,
     removing the other columns,  shifting them to the same position and using logical operations to evaluate if they
     are equal or not.
     This is done 3 times per player.
@@ -412,7 +412,7 @@ def use_mirror_functions(board_player1: int, board_player2: int) -> bool:  # TOD
     Returns
     -------
     bool:
-        if board can be mirrored or not
+        if mirror functions should be used in minimax or not
     """
     return (board_player1 & COLUMN_0_FILLED == (board_player1 << SHIFT_6_COLUMNS) & COLUMN_0_FILLED) and \
            (board_player1 & COLUMN_1_FILLED == (board_player1 << SHIFT_4_COLUMNS) & COLUMN_1_FILLED) and \
