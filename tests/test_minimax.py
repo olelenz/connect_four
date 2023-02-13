@@ -1,6 +1,5 @@
 import pytest
 
-from agents.agent_minimax.minimax import handle_empty_moves_eval, START_VALUE, get_possible_moves_iterative
 from agents.game_utils import *
 from agents.agent_minimax.minimax_window_list import MINIMAX_EVALUATION_WINDOWS_LIST, list_windows
 
@@ -10,6 +9,14 @@ DRAW_PLAYER_ONE: int = 0b0001010_0010101_0111011_0101110_0000100_0010100_0100011
 DRAW_PLAYER_TWO: int = 0b0110101_0101010_0000100_0010001_0111011_0101011_0011100
 DIAGONAL_BOARD_LEFT_TOP: int = 0b0000000_0000000_0000001_0000010_0000100_0001000_0000000
 
+EXAMPLE_BOARD: int = 0b0000000_0001011_0000110_0000000_0000001_0000000_0000100
+MIRRORED_EXAMPLE_BOARD: int = 0b000100_0000000_0000001_0000010_0000110_0001011_0000000
+
+LEFT_TOWER_ONE_BOARD: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000001
+LEFT_TOWER_TWO_BOARD: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000010
+
+RIGHT_TOWER_ONE_BOARD: int = 0b0000001_0000000_0000000_0000000_0000000_0000000_0000000
+RIGHT_TOWER_TWO_BOARD: int = 0b0000010_0000000_0000000_0000000_0000000_0000000_0000000
 
 def test_handle_empty_moves_eval_draw():
     ret = handle_empty_moves_eval(PLAYER1, GameState.IS_DRAW, 4)
@@ -69,7 +76,29 @@ def test_list_windows():
     ret = list_windows()
     assert ret == MINIMAX_EVALUATION_WINDOWS_LIST
 
-    
+
+def test_mirror_player_board():
+    ret = mirror_player_board(EXAMPLE_BOARD)
+    assert ret == MIRRORED_EXAMPLE_BOARD
+
+
+def test_mirror_boards():
+    ret = mirror_boards(EXAMPLE_BOARD, MIRRORED_EXAMPLE_BOARD)
+    assert ret == (MIRRORED_EXAMPLE_BOARD, EXAMPLE_BOARD)
+
+
+def test_add_mirrored_boards_to_dictionary():
+    dictionary = {-1: {}}
+    add_mirrored_boards_to_dictionary(LEFT_TOWER_ONE_BOARD, LEFT_TOWER_TWO_BOARD, dictionary, [10, [1, 1, 2]], 1)
+    ret = dictionary[RIGHT_TOWER_ONE_BOARD][RIGHT_TOWER_TWO_BOARD]
+    # current depth 1 means that the action in the list at depth 2 (index 2) will be mirrored, so 2 turns into 4
+    assert ret == [10, 4]
+
+
+def test_use_mirror_functions():
+    assert use_mirror_functions(LEFT_TOWER_ONE_BOARD, LEFT_TOWER_TWO_BOARD) and not use_mirror_functions(LEFT_TOWER_ONE_BOARD, RIGHT_TOWER_ONE_BOARD)
+
+
 def test_ideas():
     print("hello")
     '''

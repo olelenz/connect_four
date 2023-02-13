@@ -32,8 +32,6 @@ FULL_NO_WIN_BOARD: int = 0b0000000_0001011_0000110_0000000_0000001_0000000_00001
 DRAW_PLAYER_ONE: int = 0b0001010_0010101_0111011_0101110_0000100_0010100_0100011
 DRAW_PLAYER_TWO: int = 0b0110101_0101010_0000100_0010001_0111011_0101011_0011100
 
-FULL_WIN_BOARD_MIRRORED: int = 0b000100_0000000_0000001_0000010_0000110_0001011_0000000
-
 
 def test_initialize_game_state():
     board_player_one, board_player_two = initialize_game_state()
@@ -265,24 +263,4 @@ def test_get_possible_moves_player_two_won():
 def test_ideas():
     pass
 
-
-def test_mirror_player_board():
-    ret = mirror_player_board(FULL_WIN_BOARD)
-    assert ret == FULL_WIN_BOARD_MIRRORED
-
-
-def test_mirror_boards():
-    ret = mirror_boards(FULL_WIN_BOARD, FULL_WIN_BOARD_MIRRORED)
-    assert ret == (FULL_WIN_BOARD_MIRRORED, FULL_WIN_BOARD)
-
-
-def test_add_mirrored_boards_to_dictionary():
-    dictionary = {-1: {}}
-    add_mirrored_boards_to_dictionary(LEFT_TOWER_ONE_BOARD, LEFT_TOWER_TWO_BOARD, dictionary, [10, [1, 1, 2]], 1)
-    ret = dictionary[RIGHT_TOWER_ONE_BOARD][RIGHT_TOWER_TWO_BOARD]
-    assert ret == [10, 4]
-
-
-def test_use_mirror_functions():
-    assert use_mirror_functions(LEFT_TOWER_ONE_BOARD, LEFT_TOWER_TWO_BOARD) and not use_mirror_functions(LEFT_TOWER_ONE_BOARD, RIGHT_TOWER_ONE_BOARD)
 

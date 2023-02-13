@@ -15,7 +15,20 @@ FULL_BOARD: int = 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111
 START_VALUE: int = 100
 MAX_VALUE: int = 1_000_000_000_000_000_000
 MIN_MAX_FUNCTIONS = (min, max)
-THREE_PIECES_IN_A_WINDOW_EVAL = 6
+THREE_PIECES_IN_A_WINDOW_EVAL: int = 6
+
+COLUMN_0_FILLED: int = 0b0111111_0000000_0000000_0000000_0000000_0000000_0000000
+COLUMN_1_FILLED: int = 0b0000000_0111111_0000000_0000000_0000000_0000000_0000000
+COLUMN_2_FILLED: int = 0b0000000_0000000_0111111_0000000_0000000_0000000_0000000
+COLUMN_3_FILLED: int = 0b0000000_0000000_0000000_0111111_0000000_0000000_0000000
+COLUMN_4_FILLED: int = 0b0000000_0000000_0000000_0000000_0111111_0000000_0000000
+COLUMN_5_FILLED: int = 0b0000000_0000000_0000000_0000000_0000000_0111111_0000000
+COLUMN_6_FILLED: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0111111
+
+SHIFT_6_COLUMNS: int = 42
+SHIFT_4_COLUMNS: int = 28
+SHIFT_2_COLUMNS: int = 14
+
 
 def generate_move_minimax_id(board_player_one: int, board_player_two: int, player: BoardPiece,
                              saved_state: Optional[SavedState], next_moves: list[int], depth: int = 8) -> list[
@@ -309,4 +322,102 @@ def evaluate_board_using_windows(board_player1: int, board_player2: int) -> int:
     for window in MINIMAX_EVALUATION_WINDOWS_LIST:
         board_score += evaluate_window(window, board_player1, board_player2)
     return board_score
+
+
+def mirror_boards(board_player1: int, board_player2: int) -> tuple[int, int]:
+    """
+    Mirrors the board by mirroring both player's board string
+
+    Parameters
+    ----------
+    board_player1: int
+        Board of player 1
+
+    board_player2: int
+        Board of player 2
+
+    Returns
+    -------
+    tuple[int, int]:
+        2 mirrored boards
+    """
+    return mirror_player_board(board_player1), mirror_player_board(board_player2)
+
+
+def mirror_player_board(player_board) -> int:
+    """
+    Mirrors a single board around the middle column by bit shifting separate
+    columns and putting them together.
+
+    Parameters
+    ----------
+    player_board:
+        The players board
+
+    Returns
+    -------
+    int:
+        The mirrored board
+    """
+    new_column_0: int = COLUMN_0_FILLED & (player_board << SHIFT_6_COLUMNS)
+    # shifts the board to the left so that column 6 is in place
+    # of column 0, then removes the other columns
+    new_column_1: int = COLUMN_1_FILLED & (player_board << SHIFT_4_COLUMNS)
+    new_column_2: int = COLUMN_2_FILLED & (player_board << SHIFT_2_COLUMNS)
+    new_column_3: int = COLUMN_3_FILLED & player_board  # not shifted because in the middle
+    new_column_4: int = COLUMN_4_FILLED & (player_board >> SHIFT_2_COLUMNS)
+    new_column_5: int = COLUMN_5_FILLED & (player_board >> SHIFT_4_COLUMNS)
+    new_column_6: int = COLUMN_6_FILLED & (player_board >> SHIFT_6_COLUMNS)
+    return new_column_0 | new_column_1 | new_column_2 | new_column_3 | new_column_4 | new_column_5 | new_column_6  # puts all the columns together
+
+
+def add_mirrored_boards_to_dictionary(board_player1: int, board_player2: int, dictionary, alpha_beta: list[int, [PlayerAction]], current_depth: int):  # TODO: refactor and test
+    """
+    Uses the mirror functions to add a mirrored board, its evaluation and playeraction to the dictionary.
+
+    Parameters
+    ----------
+    board_player1: int
+        Board player1
+    board_player2: int
+        Board player2
+    dictionary: {}
+        Dictionary  # should be reference of dictionary
+    alpha_beta: tuple[int, int]
+        Tuple that contains evaluation and playeraction
+    current_depth: int
+        Depth in the minimax algorithm
+
+    """
+    mirrored_board_player1, mirrored_board_player2 = mirror_boards(board_player1, board_player2)
+    mirror_player_actions: Callable = np.vectorize(lambda arr: 6 - arr)
+    mirrored_player_action = list(map(mirror_player_actions, alpha_beta[1]))
+    dictionary[mirrored_board_player1] = {mirrored_board_player2: [alpha_beta[0], mirrored_player_action]}
+
+
+def use_mirror_functions(board_player1: int, board_player2: int) -> bool:  # TODO: refactor and test
+    """
+    Checks if the board is symmetrical around the middle column. This is accomplished by selecting 2 column,
+    removing the other columns,  shifting them to the same position and using logical operations to evaluate if they
+    are equal or not.
+    This is done 3 times per player.
+
+    Parameters
+    ----------
+    board_player1: int
+        Board player1
+    board_player2: int
+        Board player2
+
+    Returns
+    -------
+    bool:
+        if board can be mirrored or not
+    """
+    return (board_player1 & COLUMN_0_FILLED == (board_player1 << SHIFT_6_COLUMNS) & COLUMN_0_FILLED) and \
+           (board_player1 & COLUMN_1_FILLED == (board_player1 << SHIFT_4_COLUMNS) & COLUMN_1_FILLED) and \
+           (board_player1 & COLUMN_2_FILLED == (board_player1 << SHIFT_2_COLUMNS) & COLUMN_2_FILLED) and \
+           (board_player2 & COLUMN_0_FILLED == (board_player2 << SHIFT_6_COLUMNS) & COLUMN_0_FILLED) and \
+           (board_player2 & COLUMN_1_FILLED == (board_player2 << SHIFT_4_COLUMNS) & COLUMN_1_FILLED) and \
+           (board_player2 & COLUMN_2_FILLED == (board_player2 << SHIFT_2_COLUMNS) & COLUMN_2_FILLED)
 
