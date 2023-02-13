@@ -1,5 +1,6 @@
 import pytest
 
+from agents.agent_minimax.minimax import handle_empty_moves_eval, START_VALUE, get_possible_moves_iterative, mirror_boards, mirror_player_board, add_mirrored_boards_to_dictionary, use_mirror_functions
 from agents.game_utils import *
 from agents.agent_minimax.minimax_window_list import MINIMAX_EVALUATION_WINDOWS_LIST, list_windows
 
