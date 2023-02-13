@@ -31,6 +31,12 @@ MINIMAX_EVALUATION_WINDOWS_LIST = [(140737488355328, 1099511627776, 8589934592, 
         (268435456, 4194304, 65536, 1024), (536870912, 8388608, 131072, 2048), (1073741824, 16777216, 262144, 4096),
         (2097152, 32768, 512, 8), (4194304, 65536, 1024, 16), (8388608, 131072, 2048, 32)]
 
+DIAGONAL_UP_WINDOW_STARTING_POINTS = [47, 46, 45, 40, 39, 38, 33, 32, 31, 26, 25, 24]
+DIAGONAL_DOWN_WINDOW_STARTING_POINTS = [42, 43, 44, 35, 36, 37, 28, 29, 30, 21, 22, 23]
+HORIZONTAL_WINDOW_STARTING_POINTS = [47, 46, 45, 44, 43, 42, 40, 39, 38, 37, 36, 35, 33, 32, 31, 30, 29, 28, 26, 25, 24, 23, 22, 21]
+VERTICAL_WINDOW_STARTING_POINTS = [47, 46, 45, 40, 39, 38, 33, 32, 31, 26, 25, 24, 19, 18, 17, 12, 11, 10, 5, 4, 3]
+
+
 def list_windows() -> [(int, int, int, int)]:
     """
     Builds windows that are represented as board with a single piece (1) by shifting the number 1 in different amounts.
@@ -45,23 +51,21 @@ def list_windows() -> [(int, int, int, int)]:
     result: [(int, int, int, int)] = []
 
     # horizontal windows
-    #
-    for column_offset in range(4):
-        for row_offset in range(6):
-            result += [(1 << (47 - 7 * column_offset - row_offset), 1 << (40 - 7 * column_offset - row_offset),
-                        1 << (33 - 7 * column_offset - row_offset), 1 << (26 - 7 * column_offset - row_offset))]
+    # adds a tuple with 4 positions represented as bitboards (that contain 1 player piece each) to a list
+    # the first position of the window is determined by different starting points of the windows
+    # different orientation such as horizontal/vertical/diagonal are realized by using bit shifting specific amounts
+    for bit_shift_amount in HORIZONTAL_WINDOW_STARTING_POINTS:
+        result += [(1 << bit_shift_amount, 1 << (bit_shift_amount - 7), 1 << (bit_shift_amount - 14), 1 << (bit_shift_amount - 21))]
 
     # vertical windows
-    for column_offset in range(7):
-        for row_offset in range(3):
-            result += [(1 << (47 - 7 * column_offset - row_offset), 1 << (46 - 7 * column_offset - row_offset),
-                        1 << (45 - 7 * column_offset - row_offset), 1 << (44 - 7 * column_offset - row_offset))]
+    for bit_shift_amount in VERTICAL_WINDOW_STARTING_POINTS:
+        result += [(1 << bit_shift_amount, 1 << (bit_shift_amount - 1), 1 << (bit_shift_amount - 2), 1 << (bit_shift_amount - 3))]
 
     # diagonal-up windows
-    for position in [47, 46, 45, 40, 39, 38, 33, 32, 31, 26, 25, 24]:
-        result += [(1 << position, 1 << (position - 8), 1 << (position - 16), 1 << (position - 24))]
+    for bit_shift_amount in DIAGONAL_UP_WINDOW_STARTING_POINTS:
+        result += [(1 << bit_shift_amount, 1 << (bit_shift_amount - 8), 1 << (bit_shift_amount - 16), 1 << (bit_shift_amount - 24))]
 
     # diagonal-down window
-    for position in [42, 43, 44, 35, 36, 37, 28, 29, 30, 21, 22, 23]:
-        result += [(1 << position, 1 << (position - 6), 1 << (position - 12), 1 << (position - 18))]
+    for bit_shift_amount in DIAGONAL_DOWN_WINDOW_STARTING_POINTS:
+        result += [(1 << bit_shift_amount, 1 << (bit_shift_amount - 6), 1 << (bit_shift_amount - 12), 1 << (bit_shift_amount - 18))]
     return result

@@ -2,11 +2,14 @@ import pytest
 
 from agents.agent_minimax.minimax import handle_empty_moves_eval, START_VALUE, get_possible_moves_iterative
 from agents.game_utils import *
+from agents.agent_minimax.minimax_window_list import MINIMAX_EVALUATION_WINDOWS_LIST, list_windows
+
 
 EMPTY_BOARD: int = 0b0000000_0000000_0000000_0000000_0000000_0000000_0000000
 DRAW_PLAYER_ONE: int = 0b0001010_0010101_0111011_0101110_0000100_0010100_0100011
 DRAW_PLAYER_TWO: int = 0b0110101_0101010_0000100_0010001_0111011_0101011_0011100
 DIAGONAL_BOARD_LEFT_TOP: int = 0b0000000_0000000_0000001_0000010_0000100_0001000_0000000
+
 
 def test_handle_empty_moves_eval_draw():
     ret = handle_empty_moves_eval(PLAYER1, GameState.IS_DRAW, 4)
@@ -62,6 +65,11 @@ def test_get_possible_moves_iterative_full_next_moves():
     assert game_state == GameState.STILL_PLAYING
 
 
+def test_list_windows():
+    ret = list_windows()
+    assert ret == MINIMAX_EVALUATION_WINDOWS_LIST
+
+    
 def test_ideas():
     print("hello")
     '''
