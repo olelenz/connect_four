@@ -263,14 +263,14 @@ def number_of_connected_n(board: int, connected: int) -> int:
     return out
 
 
-def evaluate_window(positions: [(int, int, int, int)], board_player1: int, board_player2: int) -> int:
+def evaluate_window(window_positions: [(int, int, int, int)], board_player1: int, board_player2: int) -> int:
     """
     Evaluates a single window, with emphasis on having 3 in a window and/or not sharing a window with pieces of the
     other player. Does not check for 4-connect as its checked elsewhere.
 
     Parameters
     ----------
-    positions: [int]
+    window_positions: [int]
         List of positions, represented as a board with a single piece on it.
     board_player1: int
         Board of player 1.
@@ -282,23 +282,24 @@ def evaluate_window(positions: [(int, int, int, int)], board_player1: int, board
     :int
         Score of the window
     """
-    counter_player1: int = 0
-    counter_player2: int = 0
-    for position in positions:  # count player pieces in the window
+    number_of_player1_pieces: int = 0
+    number_of_player2_pieces: int = 0
+    for position in window_positions:  # counts player pieces in the window
         if (position & board_player1) > 0:
-            counter_player1 += 1
+            number_of_player1_pieces += 1
         elif (position & board_player2) > 0:
-            counter_player2 += 1
+            number_of_player2_pieces += 1
     # return 0 if both player have pieces in the window, or both have none
-    if (counter_player1 > 0 and counter_player2 > 0) or counter_player1 == counter_player2:
+    if (number_of_player1_pieces > 0 and number_of_player2_pieces > 0) or \
+            number_of_player1_pieces == number_of_player2_pieces:
         return 0
-
-    # putting more weight on 3 pieces in a window
-    if counter_player1 == 3:
+    # putting more weight on 3 pieces in a window, managed with global variable
+    elif number_of_player1_pieces == 3:
         return THREE_PIECES_IN_A_WINDOW_EVAL
-    elif counter_player2 == 3:
+    elif number_of_player2_pieces == 3:
         return -1 * THREE_PIECES_IN_A_WINDOW_EVAL
-    return counter_player1**2 - counter_player2**2
+    # returns 1 or 4 points depending on amount of pieces
+    return number_of_player1_pieces**2 - number_of_player2_pieces**2
 
 
 def evaluate_board_using_windows(board_player1: int, board_player2: int) -> int:
