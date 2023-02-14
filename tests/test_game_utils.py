@@ -258,9 +258,3 @@ def test_get_possible_moves_player_one_won():
 def test_get_possible_moves_player_two_won():
     ret = get_possible_moves(EMPTY_BOARD, DIAGONAL_BOARD_RIGHT_TOP, PLAYER1)
     assert ret == ([], GameState.IS_WIN)
-
-
-def test_ideas():
-    pass
-
-

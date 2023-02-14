@@ -291,5 +291,3 @@ def get_possible_moves(board_player_one: int, board_player_two: int, player: Boa
         if board_both_players & (1 << (i * (HEIGHT_BOARD+1) + (HEIGHT_BOARD-1))):  # check for top piece in column
             out.remove(i)
     return out, game_state
-
-
