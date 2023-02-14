@@ -1,6 +1,6 @@
 import pytest
 
-from agents.agent_minimax.minimax import handle_empty_moves_eval, START_VALUE, get_possible_moves_iterative, mirror_boards, mirror_player_board, add_mirrored_boards_to_dictionary, use_mirror_functions
+from agents.agent_minimax.minimax import handle_empty_moves_eval, START_VALUE, get_possible_moves_iterative, mirror_boards, mirror_player_board, add_mirrored_boards_to_dictionary, use_mirror_functions, evaluate_board_using_windows, evaluate_window
 from agents.game_utils import *
 from agents.agent_minimax.minimax_window_list import MINIMAX_EVALUATION_WINDOWS_LIST, list_windows
 
@@ -21,6 +21,15 @@ MIDDLE_TOWER_TWO_BOARD: int = 0b0000000_0000000_0000000_0000010_0000000_0000000_
 
 RIGHT_TOWER_ONE_BOARD: int = 0b0000001_0000000_0000000_0000000_0000000_0000000_0000000
 RIGHT_TOWER_TWO_BOARD: int = 0b0000010_0000000_0000000_0000000_0000000_0000000_0000000
+
+RIGHT_TOWER_TWO_IN_A_ROW: int = 0b0000011_0000000_0000000_0000000_0000000_0000000_0000000
+RIGHT_TOWER_THREE_IN_A_ROW: int = 0b0000111_0000000_0000000_0000000_0000000_0000000_0000000
+
+TEST_WINDOW_RIGHT_TOWER: (int, int, int, int) = (0b0000001_0000000_0000000_0000000_0000000_0000000_0000000,
+                                                 0b0000010_0000000_0000000_0000000_0000000_0000000_0000000,
+                                                 0b0000100_0000000_0000000_0000000_0000000_0000000_0000000,
+                                                 0b0001000_0000000_0000000_0000000_0000000_0000000_0000000)
+
 
 def test_handle_empty_moves_eval_draw():
     ret = handle_empty_moves_eval(PLAYER1, GameState.IS_DRAW, 4)
@@ -109,6 +118,43 @@ def test_use_mirror_functions_two():
 
 def test_use_mirror_functions_three():
     assert not use_mirror_functions(LEFT_TOWER_ONE_BOARD, RIGHT_TOWER_ONE_BOARD)
+
+
+def test_evaluate_board_using_windows_one():
+    res = evaluate_board_using_windows(LEFT_TOWER_ONE_BOARD, RIGHT_TOWER_ONE_BOARD)
+    assert res == 0
+
+
+def test_evaluate_board_using_windows_two():
+    res = evaluate_board_using_windows(LEFT_TOWER_ONE_BOARD, EMPTY_BOARD)
+    assert res == 3
+
+
+def test_evaluate_board_using_windows_three():
+    res = evaluate_board_using_windows(RIGHT_TOWER_THREE_IN_A_ROW, LEFT_TOWER_ONE_BOARD)
+    # explanation: Player 1: 3-window: 6 points, 2-window: 4 points, 7x 1-window: 7 points = 17 points
+    # Player 2: 3x 1-window: -3 points -> 17 - 3 = 14
+    assert res == 14
+
+
+def test_evaluate_window_one():
+    res = evaluate_window(TEST_WINDOW_RIGHT_TOWER, RIGHT_TOWER_ONE_BOARD, LEFT_TOWER_ONE_BOARD)
+    assert res == 1
+
+
+def test_evaluate_window_two():
+    res = evaluate_window(TEST_WINDOW_RIGHT_TOWER, RIGHT_TOWER_ONE_BOARD, RIGHT_TOWER_TWO_BOARD)
+    assert res == 0
+
+
+def test_evaluate_window_three():
+    res = evaluate_window(TEST_WINDOW_RIGHT_TOWER, RIGHT_TOWER_TWO_IN_A_ROW, LEFT_TOWER_ONE_BOARD)
+    assert res == 4
+
+
+def test_evaluate_window_four():
+    res = evaluate_window(TEST_WINDOW_RIGHT_TOWER, RIGHT_TOWER_THREE_IN_A_ROW, LEFT_TOWER_ONE_BOARD)
+    assert res == 6
 
 
 def test_ideas():
