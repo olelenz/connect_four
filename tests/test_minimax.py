@@ -2,7 +2,7 @@ import pytest
 
 from agents.agent_minimax.minimax import handle_empty_moves_eval, START_VALUE, get_possible_moves_iterative, \
     mirror_boards, mirror_player_board, add_mirrored_boards_to_dictionary, use_mirror_functions, \
-    evaluate_board_using_windows, evaluate_window, calculate_evaluation_score
+    evaluate_board_using_windows, evaluate_window, calculate_evaluation_score, get_eval_from_dictionary
 from agents.game_utils import *
 from agents.agent_minimax.minimax_window_list import MINIMAX_EVALUATION_WINDOWS_LIST, list_windows
 
@@ -32,6 +32,7 @@ TEST_WINDOW_RIGHT_TOWER: (int, int, int, int) = (0b0000001_0000000_0000000_00000
                                                  0b0000100_0000000_0000000_0000000_0000000_0000000_0000000,
                                                  0b0001000_0000000_0000000_0000000_0000000_0000000_0000000)
 
+EXAMPLE_DICTIONARY_ENTRY: [int, [int]] = [1, [1, 2, 3]]
 
 def test_handle_empty_moves_eval_draw():
     ret = handle_empty_moves_eval(PLAYER1, GameState.IS_DRAW, 4)
@@ -85,6 +86,17 @@ def test_get_possible_moves_iterative_full_next_moves():
     moves = [PlayerAction(5)]+moves
     assert ret_actions == moves
     assert game_state == GameState.STILL_PLAYING
+
+
+def test_get_eval_from_dictionary_not_existing():
+    ret = get_eval_from_dictionary(EMPTY_BOARD, EMPTY_BOARD, {})
+    assert ret is None
+
+
+def test_get_eval_from_dictionary_entry_existing():
+    dictionary = {EMPTY_BOARD: {EMPTY_BOARD: EXAMPLE_DICTIONARY_ENTRY}}
+    ret = get_eval_from_dictionary(EMPTY_BOARD, EMPTY_BOARD, dictionary)
+    assert ret == EXAMPLE_DICTIONARY_ENTRY
 
 
 def test_list_windows():

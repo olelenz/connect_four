@@ -30,47 +30,6 @@ SHIFT_4_COLUMNS: int = 28
 SHIFT_2_COLUMNS: int = 14
 
 
-def generate_move_minimax_id(board_player_one: int, board_player_two: int, player: BoardPiece,
-                             saved_state: Optional[SavedState], next_moves: list[int], depth: int = 8) -> list[
-    int, [PlayerAction]]:
-    """
-    Generates the next move using the minimax algorithm.
-    Parameters
-    ----------
-    board_player_one: int
-        Board player one.
-    board_player_two: int
-        Board player two.
-    player: BoardPiece
-        The next player to make a move.
-    saved_state: Optional[SavedState]
-        Can be used to save a state of the game for future calculations. Not used here.
-    next_moves: list[int]
-        Move order to try first to improve alpha-beta-pruning.
-    depth: int
-        Depth of the search tree to stop calculating.
-    Returns
-    -------
-    :Tuple[PlayerAction, Optional[SavedState]]
-        Tuple containing the move to play and the saved state.
-    """
-
-    alpha: [int, [PlayerAction]] = [-MAX_VALUE, [PlayerAction(-1)]]
-    beta: [int, [PlayerAction]] = [MAX_VALUE, [PlayerAction(-1)]]
-    dictio_one = {-1: {}}
-    dictio_two = {-1: {}}
-    use_mirror = use_mirror_functions(board_player_one, board_player_two)
-    if player == PLAYER1:
-        evaluation: list[int, [PlayerAction]] = \
-            minimax_rec(depth, board_player_one, board_player_two, player, alpha,
-                        beta, dictio_one, [], next_moves, 1, use_mirror)  # start maximizing if PLAYER1 is to play
-    else:
-        evaluation: list[int, [PlayerAction]] = \
-            minimax_rec(depth, board_player_one, board_player_two, player, alpha,
-                        beta, dictio_two, [], next_moves, 0, use_mirror)  # start minimizing if PLAYER2 is to play
-    return evaluation
-
-
 def generate_move_minimax(board_player_one: int, board_player_two: int, player: BoardPiece,
                           saved_state: Optional[SavedState], seconds: int = 5) -> Tuple[
     PlayerAction, Optional[SavedState]]:
@@ -142,6 +101,47 @@ def generate_move_loop_to_stop(move_output: multiprocessing.sharedctypes.Synchro
         if depth >= len(evaluation[1]) + 4:
             return
         depth += 1
+
+
+def generate_move_minimax_id(board_player_one: int, board_player_two: int, player: BoardPiece,
+                             saved_state: Optional[SavedState], next_moves: list[int], depth: int = 8) -> list[
+    int, [PlayerAction]]:
+    """
+    Generates the next move using the minimax algorithm.
+    Parameters
+    ----------
+    board_player_one: int
+        Board player one.
+    board_player_two: int
+        Board player two.
+    player: BoardPiece
+        The next player to make a move.
+    saved_state: Optional[SavedState]
+        Can be used to save a state of the game for future calculations. Not used here.
+    next_moves: list[int]
+        Move order to try first to improve alpha-beta-pruning.
+    depth: int
+        Depth of the search tree to stop calculating.
+    Returns
+    -------
+    :Tuple[PlayerAction, Optional[SavedState]]
+        Tuple containing the move to play and the saved state.
+    """
+
+    alpha: [int, [PlayerAction]] = [-MAX_VALUE, [PlayerAction(-1)]]
+    beta: [int, [PlayerAction]] = [MAX_VALUE, [PlayerAction(-1)]]
+    dictio_one = {-1: {}}
+    dictio_two = {-1: {}}
+    use_mirror = use_mirror_functions(board_player_one, board_player_two)
+    if player == PLAYER1:
+        evaluation: list[int, [PlayerAction]] = \
+            minimax_rec(depth, board_player_one, board_player_two, player, alpha,
+                        beta, dictio_one, [], next_moves, 1, use_mirror)  # start maximizing if PLAYER1 is to play
+    else:
+        evaluation: list[int, [PlayerAction]] = \
+            minimax_rec(depth, board_player_one, board_player_two, player, alpha,
+                        beta, dictio_two, [], next_moves, 0, use_mirror)  # start minimizing if PLAYER2 is to play
+    return evaluation
 
 
 def minimax_rec(current_depth: int, board_player_one: int, board_player_two: int,
@@ -293,14 +293,13 @@ def get_beta(current_depth: int, board_player_one: int, board_player_two: int, p
     recursion_eval = minimax_rec(current_depth - 1, board_player_one, board_player_two, BoardPiece(3 - player),
                                  alpha, beta, dictionary, moves_line_new, next_moves, 1, use_mirror)
     beta = min([beta, recursion_eval], key=lambda x: x[0])
-    #dictionary[new_board_player_one] = {new_board_player_two: [beta[0], beta[1][-current_depth:]]}  # possible mistake here
     dictionary[board_player_one] = {board_player_two: [beta[0], beta[1]]}
     if use_mirror:
         add_mirrored_boards_to_dictionary(board_player_one, board_player_two, dictionary, beta, current_depth)
     return beta
 
 
-def get_eval_from_dictionary(board_player_one: int, board_player_two: int, dictionary: {}) -> int | None:
+def get_eval_from_dictionary(board_player_one: int, board_player_two: int, dictionary: {}) -> [int, [int]] or None:
     """
     Function to get the value from the transposition table corresponding to the given boards.
     Parameters
@@ -313,10 +312,11 @@ def get_eval_from_dictionary(board_player_one: int, board_player_two: int, dicti
         Transposition table.
     Returns
     -------
-    : int | None
+    : [int, [int]] or None
         None if there is no entry, otherwise the entry.
     """
     try:
+        print(dictionary[board_player_one][board_player_two])
         return dictionary[board_player_one][board_player_two]
     except KeyError:
         return None
