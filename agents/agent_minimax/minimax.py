@@ -444,33 +444,49 @@ def evaluate_window(window_positions: [(int, int, int, int)], board_player_one: 
     window_positions: [int]
         List of positions, represented as a board with a single piece on it.
     board_player_one: int
-        Board of player 1.
+        Board of player one.
     board_player_two: int
-        Board of player 2.
+        Board of player one.
 
     Returns
     -------
     :int
-        Score of the window
+        Evaluation of the window.
     """
     number_of_player_one_pieces: int = 0
     number_of_player_two_pieces: int = 0
-    for position in window_positions:  # counts player pieces in the window
+    for position in window_positions:  # Counts player pieces in the window. TODO: more efficient way for this?
         if (position & board_player_one) > 0:
             number_of_player_one_pieces += 1
         elif (position & board_player_two) > 0:
             number_of_player_two_pieces += 1
-    # return 0 if both player have pieces in the window, or both have none
-    if (number_of_player_one_pieces > 0 and number_of_player_two_pieces > 0) or \
-            number_of_player_one_pieces == number_of_player_two_pieces:
-        return 0
-    # putting more weight on 3 pieces in a window, managed with global variable
-    elif number_of_player_one_pieces == 3:
+    return calculate_evaluation_score(number_of_player_one_pieces, number_of_player_two_pieces)
+
+
+def calculate_evaluation_score(number_of_player_one_pieces: int, number_of_player_two_pieces: int) -> int:
+    """
+
+    Parameters
+    ----------
+    number_of_player_one_pieces: int
+        Amount of player one pieces in the current window.
+    number_of_player_two_pieces: int
+        Amount of player one pieces in the current window.
+
+    Returns
+    -------
+    int:
+        Evaluation of the window.
+    """
+    # Returns currently 6 points if a player has 3 pieces in a window. Amount of points is managed in a global variable.
+    if number_of_player_one_pieces == 3:
         return THREE_PIECES_IN_A_WINDOW_EVAL
     elif number_of_player_two_pieces == 3:
         return -1 * THREE_PIECES_IN_A_WINDOW_EVAL
-    # returns 1 or 4 points depending on amount of pieces
-    return number_of_player_one_pieces**2 - number_of_player_two_pieces**2
+    else:
+        return number_of_player_one_pieces ** 2 - number_of_player_two_pieces ** 2
+        # Returns 1 or 4 points depending on the amount of pieces to a player.
+        # Player two gets negative points.
 
 
 def evaluate_board_using_windows(board_player_one: int, board_player_two: int) -> int:
@@ -565,9 +581,9 @@ def add_mirrored_boards_to_dictionary(board_player_one: int, board_player_two: i
     dictionary[mirrored_board_player_one] = {mirrored_board_player_two: [alpha_beta[0], mirrored_player_actions]}
 
 
-def use_mirror_functions(board_player_one: int, board_player_two: int) -> bool:  # TODO: refactor and test
+def use_mirror_functions(board_player_one: int, board_player_two: int) -> bool:
     """
-    Checks if the board is symmetrical around the middle column. This is accomplished by selecting 2 columns,
+    Checks if the board is symmetrical around the middle column. This is accomplished by selecting two columns,
     removing the other columns, shifting them to the same position and using logical operations to evaluate if they
     are equal or not.
     This is done three times per player.

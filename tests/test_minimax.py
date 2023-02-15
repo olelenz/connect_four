@@ -1,6 +1,8 @@
 import pytest
 
-from agents.agent_minimax.minimax import handle_empty_moves_eval, START_VALUE, get_possible_moves_iterative, mirror_boards, mirror_player_board, add_mirrored_boards_to_dictionary, use_mirror_functions, evaluate_board_using_windows, evaluate_window
+from agents.agent_minimax.minimax import handle_empty_moves_eval, START_VALUE, get_possible_moves_iterative, \
+    mirror_boards, mirror_player_board, add_mirrored_boards_to_dictionary, use_mirror_functions, \
+    evaluate_board_using_windows, evaluate_window, calculate_evaluation_score
 from agents.game_utils import *
 from agents.agent_minimax.minimax_window_list import MINIMAX_EVALUATION_WINDOWS_LIST, list_windows
 
@@ -154,6 +156,21 @@ def test_evaluate_window_three():
 
 def test_evaluate_window_four():
     res = evaluate_window(TEST_WINDOW_RIGHT_TOWER, RIGHT_TOWER_THREE_IN_A_ROW, LEFT_TOWER_ONE_BOARD)
+    assert res == 6
+
+
+def test_calculate_evaluation_score_one():
+    res = calculate_evaluation_score(1, 0)
+    assert res == 1
+
+
+def test_calculate_evaluation_score_two():
+    res = calculate_evaluation_score(0, 2)
+    assert res == -4
+
+
+def test_calculate_evaluation_score_three():
+    res = calculate_evaluation_score(3, 0)
     assert res == 6
 
 
