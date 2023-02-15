@@ -88,6 +88,30 @@ def test_get_possible_moves_iterative_full_next_moves():
     assert game_state == GameState.STILL_PLAYING
 
 
+def test_generate_move_minimax():
+    pass
+
+
+def test_generate_move_loop_to_stop():
+    pass
+
+
+def test_generate_move_minimax_id():
+    pass
+
+
+def test_minimax_rec():
+    pass
+
+
+def test_get_alpha():
+    pass
+
+
+def test_get_beta():
+    pass
+
+
 def test_get_eval_from_dictionary_not_existing():
     ret = get_eval_from_dictionary(EMPTY_BOARD, EMPTY_BOARD, {})
     assert ret is None
