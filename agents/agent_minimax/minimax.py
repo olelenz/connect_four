@@ -4,6 +4,7 @@ from typing import Tuple, Optional
 from interruptingcow import timeout
 import multiprocessing
 import time
+import multiprocessing.sharedctypes
 
 from agents.game_utils import *
 from agents.saved_state import SavedState
@@ -95,7 +96,6 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
     """
     depth: int = 1
     move_output: multiprocessing.sharedctypes.Synchronized = multiprocessing.Value('i', -1)
-    print(type(move_output))
     if platform.system() == "Windows":
         process_minimax = multiprocessing.Process(target=generate_move_loop_to_stop,
                                                   args=(move_output, board_player_one, board_player_two, player, depth))
@@ -103,7 +103,6 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
         time.sleep(seconds)
         process_minimax.terminate()
         process_minimax.join()
-
         return move_output.value, None
     else:
         try:
