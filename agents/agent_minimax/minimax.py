@@ -453,7 +453,7 @@ def evaluate_window(window_positions: [(int, int, int, int)], board_player_one: 
     :int
         Evaluation of the window.
     """
-    number_of_player_one_pieces: int = 0
+    number_of_player_one_pieces: int = 0  # could be one tuple, but makes code less readable?
     number_of_player_two_pieces: int = 0
     for position in window_positions:  # Counts player pieces in the window. TODO: more efficient way for this?
         if (position & board_player_one) > 0:
@@ -478,8 +478,12 @@ def calculate_evaluation_score(number_of_player_one_pieces: int, number_of_playe
     int:
         Evaluation of the window.
     """
+    # Returns zero if both players have pieces in the window, or both have none.
+    if (number_of_player_one_pieces > 0 and number_of_player_two_pieces > 0) or \
+            number_of_player_one_pieces == number_of_player_two_pieces:
+        return 0
     # Returns currently 6 points if a player has 3 pieces in a window. Amount of points is managed in a global variable.
-    if number_of_player_one_pieces == 3:
+    elif number_of_player_one_pieces == 3:
         return THREE_PIECES_IN_A_WINDOW_EVAL
     elif number_of_player_two_pieces == 3:
         return -1 * THREE_PIECES_IN_A_WINDOW_EVAL

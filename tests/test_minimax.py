@@ -174,6 +174,11 @@ def test_calculate_evaluation_score_three():
     assert res == 6
 
 
+def test_calculate_evaluation_score_four():
+    res = calculate_evaluation_score(1, 2)
+    assert res == 0
+
+
 def test_ideas():
     print("hello")
     '''
