@@ -375,37 +375,6 @@ def handle_empty_moves_eval(player: BoardPiece, game_state: GameState, current_d
         raise AttributeError
 
 
-def evaluate_position(board_player_one: int, board_player_two: int) -> int:
-    """
-    Evaluates a board position. Use convolution to assess position (two pieces together are good, one piece near to
-    an empty space is good, one piece next to a piece from the opponent is assessed as equal
-
-    Parameters
-    ----------
-    board_player_one: int
-        Board PLAYER1.
-
-    board_player_two: int
-        Board PLAYER2.
-
-    depth: int
-        Depth at evaluation -> earlier wins are better.
-
-    Returns
-    -------
-    :int
-        The evaluation of the position.
-    """
-    output: int = 0  # initial position evaluated as equal
-    p1_connected_two: int = number_of_connected_n(board_player_one, 2)
-    p2_connected_two: int = number_of_connected_n(board_player_two, 2)
-    connected_two_all_connection: int = number_of_connected_n(board_player_one | board_player_two, 2) - (
-            p1_connected_two + p2_connected_two)
-    output += (p1_connected_two * 2 - connected_two_all_connection) + (
-            p2_connected_two * -2 + connected_two_all_connection)
-    return output
-
-
 def number_of_connected_n(board: int, connected: int) -> int:
     """
     Evaluates the number of connected-n in a bitboard.
