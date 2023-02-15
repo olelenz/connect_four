@@ -435,7 +435,7 @@ def number_of_connected_n(board: int, connected: int) -> int:
     return out
 
 
-def evaluate_window(window_positions: [(int, int, int, int)], board_player1: int, board_player2: int) -> int:
+def evaluate_window(window_positions: [(int, int, int, int)], board_player_one: int, board_player_two: int) -> int:
     """
     Evaluates a single window, with emphasis on having 3 in a window and/or not sharing a window with pieces of the
     other player. Does not check for 4-connect as its checked elsewhere.
@@ -444,9 +444,9 @@ def evaluate_window(window_positions: [(int, int, int, int)], board_player1: int
     ----------
     window_positions: [int]
         List of positions, represented as a board with a single piece on it.
-    board_player1: int
+    board_player_one: int
         Board of player 1.
-    board_player2: int
+    board_player_two: int
         Board of player 2.
 
     Returns
@@ -454,35 +454,35 @@ def evaluate_window(window_positions: [(int, int, int, int)], board_player1: int
     :int
         Score of the window
     """
-    number_of_player1_pieces: int = 0
-    number_of_player2_pieces: int = 0
+    number_of_player_one_pieces: int = 0
+    number_of_player_two_pieces: int = 0
     for position in window_positions:  # counts player pieces in the window
-        if (position & board_player1) > 0:
-            number_of_player1_pieces += 1
-        elif (position & board_player2) > 0:
-            number_of_player2_pieces += 1
+        if (position & board_player_one) > 0:
+            number_of_player_one_pieces += 1
+        elif (position & board_player_two) > 0:
+            number_of_player_two_pieces += 1
     # return 0 if both player have pieces in the window, or both have none
-    if (number_of_player1_pieces > 0 and number_of_player2_pieces > 0) or \
-            number_of_player1_pieces == number_of_player2_pieces:
+    if (number_of_player_one_pieces > 0 and number_of_player_two_pieces > 0) or \
+            number_of_player_one_pieces == number_of_player_two_pieces:
         return 0
     # putting more weight on 3 pieces in a window, managed with global variable
-    elif number_of_player1_pieces == 3:
+    elif number_of_player_one_pieces == 3:
         return THREE_PIECES_IN_A_WINDOW_EVAL
-    elif number_of_player2_pieces == 3:
+    elif number_of_player_two_pieces == 3:
         return -1 * THREE_PIECES_IN_A_WINDOW_EVAL
     # returns 1 or 4 points depending on amount of pieces
-    return number_of_player1_pieces**2 - number_of_player2_pieces**2
+    return number_of_player_one_pieces**2 - number_of_player_two_pieces**2
 
 
-def evaluate_board_using_windows(board_player1: int, board_player2: int) -> int:
+def evaluate_board_using_windows(board_player_one: int, board_player_two: int) -> int:
     """
     Evaluates the board and returns a score.
 
     Parameters
     ----------
-    board_player1: int
+    board_player_one: int
         Board of player 1.
-    board_player2: int
+    board_player_two: int
         Board of player 2.
 
     Returns
@@ -490,22 +490,22 @@ def evaluate_board_using_windows(board_player1: int, board_player2: int) -> int:
     :int
         Evaluation of the board.
     """
-    board_score = 0
+    board_evaluation: int = 0
     for window in MINIMAX_EVALUATION_WINDOWS_LIST:
-        board_score += evaluate_window(window, board_player1, board_player2)
-    return board_score
+        board_evaluation += evaluate_window(window, board_player_one, board_player_two)
+    return board_evaluation
 
 
-def mirror_boards(board_player1: int, board_player2: int) -> tuple[int, int]:
+def mirror_boards(board_player_one: int, board_player_two: int) -> tuple[int, int]:
     """
     Mirrors the board by mirroring both player's board string.
 
     Parameters
     ----------
-    board_player1: int
+    board_player_one: int
         Board of player one.
 
-    board_player2: int
+    board_player_two: int
         Board of player two.
 
     Returns
@@ -513,7 +513,7 @@ def mirror_boards(board_player1: int, board_player2: int) -> tuple[int, int]:
     tuple[int, int]:
         Two mirrored boards.
     """
-    return mirror_player_board(board_player1), mirror_player_board(board_player2)
+    return mirror_player_board(board_player_one), mirror_player_board(board_player_two)
 
 
 def mirror_player_board(player_board) -> int:
@@ -543,15 +543,15 @@ def mirror_player_board(player_board) -> int:
     return new_column_0 | new_column_1 | new_column_2 | new_column_3 | new_column_4 | new_column_5 | new_column_6  # puts all the columns together
 
 
-def add_mirrored_boards_to_dictionary(board_player1: int, board_player2: int, dictionary, alpha_beta: list[int, [PlayerAction]], current_depth: int):  # TODO: refactor and test
+def add_mirrored_boards_to_dictionary(board_player_one: int, board_player_two: int, dictionary, alpha_beta: list[int, [PlayerAction]], current_depth: int):  # TODO: refactor and test
     """
     Uses the mirror functions to add a mirrored board, its evaluation and mirrored playeractions to the dictionary.
 
     Parameters
     ----------
-    board_player1: int
+    board_player_one: int
         Board player one.
-    board_player2: int
+    board_player_two: int
         Board player two.
     dictionary: {}
         Dictionary.  # should be reference of dictionary
@@ -560,13 +560,13 @@ def add_mirrored_boards_to_dictionary(board_player1: int, board_player2: int, di
     current_depth: int
         Depth in the minimax algorithm.
     """
-    mirrored_board_player1, mirrored_board_player2 = mirror_boards(board_player1, board_player2)
+    mirrored_board_player_one, mirrored_board_player_two = mirror_boards(board_player_one, board_player_two)
     mirror_player_actions: Callable = np.vectorize(lambda arr: 6 - arr)  # mirrors each action in the move list
-    mirrored_player_action = list(map(mirror_player_actions, alpha_beta[1]))
-    dictionary[mirrored_board_player1] = {mirrored_board_player2: [alpha_beta[0], mirrored_player_action]}
+    mirrored_player_actions = list(map(mirror_player_actions, alpha_beta[1]))
+    dictionary[mirrored_board_player_one] = {mirrored_board_player_two: [alpha_beta[0], mirrored_player_actions]}
 
 
-def use_mirror_functions(board_player1: int, board_player2: int) -> bool:  # TODO: refactor and test
+def use_mirror_functions(board_player_one: int, board_player_two: int) -> bool:  # TODO: refactor and test
     """
     Checks if the board is symmetrical around the middle column. This is accomplished by selecting 2 columns,
     removing the other columns, shifting them to the same position and using logical operations to evaluate if they
@@ -575,9 +575,9 @@ def use_mirror_functions(board_player1: int, board_player2: int) -> bool:  # TOD
 
     Parameters
     ----------
-    board_player1: int
+    board_player_one: int
         Board player one.
-    board_player2: int
+    board_player_two: int
         Board player two.
 
     Returns
@@ -585,9 +585,9 @@ def use_mirror_functions(board_player1: int, board_player2: int) -> bool:  # TOD
     bool:
         If mirror functions should be used in minimax or not.
     """
-    return (board_player1 & COLUMN_0_FILLED == (board_player1 << SHIFT_6_COLUMNS) & COLUMN_0_FILLED) and \
-           (board_player1 & COLUMN_1_FILLED == (board_player1 << SHIFT_4_COLUMNS) & COLUMN_1_FILLED) and \
-           (board_player1 & COLUMN_2_FILLED == (board_player1 << SHIFT_2_COLUMNS) & COLUMN_2_FILLED) and \
-           (board_player2 & COLUMN_0_FILLED == (board_player2 << SHIFT_6_COLUMNS) & COLUMN_0_FILLED) and \
-           (board_player2 & COLUMN_1_FILLED == (board_player2 << SHIFT_4_COLUMNS) & COLUMN_1_FILLED) and \
-           (board_player2 & COLUMN_2_FILLED == (board_player2 << SHIFT_2_COLUMNS) & COLUMN_2_FILLED)
+    return (board_player_one & COLUMN_0_FILLED == (board_player_one << SHIFT_6_COLUMNS) & COLUMN_0_FILLED) and \
+           (board_player_one & COLUMN_1_FILLED == (board_player_one << SHIFT_4_COLUMNS) & COLUMN_1_FILLED) and \
+           (board_player_one & COLUMN_2_FILLED == (board_player_one << SHIFT_2_COLUMNS) & COLUMN_2_FILLED) and \
+           (board_player_two & COLUMN_0_FILLED == (board_player_two << SHIFT_6_COLUMNS) & COLUMN_0_FILLED) and \
+           (board_player_two & COLUMN_1_FILLED == (board_player_two << SHIFT_4_COLUMNS) & COLUMN_1_FILLED) and \
+           (board_player_two & COLUMN_2_FILLED == (board_player_two << SHIFT_2_COLUMNS) & COLUMN_2_FILLED)
