@@ -375,34 +375,6 @@ def handle_empty_moves_eval(player: BoardPiece, game_state: GameState, current_d
         raise AttributeError
 
 
-def number_of_connected_n(board: int, connected: int) -> int:
-    """
-    Evaluates the number of connected-n in a bitboard.
-
-    Parameters
-    ----------
-    board: int
-        The bitboard to be evaluated.
-
-    connected: int
-        The number of connected pieces to check for.
-
-    Returns
-    -------
-    :int
-        Number of connected-n.
-
-    """
-    assert connected > 0
-    out: int = 0
-    for i in [1, 6, 7, 8]:
-        temp_board = board
-        for _ in range(connected - 1):
-            temp_board = temp_board & (temp_board >> i)
-        out += bin(temp_board).count('1')
-    return out
-
-
 def evaluate_window(window_positions: [(int, int, int, int)], board_player_one: int, board_player_two: int) -> int:
     """
     Evaluates a single window, with emphasis on having 3 in a window and/or not sharing a window with pieces of the
