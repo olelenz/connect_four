@@ -5,7 +5,8 @@ import pytest
 from agents.agent_minimax.minimax import handle_empty_moves_eval, START_VALUE, get_possible_moves_iterative, \
     mirror_boards, mirror_player_board, add_mirrored_boards_to_dictionary, use_mirror_functions, \
     evaluate_board_using_windows, evaluate_window, calculate_evaluation_score, get_eval_from_dictionary, \
-    generate_move_minimax, generate_move_loop_to_stop
+    generate_move_minimax, generate_move_loop_to_stop, generate_move_minimax_id, minimax_rec, MAX_VALUE, get_alpha, \
+    get_beta
 from agents.game_utils import *
 from agents.agent_minimax.minimax_window_list import MINIMAX_EVALUATION_WINDOWS_LIST, list_windows
 
@@ -107,19 +108,40 @@ def test_generate_move_loop_to_stop():
 
 
 def test_generate_move_minimax_id():
-    pass
+    res = generate_move_minimax_id(EMPTY_BOARD, EMPTY_BOARD, PLAYER1, None, [], 2)
+    assert res == [-3, [3, 3]]
 
 
 def test_minimax_rec():
-    pass
+    alpha: [int, [PlayerAction]] = [-MAX_VALUE, [PlayerAction(-1)]]
+    beta: [int, [PlayerAction]] = [MAX_VALUE, [PlayerAction(-1)]]
+    dictio = {-1: {}}
+    res = minimax_rec(2, EMPTY_BOARD, EMPTY_BOARD, PLAYER1, alpha, beta, dictio, [], [], 1, False)
+    assert res == [-3, [3, 3]]
 
 
-def test_get_alpha():
-    pass
+def test_get_alpha_no_dictionary_entry():
+    alpha: [int, [PlayerAction]] = [-MAX_VALUE, [PlayerAction(-1)]]
+    beta: [int, [PlayerAction]] = [MAX_VALUE, [PlayerAction(-1)]]
+    res = get_alpha(0, TEST_BOARD_ALMOST_FULL_ONE, TEST_BOARD_ALMOST_FULL_TWO, PLAYER1, alpha, beta, {}, [], [],
+                    PlayerAction(1), False)
+    assert res == [0, [1, 0]]
+
+
+def test_get_alpha_with_dictionary_entry():
+    alpha: [int, [PlayerAction]] = [-MAX_VALUE, [PlayerAction(-1)]]
+    beta: [int, [PlayerAction]] = [MAX_VALUE, [PlayerAction(-1)]]
+    res = get_alpha(0, EMPTY_BOARD, EMPTY_BOARD, PLAYER1, alpha, beta, {EMPTY_BOARD: {EMPTY_BOARD: (1, [2, 3])}},
+                    [], [], PlayerAction(1), False)
+    assert res == (1, [2, 3])
 
 
 def test_get_beta():
-    pass
+    alpha: [int, [PlayerAction]] = [-MAX_VALUE, [PlayerAction(-1)]]
+    beta: [int, [PlayerAction]] = [MAX_VALUE, [PlayerAction(-1)]]
+    res = get_beta(0, TEST_BOARD_ALMOST_FULL_ONE, TEST_BOARD_ALMOST_FULL_TWO, PLAYER1, alpha, beta, {}, [], [],
+                   PlayerAction(1), False)
+    assert res == [0, [1, 0]]
 
 
 def test_get_eval_from_dictionary_not_existing():
