@@ -1,8 +1,11 @@
+import multiprocessing
+import multiprocessing.sharedctypes
 import pytest
 
 from agents.agent_minimax.minimax import handle_empty_moves_eval, START_VALUE, get_possible_moves_iterative, \
     mirror_boards, mirror_player_board, add_mirrored_boards_to_dictionary, use_mirror_functions, \
-    evaluate_board_using_windows, evaluate_window, calculate_evaluation_score, get_eval_from_dictionary
+    evaluate_board_using_windows, evaluate_window, calculate_evaluation_score, get_eval_from_dictionary, \
+    generate_move_minimax, generate_move_loop_to_stop
 from agents.game_utils import *
 from agents.agent_minimax.minimax_window_list import MINIMAX_EVALUATION_WINDOWS_LIST, list_windows
 
@@ -33,6 +36,10 @@ TEST_WINDOW_RIGHT_TOWER: (int, int, int, int) = (0b0000001_0000000_0000000_00000
                                                  0b0001000_0000000_0000000_0000000_0000000_0000000_0000000)
 
 EXAMPLE_DICTIONARY_ENTRY: [int, [int]] = [1, [1, 2, 3]]
+
+TEST_BOARD_ALMOST_FULL_ONE: int = 0b0010101_0010101_0101010_0010101_0010101_0111010_0001010
+TEST_BOARD_ALMOST_FULL_TWO: int = 0b0101010_0101010_0010101_0101010_0101010_0010101_0010101
+
 
 def test_handle_empty_moves_eval_draw():
     ret = handle_empty_moves_eval(PLAYER1, GameState.IS_DRAW, 4)
@@ -89,11 +96,14 @@ def test_get_possible_moves_iterative_full_next_moves():
 
 
 def test_generate_move_minimax():
-    pass
+    res = generate_move_minimax(EMPTY_BOARD, EMPTY_BOARD, PLAYER1, None, 1)
+    assert res == (3, None)
 
 
 def test_generate_move_loop_to_stop():
-    pass
+    res: multiprocessing.sharedctypes.Synchronized = multiprocessing.Value('i', -1)
+    generate_move_loop_to_stop(res, TEST_BOARD_ALMOST_FULL_ONE, TEST_BOARD_ALMOST_FULL_TWO, PLAYER1, 8)
+    assert res.value == 0
 
 
 def test_generate_move_minimax_id():
