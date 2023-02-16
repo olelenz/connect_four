@@ -72,6 +72,11 @@ def test_pretty_print_board_middle_one():
     assert ret == FIRST_PIECE_STRING
 
 
+def test_string_to_board_assertion_error():
+    with pytest.raises(AttributeError):
+        string_to_board(EMPTY_BOARD_STRING+"\n")
+
+
 def test_string_to_board_empty():
     ret = string_to_board(EMPTY_BOARD_STRING)
     assert type(ret[0]) == int
