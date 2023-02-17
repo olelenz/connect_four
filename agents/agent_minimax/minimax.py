@@ -55,7 +55,7 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
     """
     depth: int = 1
     move_output: multiprocessing.sharedctypes.Synchronized = multiprocessing.Value('i', -1)
-    if platform.system() == "Windows":
+    if platform.system() == "Windows":  # Platform dependent, full test coverage problematic.
         process_minimax = multiprocessing.Process(target=generate_move_loop_to_stop,
                                                   args=(move_output, board_player_one, board_player_two, player, depth))
         process_minimax.start()

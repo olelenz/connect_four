@@ -1,6 +1,6 @@
 from typing import Callable
 
-from agents import generate_move_minimax, generate_move_random, user_move
+from agents import generate_move_minimax, user_move
 from agents.game_utils import GenMove
 
 

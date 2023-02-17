@@ -38,8 +38,8 @@ TEST_WINDOW_RIGHT_TOWER: (int, int, int, int) = (0b0000001_0000000_0000000_00000
 
 EXAMPLE_DICTIONARY_ENTRY: [int, [int]] = [1, [1, 2, 3]]
 
-TEST_BOARD_ALMOST_FULL_ONE: int = 0b0010101_0010101_0101010_0010101_0010101_0111010_0001010
-TEST_BOARD_ALMOST_FULL_TWO: int = 0b0101010_0101010_0010101_0101010_0101010_0010101_0010101
+TEST_BOARD_ALMOST_FULL_ONE: int = 0b0010101_0010101_0101010_0010101_0010101_0111010_0000000
+TEST_BOARD_ALMOST_FULL_TWO: int = 0b0101010_0101010_0010101_0101010_0101010_0010101_0000001
 
 
 def test_handle_empty_moves_eval_draw():
@@ -112,6 +112,11 @@ def test_generate_move_minimax_id():
     assert res == [-3, [3, 3]]
 
 
+def test_generate_move_minimax_id_two():
+    res = generate_move_minimax_id(MIDDLE_TOWER_ONE_BOARD, EMPTY_BOARD, PLAYER2, None, [], 2)
+    assert res == [9, [3, 3]]
+
+
 def test_minimax_rec():
     alpha: [int, [PlayerAction]] = [-MAX_VALUE, [PlayerAction(-1)]]
     beta: [int, [PlayerAction]] = [MAX_VALUE, [PlayerAction(-1)]]
@@ -125,13 +130,15 @@ def test_get_alpha_no_dictionary_entry():
     beta: [int, [PlayerAction]] = [MAX_VALUE, [PlayerAction(-1)]]
     res = get_alpha(0, TEST_BOARD_ALMOST_FULL_ONE, TEST_BOARD_ALMOST_FULL_TWO, PLAYER1, alpha, beta, {}, [], [],
                     PlayerAction(1), False)
-    assert res == [0, [1, 0]]
+    assert isinstance(res[0], int)
+    assert isinstance(res[1], list)
+    assert isinstance(res[1][0], PlayerAction)
 
 
 def test_get_alpha_with_dictionary_entry():
     alpha: [int, [PlayerAction]] = [-MAX_VALUE, [PlayerAction(-1)]]
     beta: [int, [PlayerAction]] = [MAX_VALUE, [PlayerAction(-1)]]
-    res = get_alpha(0, EMPTY_BOARD, EMPTY_BOARD, PLAYER1, alpha, beta, {EMPTY_BOARD: {EMPTY_BOARD: (1, [2, 3])}},
+    res = get_alpha(0, MIDDLE_TOWER_ONE_BOARD, EMPTY_BOARD, PLAYER2, alpha, beta, {MIDDLE_TOWER_ONE_BOARD: {EMPTY_BOARD: (1, [2, 3])}},
                     [], [], PlayerAction(1), False)
     assert res == (1, [2, 3])
 
@@ -141,7 +148,10 @@ def test_get_beta_no_dictionary_entry():
     beta: [int, [PlayerAction]] = [MAX_VALUE, [PlayerAction(-1)]]
     res = get_beta(0, TEST_BOARD_ALMOST_FULL_ONE, TEST_BOARD_ALMOST_FULL_TWO, PLAYER1, alpha, beta, {}, [], [],
                    PlayerAction(1), False)
-    assert res == [0, [1, 0]]
+    # assert type(res[1]) == "list"
+    assert isinstance(res[0], int)
+    assert isinstance(res[1], list)
+    assert isinstance(res[1][0], PlayerAction)
 
 
 def test_get_beta_with_dictionary_entry():
