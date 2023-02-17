@@ -136,12 +136,20 @@ def test_get_alpha_with_dictionary_entry():
     assert res == (1, [2, 3])
 
 
-def test_get_beta():
+def test_get_beta_no_dictionary_entry():
     alpha: [int, [PlayerAction]] = [-MAX_VALUE, [PlayerAction(-1)]]
     beta: [int, [PlayerAction]] = [MAX_VALUE, [PlayerAction(-1)]]
     res = get_beta(0, TEST_BOARD_ALMOST_FULL_ONE, TEST_BOARD_ALMOST_FULL_TWO, PLAYER1, alpha, beta, {}, [], [],
                    PlayerAction(1), False)
     assert res == [0, [1, 0]]
+
+
+def test_get_beta_with_dictionary_entry():
+    alpha: [int, [PlayerAction]] = [-MAX_VALUE, [PlayerAction(-1)]]
+    beta: [int, [PlayerAction]] = [MAX_VALUE, [PlayerAction(-1)]]
+    res = get_beta(0, EMPTY_BOARD, EMPTY_BOARD, PLAYER1, alpha, beta, {EMPTY_BOARD: {EMPTY_BOARD: (4, [5, 6])}}, [], [],
+                   PlayerAction(1), False)
+    assert res == (4, [5, 6])
 
 
 def test_get_eval_from_dictionary_not_existing():
@@ -245,6 +253,11 @@ def test_calculate_evaluation_score_three():
 def test_calculate_evaluation_score_four():
     res = calculate_evaluation_score(1, 2)
     assert res == 0
+
+
+def test_calculate_evaluation_score_five():
+    res = calculate_evaluation_score(0, 3)
+    assert res == -6
 
 
 def test_ideas():

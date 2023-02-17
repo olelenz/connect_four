@@ -492,15 +492,16 @@ def mirror_player_board(player_board) -> int:
         The mirrored board.
     """
     new_column_0: int = COLUMN_0_FILLED & (player_board << SHIFT_6_COLUMNS)
-    # shifts the board to the left so that column 6 is in place
-    # of column 0, then removes the other columns
+    # Shifts the board to the left so that column six is in place
+    # of column zero, then removes the other columns.
     new_column_1: int = COLUMN_1_FILLED & (player_board << SHIFT_4_COLUMNS)
     new_column_2: int = COLUMN_2_FILLED & (player_board << SHIFT_2_COLUMNS)
     new_column_3: int = COLUMN_3_FILLED & player_board  # not shifted because in the middle
     new_column_4: int = COLUMN_4_FILLED & (player_board >> SHIFT_2_COLUMNS)
     new_column_5: int = COLUMN_5_FILLED & (player_board >> SHIFT_4_COLUMNS)
     new_column_6: int = COLUMN_6_FILLED & (player_board >> SHIFT_6_COLUMNS)
-    return new_column_0 | new_column_1 | new_column_2 | new_column_3 | new_column_4 | new_column_5 | new_column_6  # puts all the columns together
+    return new_column_0 | new_column_1 | new_column_2 | new_column_3 | new_column_4 | new_column_5 | new_column_6
+    # Puts all the columns together.
 
 
 def add_mirrored_boards_to_dictionary(board_player_one: int, board_player_two: int, dictionary, alpha_beta: list[int, [PlayerAction]], current_depth: int):  # TODO: refactor and test
