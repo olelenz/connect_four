@@ -127,26 +127,18 @@ def generate_move_minimax_id(board_player_one: int, board_player_two: int, playe
     :Tuple[PlayerAction, Optional[SavedState]]
         Tuple containing the move to play and the saved state.
     """
-
     alpha: [int, [PlayerAction]] = [-MAX_VALUE, [PlayerAction(-1)]]
     beta: [int, [PlayerAction]] = [MAX_VALUE, [PlayerAction(-1)]]
-    dictio_one = {-1: {}}
-    dictio_two = {-1: {}}
+    dictio = {-1: {}}
     use_mirror = use_mirror_functions(board_player_one, board_player_two)
-    if player == PLAYER1:
-        evaluation: list[int, [PlayerAction]] = \
-            minimax_rec(depth, board_player_one, board_player_two, player, alpha,
-                        beta, dictio_one, [], next_moves, 1, use_mirror)  # start maximizing if PLAYER1 is to play
-    else:
-        evaluation: list[int, [PlayerAction]] = \
-            minimax_rec(depth, board_player_one, board_player_two, player, alpha,
-                        beta, dictio_two, [], next_moves, 0, use_mirror)  # start minimizing if PLAYER2 is to play
+    evaluation: list[int, [PlayerAction]] = minimax_rec(depth, board_player_one, board_player_two, player, alpha,
+                                                        beta, dictio, [], next_moves, player == PLAYER1, use_mirror)
     return evaluation
 
 
 def minimax_rec(current_depth: int, board_player_one: int, board_player_two: int,
                 player: BoardPiece, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {},
-                moves_line: list[int], next_moves: list[int], minmax: int, use_mirror: bool) -> list[int, [PlayerAction]]:
+                moves_line: list[int], next_moves: list[int], maximizing: bool, use_mirror: bool) -> list[int, [PlayerAction]]:
     """
     Main recursion function for the minimax algorith. Handles the anchors and the calls to further needed calculation.
     Parameters
@@ -169,8 +161,8 @@ def minimax_rec(current_depth: int, board_player_one: int, board_player_two: int
         Current line of move taken.
     next_moves: list[int]
         Next moves to evaluate first from recent calculation for better pruning.
-    minmax: int
-        Flag for min (0) and max (1) of the algorithm.
+    maximizing: bool
+        Flag for maximizing and minimizing of the algorithm.
     use_mirror: bool
         If the mirrored board should be saved in the transposition table.
 
@@ -185,24 +177,21 @@ def minimax_rec(current_depth: int, board_player_one: int, board_player_two: int
     if current_depth == 0:  # desired depth reached - recursion anchor
         evaluation: int = evaluate_board_using_windows(board_player_one, board_player_two)
         return [evaluation, moves_line]
-    if minmax == 1:  # max
-        for move in possible_moves:
-            new_board_player_one, new_board_player_two = apply_player_action(
-                (board_player_one, board_player_two, player), move)
-            alpha = get_alpha(current_depth, new_board_player_one, new_board_player_two, player,
-                              alpha, beta, dictionary, moves_line, next_moves, move, use_mirror)
-            if beta[0] <= alpha[0]:
-                return alpha
-        return alpha
-    else:  # min
-        for move in possible_moves:
-            new_board_player_one, new_board_player_two = apply_player_action(
-                (board_player_one, board_player_two, player), move)
-            beta = get_beta(current_depth, new_board_player_one, new_board_player_two, player, alpha, beta, dictionary,
-                            moves_line, next_moves, move, use_mirror)
-            if beta[0] <= alpha[0]:
-                return beta
-        return beta
+    if maximizing:
+        get_alpha_or_beta = get_alpha
+    else:
+        get_alpha_or_beta = get_beta
+    for move in possible_moves:
+        new_board_player_one, new_board_player_two = apply_player_action((board_player_one, board_player_two, player), move)
+        alpha_or_beta_result = get_alpha_or_beta(current_depth, new_board_player_one, new_board_player_two, player,
+                                             alpha, beta, dictionary, moves_line, next_moves, move, use_mirror)
+        if maximizing:
+            alpha = alpha_or_beta_result
+        else:
+            beta = alpha_or_beta_result
+        if beta[0] <= alpha[0]:
+            return alpha_or_beta_result
+    return alpha_or_beta_result
 
 
 def get_alpha(current_depth: int, board_player_one: int, board_player_two: int, player: BoardPiece, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {}, moves_line: list[int], next_moves: list[int], move: PlayerAction, use_mirror: bool) -> list[int, [PlayerAction]]:
@@ -248,7 +237,7 @@ def get_alpha(current_depth: int, board_player_one: int, board_player_two: int, 
     alpha = max([alpha, recursion_eval], key=lambda x: x[0])
     dictionary[board_player_one] = {board_player_two: [alpha[0], alpha[1]]}
     if use_mirror:
-        add_mirrored_boards_to_dictionary(board_player_one, board_player_two, dictionary, alpha, current_depth)
+        add_mirrored_boards_to_dictionary(board_player_one, board_player_two, dictionary, alpha)
     return alpha
 
 
@@ -295,7 +284,7 @@ def get_beta(current_depth: int, board_player_one: int, board_player_two: int, p
     beta = min([beta, recursion_eval], key=lambda x: x[0])
     dictionary[board_player_one] = {board_player_two: [beta[0], beta[1]]}
     if use_mirror:
-        add_mirrored_boards_to_dictionary(board_player_one, board_player_two, dictionary, beta, current_depth)
+        add_mirrored_boards_to_dictionary(board_player_one, board_player_two, dictionary, beta)
     return beta
 
 
@@ -503,7 +492,7 @@ def mirror_player_board(player_board) -> int:
     # Puts all the columns together.
 
 
-def add_mirrored_boards_to_dictionary(board_player_one: int, board_player_two: int, dictionary, alpha_beta: list[int, [PlayerAction]], current_depth: int):
+def add_mirrored_boards_to_dictionary(board_player_one: int, board_player_two: int, dictionary, alpha_beta: list[int, [PlayerAction]]):
     """
     Uses the mirror functions to add a mirrored board, its evaluation and mirrored playeractions to the dictionary.
 
@@ -517,8 +506,6 @@ def add_mirrored_boards_to_dictionary(board_player_one: int, board_player_two: i
         Dictionary.  # should be reference of dictionary
     alpha_beta: tuple[int, int]
         Tuple that contains evaluation and playeractions.
-    current_depth: int
-        Depth in the minimax algorithm.
     """
     mirrored_board_player_one, mirrored_board_player_two = mirror_boards(board_player_one, board_player_two)
     mirror_player_actions: Callable = np.vectorize(lambda arr: 6 - arr)  # Mirrors each action in the move list.

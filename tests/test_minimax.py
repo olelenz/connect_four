@@ -190,8 +190,8 @@ def test_mirror_boards():
 
 def test_add_mirrored_boards_to_dictionary():
     dictionary = {-1: {}}
-    add_mirrored_boards_to_dictionary(LEFT_TOWER_ONE_BOARD, LEFT_TOWER_TWO_BOARD, dictionary, [10, [1, 1, 2]], 1)
-    # mirrored boards should be in the dictionary, evaluation and mirrored move list
+    add_mirrored_boards_to_dictionary(LEFT_TOWER_ONE_BOARD, LEFT_TOWER_TWO_BOARD, dictionary, [10, [1, 1, 2]])
+    # Mirrored boards should be in the dictionary, evaluation and mirrored move list.
     ret = dictionary[RIGHT_TOWER_ONE_BOARD][RIGHT_TOWER_TWO_BOARD]
     assert ret == [10, [5, 5, 4]]
 
@@ -220,7 +220,7 @@ def test_evaluate_board_using_windows_two():
 
 def test_evaluate_board_using_windows_three():
     res = evaluate_board_using_windows(RIGHT_TOWER_THREE_IN_A_ROW, LEFT_TOWER_ONE_BOARD)
-    # explanation: Player 1: 3-window: 6 points, 2-window: 4 points, 7x 1-window: 7 points = 17 points
+    # Explanation: Player 1: 3-window: 6 points, 2-window: 4 points, 7x 1-window: 7 points = 17 points
     # Player 2: 3x 1-window: -3 points -> 17 - 3 = 14
     assert res == 14
 
