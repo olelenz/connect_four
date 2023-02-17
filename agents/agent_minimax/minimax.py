@@ -233,7 +233,7 @@ def get_alpha(current_depth: int, board_player_one: int, board_player_two: int, 
     moves_line_new = moves_line.copy()
     moves_line_new.append(move)
     recursion_eval = minimax_rec(current_depth - 1, board_player_one, board_player_two, BoardPiece(3 - player),
-                                 alpha, beta, dictionary, moves_line_new, next_moves, 0, use_mirror)
+                                 alpha, beta, dictionary, moves_line_new, next_moves, False, use_mirror)
     alpha = max([alpha, recursion_eval], key=lambda x: x[0])
     dictionary[board_player_one] = {board_player_two: [alpha[0], alpha[1]]}
     if use_mirror:
@@ -280,7 +280,7 @@ def get_beta(current_depth: int, board_player_one: int, board_player_two: int, p
     moves_line_new = moves_line.copy()
     moves_line_new.append(move)
     recursion_eval = minimax_rec(current_depth - 1, board_player_one, board_player_two, BoardPiece(3 - player),
-                                 alpha, beta, dictionary, moves_line_new, next_moves, 1, use_mirror)
+                                 alpha, beta, dictionary, moves_line_new, next_moves, True, use_mirror)
     beta = min([beta, recursion_eval], key=lambda x: x[0])
     dictionary[board_player_one] = {board_player_two: [beta[0], beta[1]]}
     if use_mirror:
@@ -382,7 +382,7 @@ def evaluate_window(window_positions: [(int, int, int, int)], board_player_one: 
     :int
         Evaluation of the window.
     """
-    number_of_player_one_pieces: int = 0  # could be one tuple, but makes code less readable?
+    number_of_player_one_pieces: int = 0
     number_of_player_two_pieces: int = 0
     for position in window_positions:  # Counts player pieces in the window.
         if (position & board_player_one) > 0:
