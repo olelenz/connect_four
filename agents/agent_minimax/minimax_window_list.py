@@ -39,7 +39,7 @@ VERTICAL_WINDOW_STARTING_POINTS = [47, 46, 45, 40, 39, 38, 33, 32, 31, 26, 25, 2
 
 def list_windows() -> [(int, int, int, int)]:
     """
-    Builds windows that are represented as board with a single piece (1) by shifting the number 1 in different amounts.
+    Builds windows that are represented as board with a single playerpiece by shifting the number "1" in different amounts.
 
     Returns
     -------
@@ -50,22 +50,22 @@ def list_windows() -> [(int, int, int, int)]:
     # 0b0000000_0000000_0000000_0000000_0000000_0000000_0000001 for reference
     result: [(int, int, int, int)] = []
 
-    # horizontal windows
-    # adds a tuple with 4 positions represented as bitboards (that contain 1 player piece each) to a list
+    # Horizontal windows
+    # Adds a tuple with four positions represented as bitboards (that contain one player piece each) to a list
     # the first position of the window is determined by different starting points of the windows
-    # different orientation such as horizontal/vertical/diagonal are realized by using bit shifting specific amounts
+    # different orientation such as horizontal/vertical/diagonal are realized by using bit shifting specific amounts.
     for bit_shift_amount in HORIZONTAL_WINDOW_STARTING_POINTS:
         result += [(1 << bit_shift_amount, 1 << (bit_shift_amount - 7), 1 << (bit_shift_amount - 14), 1 << (bit_shift_amount - 21))]
 
-    # vertical windows
+    # Vertical windows
     for bit_shift_amount in VERTICAL_WINDOW_STARTING_POINTS:
         result += [(1 << bit_shift_amount, 1 << (bit_shift_amount - 1), 1 << (bit_shift_amount - 2), 1 << (bit_shift_amount - 3))]
 
-    # diagonal-up windows
+    # Diagonal-up windows
     for bit_shift_amount in DIAGONAL_UP_WINDOW_STARTING_POINTS:
         result += [(1 << bit_shift_amount, 1 << (bit_shift_amount - 8), 1 << (bit_shift_amount - 16), 1 << (bit_shift_amount - 24))]
 
-    # diagonal-down window
+    # Diagonal-down window
     for bit_shift_amount in DIAGONAL_DOWN_WINDOW_STARTING_POINTS:
         result += [(1 << bit_shift_amount, 1 << (bit_shift_amount - 6), 1 << (bit_shift_amount - 12), 1 << (bit_shift_amount - 18))]
     return result

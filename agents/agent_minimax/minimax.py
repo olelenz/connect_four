@@ -316,7 +316,6 @@ def get_eval_from_dictionary(board_player_one: int, board_player_two: int, dicti
         None if there is no entry, otherwise the entry.
     """
     try:
-        print(dictionary[board_player_one][board_player_two])
         return dictionary[board_player_one][board_player_two]
     except KeyError:
         return None
@@ -396,7 +395,7 @@ def evaluate_window(window_positions: [(int, int, int, int)], board_player_one: 
     """
     number_of_player_one_pieces: int = 0  # could be one tuple, but makes code less readable?
     number_of_player_two_pieces: int = 0
-    for position in window_positions:  # Counts player pieces in the window. TODO: more efficient way for this?
+    for position in window_positions:  # Counts player pieces in the window.
         if (position & board_player_one) > 0:
             number_of_player_one_pieces += 1
         elif (position & board_player_two) > 0:
@@ -504,7 +503,7 @@ def mirror_player_board(player_board) -> int:
     # Puts all the columns together.
 
 
-def add_mirrored_boards_to_dictionary(board_player_one: int, board_player_two: int, dictionary, alpha_beta: list[int, [PlayerAction]], current_depth: int):  # TODO: refactor and test
+def add_mirrored_boards_to_dictionary(board_player_one: int, board_player_two: int, dictionary, alpha_beta: list[int, [PlayerAction]], current_depth: int):
     """
     Uses the mirror functions to add a mirrored board, its evaluation and mirrored playeractions to the dictionary.
 
@@ -522,7 +521,7 @@ def add_mirrored_boards_to_dictionary(board_player_one: int, board_player_two: i
         Depth in the minimax algorithm.
     """
     mirrored_board_player_one, mirrored_board_player_two = mirror_boards(board_player_one, board_player_two)
-    mirror_player_actions: Callable = np.vectorize(lambda arr: 6 - arr)  # mirrors each action in the move list
+    mirror_player_actions: Callable = np.vectorize(lambda arr: 6 - arr)  # Mirrors each action in the move list.
     mirrored_player_actions = list(map(mirror_player_actions, alpha_beta[1]))
     dictionary[mirrored_board_player_one] = {mirrored_board_player_two: [alpha_beta[0], mirrored_player_actions]}
 
