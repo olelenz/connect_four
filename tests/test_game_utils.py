@@ -74,7 +74,7 @@ def test_pretty_print_board_middle_one():
 
 def test_string_to_board_assertion_error():
     with pytest.raises(AttributeError):
-        string_to_board(EMPTY_BOARD_STRING+"\n")
+        string_to_board(EMPTY_BOARD_STRING + "\n")
 
 
 def test_string_to_board_empty():
@@ -104,60 +104,61 @@ def test_string_to_board_diagonal_board_right_top_player_two():
 
 
 def test_apply_player_action_empty_board_player_one():
-    ret = apply_player_action((EMPTY_BOARD, EMPTY_BOARD, PLAYER1), PlayerAction(3))
+    ret = apply_player_action(EMPTY_BOARD, EMPTY_BOARD, PLAYER1, PlayerAction(3))
     assert ret[0] == FIRST_PIECE_BOARD
     assert ret[1] == EMPTY_BOARD
 
 
 def test_apply_player_action_empty_board_player_two():
-    ret = apply_player_action((EMPTY_BOARD, EMPTY_BOARD, PLAYER2), PlayerAction(3))
+    ret = apply_player_action(EMPTY_BOARD, EMPTY_BOARD, PLAYER2, PlayerAction(3))
     assert ret[0] == EMPTY_BOARD
     assert ret[1] == FIRST_PIECE_BOARD
 
 
 def test_apply_player_action_left_bottom_corner_player_one():
-    ret = apply_player_action((EMPTY_BOARD, EMPTY_BOARD, PLAYER1), PlayerAction(0))
+    ret = apply_player_action(EMPTY_BOARD, EMPTY_BOARD, PLAYER1, PlayerAction(0))
     assert ret[0] == LEFT_BOTTOM_CORNER_PIECE_BOARD
     assert ret[1] == EMPTY_BOARD
 
 
 def test_apply_player_action_left_bottom_corner_player_two():
-    ret = apply_player_action((EMPTY_BOARD, EMPTY_BOARD, PLAYER2), PlayerAction(0))
+    ret = apply_player_action(EMPTY_BOARD, EMPTY_BOARD, PLAYER2, PlayerAction(0))
     assert ret[0] == EMPTY_BOARD
     assert ret[1] == LEFT_BOTTOM_CORNER_PIECE_BOARD
 
 
 def test_apply_player_action_column_two_full():
     with pytest.raises(ValueError):
-        apply_player_action((COLUMN_TWO_FILLED_BOARD_PLAYER_ONE, COLUMN_TWO_FILLED_BOARD_PLAYER_TWO, PLAYER1), PlayerAction(2))
+        apply_player_action(COLUMN_TWO_FILLED_BOARD_PLAYER_ONE, COLUMN_TWO_FILLED_BOARD_PLAYER_TWO, PLAYER1,
+                            PlayerAction(2))
 
 
 def test_apply_player_action_row_two():
-    ret = apply_player_action((LEFT_TOWER_ONE_BOARD, EMPTY_BOARD, PLAYER2), PlayerAction(0))
+    ret = apply_player_action(LEFT_TOWER_ONE_BOARD, EMPTY_BOARD, PLAYER2, PlayerAction(0))
     assert ret[0] == LEFT_TOWER_ONE_BOARD
     assert ret[1] == LEFT_TOWER_TWO_BOARD
 
 
 def test_apply_player_action_row_three():
-    ret = apply_player_action((LEFT_TOWER_ONE_BOARD, LEFT_TOWER_TWO_BOARD, PLAYER1), PlayerAction(0))
+    ret = apply_player_action(LEFT_TOWER_ONE_BOARD, LEFT_TOWER_TWO_BOARD, PLAYER1, PlayerAction(0))
     assert ret[0] == LEFT_TOWER_THREE_BOARD
     assert ret[1] == LEFT_TOWER_TWO_BOARD
 
 
 def test_apply_player_action_row_four():
-    ret = apply_player_action((LEFT_TOWER_THREE_BOARD, LEFT_TOWER_TWO_BOARD, PLAYER2), PlayerAction(0))
+    ret = apply_player_action(LEFT_TOWER_THREE_BOARD, LEFT_TOWER_TWO_BOARD, PLAYER2, PlayerAction(0))
     assert ret[0] == LEFT_TOWER_THREE_BOARD
     assert ret[1] == LEFT_TOWER_FOUR_BOARD
 
 
 def test_apply_player_action_row_five():
-    ret = apply_player_action((LEFT_TOWER_THREE_BOARD, LEFT_TOWER_FOUR_BOARD, PLAYER1), PlayerAction(0))
+    ret = apply_player_action(LEFT_TOWER_THREE_BOARD, LEFT_TOWER_FOUR_BOARD, PLAYER1, PlayerAction(0))
     assert ret[0] == LEFT_TOWER_FIVE_BOARD
     assert ret[1] == LEFT_TOWER_FOUR_BOARD
 
 
 def test_apply_player_action_row_six():
-    ret = apply_player_action((LEFT_TOWER_FIVE_BOARD, LEFT_TOWER_FOUR_BOARD, PLAYER2), PlayerAction(0))
+    ret = apply_player_action(LEFT_TOWER_FIVE_BOARD, LEFT_TOWER_FOUR_BOARD, PLAYER2, PlayerAction(0))
     assert ret[0] == LEFT_TOWER_FIVE_BOARD
     assert ret[1] == LEFT_TOWER_SIX_BOARD
 

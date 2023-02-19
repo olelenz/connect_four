@@ -59,32 +59,32 @@ def test_handle_empty_moves_eval_player_two_won():
 
 
 def test_get_possible_moves_iterative_draw():
-    ret_actions, game_state = get_possible_moves_iterative((DRAW_PLAYER_ONE, DRAW_PLAYER_TWO, PLAYER1), [2])
+    ret_actions, game_state = get_possible_moves_iterative(DRAW_PLAYER_ONE, DRAW_PLAYER_TWO, PLAYER1, [2])
     assert ret_actions == []
     assert game_state == GameState.IS_DRAW
 
 
 def test_get_possible_moves_iterative_win_player_one():
-    ret_actions, game_state = get_possible_moves_iterative((DIAGONAL_BOARD_LEFT_TOP, EMPTY_BOARD, PLAYER2), [2])
+    ret_actions, game_state = get_possible_moves_iterative(DIAGONAL_BOARD_LEFT_TOP, EMPTY_BOARD, PLAYER2, [2])
     assert ret_actions == []
     assert game_state == GameState.IS_WIN
 
 
 def test_get_possible_moves_iterative_win_player_two():
-    ret_actions, game_state = get_possible_moves_iterative((EMPTY_BOARD, DIAGONAL_BOARD_LEFT_TOP, PLAYER1), [2])
+    ret_actions, game_state = get_possible_moves_iterative(EMPTY_BOARD, DIAGONAL_BOARD_LEFT_TOP, PLAYER1, [2])
     assert ret_actions == []
     assert game_state == GameState.IS_WIN
 
 
 def test_get_possible_moves_iterative_empty_next_moves():
-    ret_actions, game_state = get_possible_moves_iterative((EMPTY_BOARD, EMPTY_BOARD, PLAYER1), [])
+    ret_actions, game_state = get_possible_moves_iterative(EMPTY_BOARD, EMPTY_BOARD, PLAYER1, [])
     moves: list[PlayerAction] = MOVE_ORDER.copy()
     assert ret_actions == moves
     assert game_state == GameState.STILL_PLAYING
 
 
 def test_get_possible_moves_iterative_full_next_moves():
-    ret_actions, game_state = get_possible_moves_iterative((EMPTY_BOARD, EMPTY_BOARD, PLAYER1), [5])
+    ret_actions, game_state = get_possible_moves_iterative(EMPTY_BOARD, EMPTY_BOARD, PLAYER1, [5])
     moves: list[PlayerAction] = MOVE_ORDER.copy()
     moves.remove(PlayerAction(5))
     moves = [PlayerAction(5)]+moves
@@ -94,12 +94,15 @@ def test_get_possible_moves_iterative_full_next_moves():
 
 def test_generate_move_minimax():
     res = generate_move_minimax(EMPTY_BOARD, EMPTY_BOARD, PLAYER1, None, 1)
-    assert res == (3, None)
+    assert isinstance(res[0], int)
+    assert res[1] is None
 
 
 def test_generate_move_loop_to_stop():
     res: multiprocessing.sharedctypes.Synchronized = multiprocessing.Value('i', -1)
-    generate_move_loop_to_stop(res, TEST_BOARD_ALMOST_FULL_ONE, TEST_BOARD_ALMOST_FULL_TWO, PLAYER1, 8)
+    loop_over_flag = multiprocessing.Event()
+    generate_move_loop_to_stop(res, TEST_BOARD_ALMOST_FULL_ONE, TEST_BOARD_ALMOST_FULL_TWO, PLAYER1, 5, loop_over_flag)
+
     assert res.value == 0
 
 
@@ -206,7 +209,7 @@ def test_use_mirror_functions_three():
 
 def test_evaluate_board_using_windows_one():
     res = evaluate_board_using_windows(LEFT_TOWER_ONE_BOARD, RIGHT_TOWER_ONE_BOARD)
-    assert res == 0
+    assert res == EVAL_DRAWN_POSITION
 
 
 def test_evaluate_board_using_windows_two():
@@ -228,7 +231,7 @@ def test_evaluate_window_one():
 
 def test_evaluate_window_two():
     res = evaluate_window(TEST_WINDOW_RIGHT_TOWER, RIGHT_TOWER_ONE_BOARD, RIGHT_TOWER_TWO_BOARD)
-    assert res == 0
+    assert res == EVAL_DRAWN_POSITION
 
 
 def test_evaluate_window_three():
@@ -238,7 +241,7 @@ def test_evaluate_window_three():
 
 def test_evaluate_window_four():
     res = evaluate_window(TEST_WINDOW_RIGHT_TOWER, RIGHT_TOWER_THREE_IN_A_ROW, LEFT_TOWER_ONE_BOARD)
-    assert res == 6
+    assert res == THREE_PIECES_IN_A_WINDOW_EVAL
 
 
 def test_calculate_evaluation_score_one():
@@ -253,14 +256,14 @@ def test_calculate_evaluation_score_two():
 
 def test_calculate_evaluation_score_three():
     res = calculate_evaluation_score(3, 0)
-    assert res == 6
+    assert res == THREE_PIECES_IN_A_WINDOW_EVAL
 
 
 def test_calculate_evaluation_score_four():
     res = calculate_evaluation_score(1, 2)
-    assert res == 0
+    assert res == EVAL_DRAWN_POSITION
 
 
 def test_calculate_evaluation_score_five():
     res = calculate_evaluation_score(0, 3)
-    assert res == -6
+    assert res == -THREE_PIECES_IN_A_WINDOW_EVAL

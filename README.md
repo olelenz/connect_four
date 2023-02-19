@@ -84,3 +84,6 @@ The following project by Pascal Pons implements a Connect 4 solver which was in 
 * [GitHub project](https://github.com/PascalPons/connect4)
 * [Solver](https://connect4.gamesolver.org/en/)
 * [Explanations](http://blog.gamesolver.org/)
+
+The code skeleton was provided by Felix Lundt.
+* [Website](https://www.sprekelerlab.org/felix/)

@@ -1,5 +1,4 @@
 scipy==1.10.0
 typing==3.7.4.3
-interruptingcow==0.8
 numpy==1.24.2
 pytest==7.2.1

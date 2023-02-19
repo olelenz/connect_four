@@ -1,22 +1,18 @@
-import platform
 from typing import Tuple, Optional
-from interruptingcow import timeout
 import multiprocessing
-import time
 import multiprocessing.sharedctypes
 
 from agents.game_utils import *
 from agents.saved_state import SavedState
 from agents.agent_minimax.minimax_window_list import MINIMAX_EVALUATION_WINDOWS_LIST
 
-SECONDS_TO_PLAY: int = 5
+SECONDS_TO_PLAY: int = 1
 DEPTH_TO_PLAY: int = 8
 
-FULL_BOARD: int = 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111
 START_VALUE: int = 100
 MAX_VALUE: int = 1_000_000_000_000_000_000
-MIN_MAX_FUNCTIONS = (min, max)
 THREE_PIECES_IN_A_WINDOW_EVAL: int = 6
+EVAL_DRAWN_POSITION: int = 0
 
 COLUMN_0_FILLED: int = 0b0111111_0000000_0000000_0000000_0000000_0000000_0000000
 COLUMN_1_FILLED: int = 0b0000000_0111111_0000000_0000000_0000000_0000000_0000000
@@ -54,26 +50,23 @@ def generate_move_minimax(board_player_one: int, board_player_two: int, player: 
     :Tuple[PlayerAction, Optional[SavedState]]
         Tuple containing the move to play and the saved state.
     """
-    depth: int = 1
+    depth: int = 1  # Starting with depth one.
     move_output: multiprocessing.sharedctypes.Synchronized = multiprocessing.Value('i', -1)
-    if platform.system() == "Windows":  # Platform dependent, full test coverage problematic.
-        process_minimax = multiprocessing.Process(target=generate_move_loop_to_stop,
-                                                  args=(move_output, board_player_one, board_player_two, player, depth))
-        process_minimax.start()
-        time.sleep(seconds)
-        process_minimax.terminate()
-        process_minimax.join()
-        return move_output.value, None
-    else:
-        try:
-            with timeout(seconds, exception=RuntimeError):
-                generate_move_loop_to_stop(move_output, board_player_one, board_player_two, player, depth)
-        except RuntimeError:
-            pass
-        return PlayerAction(move_output.value), None
+
+    loop_over_flag = multiprocessing.Event()
+    process_minimax = multiprocessing.Process(target=generate_move_loop_to_stop,
+                                              args=(move_output, board_player_one, board_player_two, player, depth,
+                                                    loop_over_flag))
+    process_minimax.start()
+    loop_over_flag.wait(seconds)
+    process_minimax.terminate()
+    process_minimax.join()
+    return move_output.value, None
 
 
-def generate_move_loop_to_stop(move_output: multiprocessing.sharedctypes.Synchronized, board_player_one: int, board_player_two: int, player: BoardPiece, depth: int):
+def generate_move_loop_to_stop(move_output: multiprocessing.sharedctypes.Synchronized, board_player_one: int,
+                               board_player_two: int, player: BoardPiece, depth: int,
+                               loop_over_flag: multiprocessing.Event):
     """
 
     Parameters
@@ -88,25 +81,30 @@ def generate_move_loop_to_stop(move_output: multiprocessing.sharedctypes.Synchro
         The player to make a move.
     depth: int
         Current depth (decreasing).
+    loop_over_flag: multiprocessing.Event
+        Event to stop loop if all moves are calculated.
 
     Returns
     -------
 
     """
     evaluation: list[int, [PlayerAction]] = [0, []]
-    while True:
-        evaluation: list[int, [PlayerAction]] = generate_move_minimax_id(board_player_one, board_player_two,
-                                                                         player, None, evaluation[1], depth)
-        move_output.value = evaluation[1][0]
-        print(depth, " moves: ", evaluation[1])
-        if depth >= len(evaluation[1]) + 4:
+    while True:  # Gets stopped from the outside when time is over.
+        evaluation: list[int, [PlayerAction]] = generate_move_minimax_id(board_player_one=board_player_one,
+                                                                         board_player_two=board_player_two,
+                                                                         player=player, saved_state=None,
+                                                                         next_moves=evaluation[1], depth=depth)
+        if depth >= len(evaluation[1]) + 1:  # The agent found all possible moves at this point.
+            loop_over_flag.set()
             return
+        move_output.value = evaluation[1][0]
+        print("Moves at depth {:>2} : {}".format(depth, evaluation[1]))
         depth += 1
 
 
 def generate_move_minimax_id(board_player_one: int, board_player_two: int, player: BoardPiece,
-                             saved_state: Optional[SavedState], next_moves: list[int], depth: int = DEPTH_TO_PLAY) -> list[
-    int, [PlayerAction]]:
+                             saved_state: Optional[SavedState], next_moves: list[int], depth: int = DEPTH_TO_PLAY) -> \
+        list[int, [PlayerAction]]:
     """
     Generates the next move using the minimax algorithm.
     Parameters
@@ -128,18 +126,21 @@ def generate_move_minimax_id(board_player_one: int, board_player_two: int, playe
     :Tuple[PlayerAction, Optional[SavedState]]
         Tuple containing the move to play and the saved state.
     """
-    alpha: [int, [PlayerAction]] = [-MAX_VALUE, [PlayerAction(-1)]]
-    beta: [int, [PlayerAction]] = [MAX_VALUE, [PlayerAction(-1)]]
-    dictio = {-1: {}}
-    use_mirror = use_mirror_functions(board_player_one, board_player_two)
-    evaluation: list[int, [PlayerAction]] = minimax_rec(depth, board_player_one, board_player_two, player, alpha,
-                                                        beta, dictio, [], next_moves, player == PLAYER1, use_mirror)
+    use_mirror = use_mirror_functions(board_player_one=board_player_one, board_player_two=board_player_two)
+    evaluation: list[int, [PlayerAction]] = minimax_rec(current_depth=depth, board_player_one=board_player_one,
+                                                        board_player_two=board_player_two, player=player,
+                                                        alpha=[-MAX_VALUE, [PlayerAction(-1)]],
+                                                        beta=[MAX_VALUE, [PlayerAction(-1)]], dictionary={-1: {}},
+                                                        moves_line=[],
+                                                        next_moves=next_moves, maximizing=player == PLAYER1,
+                                                        use_mirror=use_mirror)
     return evaluation
 
 
 def minimax_rec(current_depth: int, board_player_one: int, board_player_two: int,
                 player: BoardPiece, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {},
-                moves_line: list[int], next_moves: list[int], maximizing: bool, use_mirror: bool) -> list[int, [PlayerAction]]:
+                moves_line: list[int], next_moves: list[int], maximizing: bool, use_mirror: bool) -> list[
+    int, [PlayerAction]]:
     """
     Main recursion function for the minimax algorith. Handles the anchors and the calls to further needed calculation.
     Parameters
@@ -172,20 +173,28 @@ def minimax_rec(current_depth: int, board_player_one: int, board_player_two: int
     :list[int, [PlayerAction]]
         List containing the evaluation and the list of PlayerActions to get to that evaluation.
     """
-    possible_moves, game_state = get_possible_moves_iterative((board_player_one, board_player_two, player), next_moves)
+    possible_moves, game_state = get_possible_moves_iterative(board_player_one=board_player_one,
+                                                              board_player_two=board_player_two, player=player,
+                                                              next_moves=next_moves)
     if not possible_moves:
-        return [handle_empty_moves_eval(player, game_state, current_depth), moves_line]
+        return [handle_empty_moves_eval(player=player, game_state=game_state, current_depth=current_depth), moves_line]
     if current_depth == 0:  # desired depth reached - recursion anchor
-        evaluation: int = evaluate_board_using_windows(board_player_one, board_player_two)
+        evaluation: int = evaluate_board_using_windows(board_player_one=board_player_one,
+                                                       board_player_two=board_player_two)
         return [evaluation, moves_line]
     if maximizing:
         get_alpha_or_beta = get_alpha
     else:
         get_alpha_or_beta = get_beta
     for move in possible_moves:
-        new_board_player_one, new_board_player_two = apply_player_action((board_player_one, board_player_two, player), move)
-        alpha_or_beta_result = get_alpha_or_beta(current_depth, new_board_player_one, new_board_player_two, player,
-                                             alpha, beta, dictionary, moves_line, next_moves, move, use_mirror)
+        new_board_player_one, new_board_player_two = apply_player_action(board_player_one=board_player_one,
+                                                                         board_player_two=board_player_two,
+                                                                         player=player,
+                                                                         action=move)
+        alpha_or_beta_result = get_alpha_or_beta(current_depth=current_depth, board_player_one=new_board_player_one,
+                                                 board_player_two=new_board_player_two, player=player,
+                                                 alpha=alpha, beta=beta, dictionary=dictionary, moves_line=moves_line,
+                                                 next_moves=next_moves, move=move, use_mirror=use_mirror)
         if maximizing:
             alpha = alpha_or_beta_result
         else:
@@ -195,7 +204,9 @@ def minimax_rec(current_depth: int, board_player_one: int, board_player_two: int
     return alpha_or_beta_result
 
 
-def get_alpha(current_depth: int, board_player_one: int, board_player_two: int, player: BoardPiece, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {}, moves_line: list[int], next_moves: list[int], move: PlayerAction, use_mirror: bool) -> list[int, [PlayerAction]]:
+def get_alpha(current_depth: int, board_player_one: int, board_player_two: int, player: BoardPiece,
+              alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {}, moves_line: list[int],
+              next_moves: list[int], move: PlayerAction, use_mirror: bool) -> list[int, [PlayerAction]]:
     """
     Function to calculate the new alpha-value and then continue in the recursion.
     Parameters
@@ -227,22 +238,28 @@ def get_alpha(current_depth: int, board_player_one: int, board_player_two: int, 
     :list[int, [PlayerAction]]
         Values for alpha.
     """
-    saved_eval = get_eval_from_dictionary(board_player_one, board_player_two, dictionary)
+    saved_eval = get_eval_from_dictionary(board_player_one=board_player_one, board_player_two=board_player_two,
+                                          dictionary=dictionary)
     if saved_eval is not None:  # There is an entry in the transposition table.
         return max([alpha, saved_eval], key=lambda x: x[0])
 
     moves_line_new = moves_line.copy()
     moves_line_new.append(move)
-    recursion_eval = minimax_rec(current_depth - 1, board_player_one, board_player_two, BoardPiece(3 - player),
-                                 alpha, beta, dictionary, moves_line_new, next_moves, False, use_mirror)
+    recursion_eval = minimax_rec(current_depth=current_depth - 1, board_player_one=board_player_one,
+                                 board_player_two=board_player_two, player=BoardPiece(3 - player),
+                                 alpha=alpha, beta=beta, dictionary=dictionary, moves_line=moves_line_new,
+                                 next_moves=next_moves, maximizing=False, use_mirror=use_mirror)
     alpha = max([alpha, recursion_eval], key=lambda x: x[0])
     dictionary[board_player_one] = {board_player_two: [alpha[0], alpha[1]]}
     if use_mirror:
-        add_mirrored_boards_to_dictionary(board_player_one, board_player_two, dictionary, alpha)
+        add_mirrored_boards_to_dictionary(board_player_one=board_player_one, board_player_two=board_player_two,
+                                          dictionary=dictionary, alpha_beta=alpha)
     return alpha
 
 
-def get_beta(current_depth: int, board_player_one: int, board_player_two: int, player: BoardPiece, alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {}, moves_line: list[int], next_moves: list[int], move: PlayerAction, use_mirror: bool) -> list[int, [PlayerAction]]:
+def get_beta(current_depth: int, board_player_one: int, board_player_two: int, player: BoardPiece,
+             alpha: list[int, [PlayerAction]], beta: list[int, [PlayerAction]], dictionary: {}, moves_line: list[int],
+             next_moves: list[int], move: PlayerAction, use_mirror: bool) -> list[int, [PlayerAction]]:
     """
     Function to calculate the new beta-value and then continue in the recursion.
     Parameters
@@ -274,18 +291,22 @@ def get_beta(current_depth: int, board_player_one: int, board_player_two: int, p
     :list[int, [PlayerAction]]
         Values for beta.
     """
-    saved_eval = get_eval_from_dictionary(board_player_one, board_player_two, dictionary)
+    saved_eval = get_eval_from_dictionary(board_player_one=board_player_one, board_player_two=board_player_two,
+                                          dictionary=dictionary)
     if saved_eval is not None:
         return min([beta, saved_eval], key=lambda x: x[0])
 
     moves_line_new = moves_line.copy()
     moves_line_new.append(move)
-    recursion_eval = minimax_rec(current_depth - 1, board_player_one, board_player_two, BoardPiece(3 - player),
-                                 alpha, beta, dictionary, moves_line_new, next_moves, True, use_mirror)
+    recursion_eval = minimax_rec(current_depth=current_depth - 1, board_player_one=board_player_one,
+                                 board_player_two=board_player_two, player=BoardPiece(3 - player),
+                                 alpha=alpha, beta=beta, dictionary=dictionary, moves_line=moves_line_new,
+                                 next_moves=next_moves, maximizing=True, use_mirror=use_mirror)
     beta = min([beta, recursion_eval], key=lambda x: x[0])
     dictionary[board_player_one] = {board_player_two: [beta[0], beta[1]]}
     if use_mirror:
-        add_mirrored_boards_to_dictionary(board_player_one, board_player_two, dictionary, beta)
+        add_mirrored_boards_to_dictionary(board_player_one=board_player_one, board_player_two=board_player_two,
+                                          dictionary=dictionary, alpha_beta=beta)
     return beta
 
 
@@ -311,13 +332,18 @@ def get_eval_from_dictionary(board_player_one: int, board_player_two: int, dicti
         return None
 
 
-def get_possible_moves_iterative(board_information: (int, int, BoardPiece), next_moves: list[int]) -> ([PlayerAction], GameState):
+def get_possible_moves_iterative(board_player_one: int, board_player_two: int, player: BoardPiece,
+                                 next_moves: list[int]) -> ([PlayerAction], GameState):
     """
     Function to get the possible moves. Distinguishes between a function call with and without the use of the better move-ordering.
     Parameters
     ----------
-    board_information: (int, int, BoardPiece)
-        Tuple containing the two current boards and the current player.
+    board_player_one: int
+        Board player one.
+    board_player_two: int
+        Board player two.
+    player: BoardPiece
+        The player to make a move.
     next_moves: list[int]
         List containing the next moves for better ordering.
     Returns
@@ -326,9 +352,10 @@ def get_possible_moves_iterative(board_information: (int, int, BoardPiece), next
         Tuple with the list of playeractions and the current GameState.
     """
     try:
-        return get_possible_moves(board_information[0], board_information[1], board_information[2], next_moves.pop(0))
+        return get_possible_moves(board_player_one=board_player_one, board_player_two=board_player_two, player=player,
+                                  next_move=next_moves.pop(0))
     except IndexError:
-        return get_possible_moves(board_information[0], board_information[1], board_information[2])
+        return get_possible_moves(board_player_one=board_player_one, board_player_two=board_player_two, player=player)
 
 
 def handle_empty_moves_eval(player: BoardPiece, game_state: GameState, current_depth: int) -> int:
@@ -359,9 +386,32 @@ def handle_empty_moves_eval(player: BoardPiece, game_state: GameState, current_d
         else:
             return int(START_VALUE * 2 ** current_depth)
     elif game_state == GameState.IS_DRAW:
-        return 0
+        return EVAL_DRAWN_POSITION
     else:
         raise AttributeError
+
+
+def evaluate_board_using_windows(board_player_one: int, board_player_two: int) -> int:
+    """
+    Evaluates the board and returns a score.
+
+    Parameters
+    ----------
+    board_player_one: int
+        Board of player 1.
+    board_player_two: int
+        Board of player 2.
+
+    Returns
+    -------
+    :int
+        Evaluation of the board.
+    """
+    board_evaluation: int = 0
+    for window in MINIMAX_EVALUATION_WINDOWS_LIST:
+        board_evaluation += evaluate_window(window_positions=window, board_player_one=board_player_one,
+                                            board_player_two=board_player_two)
+    return board_evaluation
 
 
 def evaluate_window(window_positions: [(int, int, int, int)], board_player_one: int, board_player_two: int) -> int:
@@ -390,7 +440,8 @@ def evaluate_window(window_positions: [(int, int, int, int)], board_player_one: 
             number_of_player_one_pieces += 1
         elif (position & board_player_two) > 0:
             number_of_player_two_pieces += 1
-    return calculate_evaluation_score(number_of_player_one_pieces, number_of_player_two_pieces)
+    return calculate_evaluation_score(number_of_player_one_pieces=number_of_player_one_pieces,
+                                      number_of_player_two_pieces=number_of_player_two_pieces)
 
 
 def calculate_evaluation_score(number_of_player_one_pieces: int, number_of_player_two_pieces: int) -> int:
@@ -408,11 +459,11 @@ def calculate_evaluation_score(number_of_player_one_pieces: int, number_of_playe
     int:
         Evaluation of the window.
     """
-    # Returns zero if both players have pieces in the window, or both have none.
+    # Returns EVAL_DRAWN_POSITION if both players have pieces in the window, or both have none.
     if (number_of_player_one_pieces > 0 and number_of_player_two_pieces > 0) or \
             number_of_player_one_pieces == number_of_player_two_pieces:
-        return 0
-    # Returns currently 6 points if a player has 3 pieces in a window. Amount of points is managed in a global variable.
+        return EVAL_DRAWN_POSITION
+    # Returns THREE_PIECES_IN_A_WINDOW_EVAL points if a player has 3 pieces in a window. Amount of points is managed in a global variable.
     elif number_of_player_one_pieces == 3:
         return THREE_PIECES_IN_A_WINDOW_EVAL
     elif number_of_player_two_pieces == 3:
@@ -421,28 +472,6 @@ def calculate_evaluation_score(number_of_player_one_pieces: int, number_of_playe
         return number_of_player_one_pieces ** 2 - number_of_player_two_pieces ** 2
         # Returns 1 or 4 points depending on the amount of pieces to a player.
         # Player two gets negative points.
-
-
-def evaluate_board_using_windows(board_player_one: int, board_player_two: int) -> int:
-    """
-    Evaluates the board and returns a score.
-
-    Parameters
-    ----------
-    board_player_one: int
-        Board of player 1.
-    board_player_two: int
-        Board of player 2.
-
-    Returns
-    -------
-    :int
-        Evaluation of the board.
-    """
-    board_evaluation: int = 0
-    for window in MINIMAX_EVALUATION_WINDOWS_LIST:
-        board_evaluation += evaluate_window(window, board_player_one, board_player_two)
-    return board_evaluation
 
 
 def mirror_boards(board_player_one: int, board_player_two: int) -> tuple[int, int]:
@@ -462,7 +491,7 @@ def mirror_boards(board_player_one: int, board_player_two: int) -> tuple[int, in
     tuple[int, int]:
         Two mirrored boards.
     """
-    return mirror_player_board(board_player_one), mirror_player_board(board_player_two)
+    return mirror_player_board(player_board=board_player_one), mirror_player_board(player_board=board_player_two)
 
 
 def mirror_player_board(player_board) -> int:
@@ -493,7 +522,8 @@ def mirror_player_board(player_board) -> int:
     # Puts all the columns together.
 
 
-def add_mirrored_boards_to_dictionary(board_player_one: int, board_player_two: int, dictionary, alpha_beta: list[int, [PlayerAction]]):
+def add_mirrored_boards_to_dictionary(board_player_one: int, board_player_two: int, dictionary,
+                                      alpha_beta: list[int, [PlayerAction]]):
     """
     Uses the mirror functions to add a mirrored board, its evaluation and mirrored playeractions to the dictionary.
 
@@ -508,7 +538,8 @@ def add_mirrored_boards_to_dictionary(board_player_one: int, board_player_two: i
     alpha_beta: tuple[int, int]
         Tuple that contains evaluation and playeractions.
     """
-    mirrored_board_player_one, mirrored_board_player_two = mirror_boards(board_player_one, board_player_two)
+    mirrored_board_player_one, mirrored_board_player_two = mirror_boards(board_player_one=board_player_one,
+                                                                         board_player_two=board_player_two)
     mirror_player_actions: Callable = np.vectorize(lambda arr: 6 - arr)  # Mirrors each action in the move list.
     mirrored_player_actions = list(map(mirror_player_actions, alpha_beta[1]))
     dictionary[mirrored_board_player_one] = {mirrored_board_player_two: [alpha_beta[0], mirrored_player_actions]}

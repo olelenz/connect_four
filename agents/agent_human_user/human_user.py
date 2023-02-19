@@ -1,6 +1,4 @@
-import numpy as np
-
-from agents.game_utils import BoardPiece, PlayerAction, NO_PLAYER
+from agents.game_utils import BoardPiece, PlayerAction
 from typing import Optional, Callable
 
 from agents.saved_state import SavedState
@@ -42,5 +40,4 @@ def handle_illegal_moves(board_player_one: int, board_player_two: int, column: P
     is_closed = bool((board_player_one | board_player_two) & (1 << (column * 7 + 5)))
     if is_closed:
         raise ValueError
-
     return True
