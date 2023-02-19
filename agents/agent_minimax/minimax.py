@@ -9,6 +9,8 @@ from agents.game_utils import *
 from agents.saved_state import SavedState
 from agents.agent_minimax.minimax_window_list import MINIMAX_EVALUATION_WINDOWS_LIST
 
+SECONDS_TO_PLAY: int = 5
+DEPTH_TO_PLAY: int = 8
 
 FULL_BOARD: int = 0b0111111_0111111_0111111_0111111_0111111_0111111_0111111
 START_VALUE: int = 100
@@ -30,7 +32,7 @@ SHIFT_2_COLUMNS: int = 14
 
 
 def generate_move_minimax(board_player_one: int, board_player_two: int, player: BoardPiece,
-                          saved_state: Optional[SavedState], seconds: int = 5) -> Tuple[
+                          saved_state: Optional[SavedState], seconds: int = SECONDS_TO_PLAY) -> Tuple[
     PlayerAction, Optional[SavedState]]:
     """
     Starting point to use the minimax algorithm. Handles the interrupting after the amount of seconds given.
@@ -103,7 +105,7 @@ def generate_move_loop_to_stop(move_output: multiprocessing.sharedctypes.Synchro
 
 
 def generate_move_minimax_id(board_player_one: int, board_player_two: int, player: BoardPiece,
-                             saved_state: Optional[SavedState], next_moves: list[int], depth: int = 8) -> list[
+                             saved_state: Optional[SavedState], next_moves: list[int], depth: int = DEPTH_TO_PLAY) -> list[
     int, [PlayerAction]]:
     """
     Generates the next move using the minimax algorithm.
