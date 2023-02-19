@@ -79,7 +79,7 @@ Project Link: [https://github.com/olelenz/connect_four](https://github.com/olele
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-The following project by Pascal Pons implements a Connect 4 solver which was in this project used to adapt the evaluation function. Check it out if you want to play against a perfect agent.
+The following project by Pascal Pons implements a Connect 4 solver which was used in this project to adapt the evaluation function. Check it out if you want to play against a perfect agent.
 
 * [GitHub project](https://github.com/PascalPons/connect4)
 * [Solver](https://connect4.gamesolver.org/en/)
