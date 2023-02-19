@@ -2,11 +2,7 @@ import multiprocessing
 import multiprocessing.sharedctypes
 import pytest
 
-from agents.agent_minimax.minimax import handle_empty_moves_eval, START_VALUE, get_possible_moves_iterative, \
-    mirror_boards, mirror_player_board, add_mirrored_boards_to_dictionary, use_mirror_functions, \
-    evaluate_board_using_windows, evaluate_window, calculate_evaluation_score, get_eval_from_dictionary, \
-    generate_move_minimax, generate_move_loop_to_stop, generate_move_minimax_id, minimax_rec, MAX_VALUE, get_alpha, \
-    get_beta
+from agents.agent_minimax.minimax import *
 from agents.game_utils import *
 from agents.agent_minimax.minimax_window_list import MINIMAX_EVALUATION_WINDOWS_LIST, list_windows
 

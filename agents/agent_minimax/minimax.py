@@ -1,4 +1,3 @@
-import os
 import platform
 from typing import Tuple, Optional
 from interruptingcow import timeout
