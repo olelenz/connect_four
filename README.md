@@ -37,8 +37,6 @@ As a part of the Programming Project in Python course held in WS22/23 at TU-Berl
 It uses bitboards, the minimax algorithm, alpha-beta pruning, a transposition table and iterative deepening.
 
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 <!-- GETTING STARTED -->
 ## Getting Started
@@ -67,20 +65,15 @@ Using pip you are able to install the required packages quickly.
   pip install -r requirements.txt
   ```
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 <!-- CONTACT -->
 ## Contact
 
 Ole Lenz - ole.lenz@gmx.net and ole.lenz@campus.tu-berlin.de
 
-Stefan Warmboldt - 
+Stefan Warmboldt - stefan.warmboldt@gmx.net and stefan.warmboldt@campus.tu-berlin.de
 
 Project Link: [https://github.com/olelenz/connect_four](https://github.com/olelenz/connect_four)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- ACKNOWLEDGMENTS -->
@@ -91,5 +84,3 @@ The following project by Pascal Pons implements a Connect 4 solver which was in 
 * [GitHub project](https://github.com/PascalPons/connect4)
 * [Solver](https://connect4.gamesolver.org/en/)
 * [Explanations](http://blog.gamesolver.org/)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
