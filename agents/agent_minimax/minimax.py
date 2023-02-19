@@ -6,7 +6,7 @@ from agents.game_utils import *
 from agents.saved_state import SavedState
 from agents.agent_minimax.minimax_window_list import MINIMAX_EVALUATION_WINDOWS_LIST
 
-SECONDS_TO_PLAY: int = 1
+SECONDS_TO_PLAY: int = 5
 DEPTH_TO_PLAY: int = 8
 
 START_VALUE: int = 100
